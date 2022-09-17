@@ -1,0 +1,76 @@
+def log_2(n):
+    if n:
+        import math
+        return math.log(n,2)
+    else:
+        return 0
+    
+def simpleprobability(xlst):
+    maindict = {}
+    for i in xlst:
+        if i in maindict.keys():
+            maindict[i] += 1
+        else:
+           maindict[i] = 1
+    newlist = []
+    for k,v in maindict.items():
+        newlist += [v/len(xlst)]
+    return newlist
+    
+def simpleentropy(xlst):
+    newlist = simpleprobability(xlst)
+    my_sum = 0
+    for i in newlist:
+        my_sum += log_2(1/i)*i
+    final = my_sum
+    return final
+
+# print(simpleentropy(["a","b","a","c","c","a"]))
+# print(simpleentropy(["a","a","a","a"]))
+# print(simpleentropy(["a","b","a","b","a","b"]))
+# print(simpleentropy([1,2,1,1,2,3,1,1,2]))
+
+def values(lst):
+    maindict = {}
+    for i in lst:
+        if i[0] in maindict.keys():
+            maindict[i[0]] += [i[1],]
+        else:
+           maindict[i[0]] = [i[1],]
+    newlist = []
+    for k,v in maindict.items():
+        newlist += [v]
+    return newlist
+
+def probability(lst):
+    maindict = {}
+    for i in lst:
+        if i[0] in maindict.keys():
+            maindict[i[0]] += 1
+        else:
+           maindict[i[0]] = 1
+    newlist = []
+    for k,v in maindict.items():
+        newlist += [v/len(lst)]
+    return newlist
+
+def entropy(lst):
+    newlist = probability(lst)
+    my_sum = 0
+    for i in newlist:
+        my_sum += log_2(1/i)*i
+    final = my_sum
+    return final
+
+def infogain(lst):
+    sum = 0
+    for i,j in zip(probability(lst),values(lst)):
+        y = i * simpleentropy(j)
+        sum += y
+    return entropy(lst) - sum
+    
+x = [[1,1],[1,2],[1,1],[2,1],[2,3],[2,3],[2,3]]
+
+print(values(x))
+print(probability(x))
+print(infogain(x))

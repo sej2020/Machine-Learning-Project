@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\begin{document}
+\begin{enumerate}
+  \item Assume $P$ is a distribution over a finite set $S$.  Then
+\begin{eqnarray}
+H(P) &=& \sum_{s \in S}p(s)\log (1/p(s))
+\end{eqnarray}
+Here is a list of items: [1,2,1,1,2,3,1,1,2]
+Write a Python function that determines the entropy.
+\item What does it mean when $H(P) = 0$?
+\item When computing entropy, we allow $\log 1/0 \rightarrow 0$--why?
+\item When does $H$ reach a maximum value--use calculus to determine this.
+\item Let X = [[1,1],[1,2],[1,1],[2,1],[2,3],[2,3],[2,3]].  Find the information gain using the first element of the list as the ``splitting attribute".
+\item Generally entropy  (machine learning) is defined using random variables.  Let $AB$ be joint discrete random variables over some sample space $\Omega$.  If the distributions are independent, what is the entropy?
+\item What is the conditional probability of $X$, given the first element of the list, what is the probability of the second?  
+\item How is Baye's Theorem related to entropy?
+\item X = [[1,2,1],[1,3,1],[2,3,0],[2,1,0],[2,2,1],[1,1,1],[1,1,0]].  The ``attributes" are the first list members and class the last.  Build the decision tree for this using entropy.
+\item Why is a tree pruned?
+\item What does overfitting mean?
+\item Why do you suppose entropy uses $\log$? It's not random by the way.
+\end{enumerate}
+\end{document}
