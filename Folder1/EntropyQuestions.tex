@@ -11,16 +11,65 @@ H(P) &=& \sum_{s \in S}p(s)\log (1/p(s))
 \end{eqnarray}
 Here is a list of items: [1,2,1,1,2,3,1,1,2]
 Write a Python function that determines the entropy.
+\begin{itemize}
+    \item In Info Gain doc on Github
+\end{itemize}
 \item What does it mean when $H(P) = 0$?
+\begin{itemize}
+    \item H(P) = 0 means the distribution P conveys no information. This indicates that the outcome of P is certain. This is the case if p(s) = 0 or p(s) = 1.
+\end{itemize}
 \item When computing entropy, we allow $\log 1/0 \rightarrow 0$--why?
+\begin{itemize}
+    \item As p(s) approaches 0, $p(s) * \log (1/p(s))$ approaches 0, even though $\log (1/p(s))$ is undefined.
+\end{itemize}
 \item When does $H$ reach a maximum value--use calculus to determine this.
+\begin{itemize}
+    \item $H'(P) = \frac{d}{dp(s)} \sum_{s \in S}p(s)\log (1/p(s))$
+    \item $H'(P) = \sum_{s \in S}\frac{d}{dp(s)}(p(s)\log (1/p(s)))$
+    \item $H'(P) = \sum_{s \in S}-\log (p(s)) -1$
+    \item $0 = \sum_{s \in S}-\log (p(s)) -1$
+    \item For $\log_2$ and a set $S$ of cardinality 2, the $P$ distribution that satisfies the equation  is [0.5,0.5]
+\end{itemize}
 \item Let X = [[1,1],[1,2],[1,1],[2,1],[2,3],[2,3],[2,3]].  Find the information gain using the first element of the list as the ``splitting attribute".
+\begin{itemize}
+    \item In Info Gain doc on Github
+\end{itemize}
 \item Generally entropy  (machine learning) is defined using random variables.  Let $AB$ be joint discrete random variables over some sample space $\Omega$.  If the distributions are independent, what is the entropy?
+\begin{eqnarray}
+\sum_{a \in \Omega}\sum_{b \in \Omega}p(a,b)\log (1/p(a,b))
+\end{eqnarray}
 \item What is the conditional probability of $X$, given the first element of the list, what is the probability of the second?  
+\begin{center}
+\begin{tabular}{||c || c c c ||} 
+ \hline
+ & (x,1) & (x,2) & (x,3) \\ [0.5ex] 
+ \hline\hline
+ (1,y) & $2/3$ & $1/3$ & $0/3$ \\
+ \hline
+ (2,y) & $1/4$ & $0/4$ & $3/4$ \\
+ \hline
+\end{tabular}
+\end{center}
 \item How is Baye's Theorem related to entropy?
+\begin{itemize}
+    \item You can use Bayes' Theorem to classify data. Given a set of attributes $\{a_1,a_2,...a_n\}$, you can classify each object into class $Y_i$. The method is to select the class that maximizes $P(Y=i|\{a_1,a_2,...a_n\})$.
+    \item Similarly, we use entropy calculations to repeatedly classify our data in set $S$ by finding attribute $A$ with a distribution $\{a_1,a_2,...a_n\}$ that maximizes $(Information Gain(S,A)|\{a_1,a_2,...a_n\})$.
+\end{itemize}
 \item X = [[1,2,1],[1,3,1],[2,3,0],[2,1,0],[2,2,1],[1,1,1],[1,1,0]].  The ``attributes" are the first list members and class the last.  Build the decision tree for this using entropy.
+\begin{itemize}
+    \item In progress...
+\end{itemize}
 \item Why is a tree pruned?
+\begin{itemize}
+    \item A tree is pruned to prevent overfitting. To prune a node, you remove the part of the tree rooted at that node and make it a leaf node. You select nodes to prune only if the hypothesis performs no worse if the node is pruned (Mitchell 69).
+\end{itemize}
 \item What does overfitting mean?
+\begin{itemize}
+    \item A hypothesis is overfit if there is a different hypothesis that performs less well on the training instances, but performs better on a set of test instances. This can happen when the training data contains noise and the ID3 algorithm constructs a more complex tree to classify this noisy data. Accuracy of a hypothesis on test data tends to increase with the size of the tree up to a certain point and then may decline. This decline is evidence that the hypothesis overfits the training examples (Mitchell 67).
+\end{itemize}
 \item Why do you suppose entropy uses $\log$? It's not random by the way.
+\begin{itemize}
+    \item We want the entropy function to yield 0 when the p(s) is 1. log is the only function that fits that criteria.
+\end{itemize}
 \end{enumerate}
 \end{document}
