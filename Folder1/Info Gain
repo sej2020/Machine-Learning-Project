@@ -64,8 +64,8 @@ def entropy(lst):
 
 def infogain(lst):
     sum = 0
-    for i,j in zip(probability(lst),values(lst)):
-        y = i * simpleentropy(j)
+    for i in range(len(probability(lst))):
+        y = probability(lst)[i] * simpleentropy(values(lst)[i])
         sum += y
     return entropy(lst) - sum
     
