@@ -1,6 +1,30 @@
+with open('Folder1/fertility.txt') as fertility:
+    patients = []
+    classification = []
+    for line in fertility:
+        data = line.split()
+        for i in data:
+            ndata = i.split(',')
+            patients += [ndata]
+    for p in range(len(patients)):
+        classification += patients[p][-1]
+        patients[p] = patients[p][:-1]
+    for j in patients:
+        for k in range(len(j)):
+            j[k] = float(j[k])
+    for l in range(len(classification)):
+        if classification[l] == 'N':
+            classification[l] = 0
+        else:
+            classification[l] = 1
+    final = [patients,classification]
+        
 from sklearn import linear_model
+reg = linear_model.LinearRegression()
+reg.fit(final[0],final[1])
+print(reg.coef_)
+        
+    
 
-with open('fertility_Diagnosis.txt') as f:
-    lines = f.readlines()
 
-print(f)
+
