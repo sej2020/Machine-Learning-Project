@@ -1,0 +1,6 @@
+from sklearn import linear_model
+
+with open('fertility_Diagnosis.txt') as f:
+    lines = f.readlines()
+
+print(f)
