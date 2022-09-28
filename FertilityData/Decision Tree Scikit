@@ -1,4 +1,5 @@
-with open('Folder1/fertility.txt') as fertility:
+#data preprocessing
+with open('FertilityData/fertility.txt') as fertility:
     patients = []
     classification = []
     for line in fertility:
@@ -14,20 +15,50 @@ with open('Folder1/fertility.txt') as fertility:
             j[k] = float(j[k])
     for l in range(len(classification)):
         if classification[l] == 'N':
-            classification[l] = float(0)
+            classification[l] = 0
         else:
-            classification[l] = float(1)
-    final = [patients,classification]
+            classification[l] = 1
+    patientstrim = []
+    for m in patients:
+        patientstrim += [[m[1],m[6],m[8]]]
 
+
+#imports
+import numpy as np
 from sklearn import tree
-import graphviz
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
-x = final[0]
-y = final[1]
-clf = tree.DecisionTreeRegressor()
-clf = clf.fit(x,y)
-graph = tree.export_text(clf)
-print(graph)
 
 
+#create regression
+train_x_list, test_x_list, train_y_list, test_y_list = train_test_split(patientstrim, classification, test_size=0.2)
+x_train = np.array(train_x_list)
+y_train = np.array(train_y_list)
+x_test = np.array(test_x_list)
+y_test = np.array(test_y_list)
+clf = tree.DecisionTreeRegressor(max_depth=4)
+clf = clf.fit(x_train,y_train)
 
+
+#regression vizualization
+fig = plt.figure(figsize=(13,9))
+viz = tree.plot_tree(clf,filled=True)
+plt.show()
+
+
+#accuracy metric
+scores = cross_val_score(clf,x_train,y_train, cv=4, scoring='r2')
+print(f"Cross validation R2 score: {scores}")
+sum = 0
+for i in scores:
+    sum += i
+average_score = sum/len(scores)
+print(f"Average: {average_score}")
+
+
+#prediction
+test_predict = clf.predict(x_test)
+for i in range(len(y_test)):
+    print(f"Prediction for {x_test[i]} is {test_predict[i]} while actual result is {y_test[i]}")

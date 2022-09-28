@@ -1,4 +1,5 @@
-with open('Folder1/fertility.txt') as fertility:
+#data preprocessing
+with open('FertilityData/fertility.txt') as fertility:
     patients = []
     classification = []
     for line in fertility:
@@ -17,14 +18,79 @@ with open('Folder1/fertility.txt') as fertility:
             classification[l] = 0
         else:
             classification[l] = 1
-    final = [patients,classification]
-        
+    patientstrim = []
+    for m in patients:
+        patientstrim += [[m[1],m[6],m[8]]]
+
+
+
+#imports
 from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+#create regression
+train_x_list, test_x_list, train_y_list, test_y_list = train_test_split(patientstrim, classification, test_size=0.2)
+x_train = np.array(train_x_list)
+y_train = np.array(train_y_list)
+x_test = np.array(test_x_list)
+y_test = np.array(test_y_list)
 reg = linear_model.LinearRegression()
-reg.fit(final[0],final[1])
-print(reg.coef_)
-        
-    
+reg.fit(x_train,y_train)
+print(f"Coefficients of regression: {reg.coef_}")
 
 
+#regression vizualization
+def getxvalues(lst,attribute):
+    nlst = []
+    for i in lst:
+        nlst += [i[attribute]]
+    return nlst
 
+age = getxvalues(x_train,0)
+alcohol_consumption = getxvalues(x_train, 1)
+hours_sed = getxvalues(x_train,2)
+
+plt.plot(age,y_train,'ro')
+plt.xlabel("Age")
+plt.ylabel("Likelihood of Altered Fertility")
+plt.xlim([0,1])
+locs, labels = plt.xticks()
+labels = [(round(18+item*18,2)) for item in locs]
+plt.xticks(locs,labels)
+age_line_x = np.linspace(0,1,100)
+age_line_y = reg.coef_[0]*age_line_x
+plt.plot(age_line_x,age_line_y,'-r')
+plt.show()
+
+plt.plot(age,y_train,'ro')
+plt.xlabel("Hours Sedentary")
+plt.ylabel("Likelihood of Altered Fertility")
+plt.xlim([0,1])
+locs, labels = plt.xticks()
+labels = [round((item*16),2) for item in locs]
+plt.xticks(locs,labels)
+hours_sed_line_x = np.linspace(0,1,100)
+hours_sed_line_y = reg.coef_[2]*hours_sed_line_x
+plt.plot(hours_sed_line_x,hours_sed_line_y,'-r')
+plt.show()
+
+
+#accuracy metric
+scores = cross_val_score(reg,x_train,y_train, cv=4, scoring='r2')
+print(f"Cross validation R2 score: {scores}")
+sum = 0
+for i in scores:
+    sum += i
+average_score = sum/len(scores)
+print(f"Average: {average_score}")
+
+
+#prediction
+test_predict = reg.predict(x_test)
+for i in range(len(y_test)):
+    print(f"Prediction for {x_test[i]} is {test_predict[i]} while actual result is {y_test[i]}")
