@@ -1,0 +1,103 @@
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
+from pandas.plotting import scatter_matrix
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.experimental import enable_halving_search_cv
+from sklearn.model_selection import HalvingGridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import uniform as sp_randFloat
+from scipy.stats import randint as sp_randInt
+
+
+
+def load_pp_data():
+    csv_path = r"C:\Users\18123\OneDrive\Documents\IU Bloomington\Machine-Learning-Project\PowerPlantData\CCPP\Folds5x2_pp.csv"
+    return pd.read_csv(csv_path)
+
+pp = load_pp_data()
+# print(pp.describe())
+
+# pp.hist(bins=50, figsize=(15,11))
+# plt.show()
+
+pp["AT_cat"] = pd.cut(pp["AT"],bins=[0.,10.,20.,30.,np.inf],labels=[1,2,3,4])
+# pp["AT_cat"].hist()
+# plt.show()
+
+split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
+for train_index, test_index in split.split(pp,pp["AT_cat"]):
+    train_set = pp.loc[train_index]
+    test_set = pp.loc[test_index]
+
+for set_ in(train_set,test_set):
+    set_.drop("AT_cat",axis=1,inplace=True)
+
+pptrain = train_set.copy()
+pptest = test_set.copy()
+
+# corr_matrix = pptrain.corr()
+# print(corr_matrix["PE"].sort_values(ascending=False))
+
+# pptrain.plot(kind="scatter",x="PE",y="AT",alpha=0.1)
+# plt.show()
+
+
+pptrain_attrib = pptrain.drop("PE",axis=1)
+pptrain_labels = pptrain["PE"].copy()
+
+scaler = StandardScaler()
+scaler.fit_transform(pptrain_attrib)
+
+tree_reg = DecisionTreeRegressor(random_state=10)
+tree_reg.fit(pptrain_attrib,pptrain_labels)
+
+# some_data = pptrain_attrib.iloc[:5]
+# some_labels = pptrain_labels.iloc[:5]
+# print("Predictions:",lin_reg.predict(some_data))
+# print("Labels:",list(some_labels))
+
+pptrain_tree_predictions = tree_reg.predict(pptrain_attrib)
+tree_mse = mean_squared_error(pptrain_labels,pptrain_tree_predictions)
+tree_rmse = np.sqrt(tree_mse)
+# print(tree_rmse)
+
+tree_scores = cross_val_score(tree_reg, pptrain_attrib, pptrain_labels, scoring="neg_mean_squared_error", cv=10)
+tree_rmse_scores = np.sqrt(-tree_scores)
+
+def display_scores(scores):
+    print(f"Mean: {scores.mean()} +- {scores.std()}")
+    print("Scores:", scores)
+
+display_scores(tree_rmse_scores)
+
+print(tree_reg.get_params())
+
+tree_param_grid = [{'ccp_alpha': [0.0,0.00001], 'criterion': ['squared_error','friedman_mse','absolute_error','poisson'], 'max_depth': [None], 'max_features': ['log2'], 'max_leaf_nodes': [9,10,11], 'min_impurity_decrease': [0.0], 'min_samples_leaf': [1], 'min_samples_split': [4], 'min_weight_fraction_leaf': [0.0], 'random_state': [10], 'splitter': ['best']}]
+# rand_tree_param_grid = [{'ccp_alpha': sp_randFloat(0,1), 'criterion': ['squared_error','friedman_mse','absolute_error','poisson'], 'max_depth': sp_randInt(2,100), 'max_features': [None,'sqrt','log2'], 'max_leaf_nodes': sp_randInt(2,100), 'min_impurity_decrease': sp_randFloat(0,1), 'min_samples_leaf': sp_randInt(1,100), 'min_samples_split': sp_randInt(2,100), 'min_weight_fraction_leaf': sp_randFloat(0,0.5), 'random_state': [None], 'splitter': ['best','random']}]
+tree_grid_search = HalvingGridSearchCV(tree_reg, tree_param_grid, cv=10, factor=3, max_resources=30, scoring='neg_mean_squared_error',return_train_score=True, random_state=15)
+# tree_grid_search = RandomizedSearchCV(tree_reg,rand_tree_param_grid,cv=10,n_iter=1)
+tree_grid_search.fit(pptrain_attrib,pptrain_labels)
+print(tree_grid_search.best_params_)
+tree_rmse = tree_grid_search.cv_results_['mean_test_score'][tree_grid_search.best_index_]
+print(tree_rmse)
+print(np.sqrt(-tree_rmse))
+
+final_tree = tree_grid_search.best_estimator_
+
+pptest_attrib = pptest.drop("PE",axis=1)
+pptest_labels = pptest["PE"].copy()
+
+final_tree_predictions = final_tree.predict(pptest_attrib)
+
+final_tree_mse = mean_squared_error(pptest_labels,final_tree_predictions)
+final_tree_rmse = np.sqrt(final_tree_mse)
+print(final_tree_rmse)
