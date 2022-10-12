@@ -1,0 +1,294 @@
+#Imports*****************************************************************************************************************************************
+import pandas as pd
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
+from sklearn.metrics import mean_absolute_error
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import uniform as sp_randFloat
+from scipy.stats import randint as sp_randInt
+from sklearn.linear_model import SGDRegressor
+from sklearn import neighbors
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
+
+#Load and Describe Data**************************************************************************************************************************
+def load_pp_data():
+    csv_path = r"C:\Users\18123\OneDrive\Documents\IU Bloomington\Machine-Learning-Project\PowerPlantData\CCPP\Folds5x2_pp.csv"
+    return pd.read_csv(csv_path)
+
+pp = load_pp_data()
+print(pp.describe())
+
+#Train/Test Split and Prepare Data*************************************************************************************************************
+pp["AT_cat"] = pd.cut(pp["AT"],bins=[0.,10.,20.,30.,np.inf],labels=[1,2,3,4])
+
+split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
+for train_index, test_index in split.split(pp,pp["AT_cat"]):
+    train_set = pp.loc[train_index]
+    test_set = pp.loc[test_index]
+
+for set_ in(train_set,test_set):
+    set_.drop("AT_cat",axis=1,inplace=True)
+
+pptrain = train_set.copy()
+pptest = test_set.copy()
+
+pptrain_attrib = pptrain.drop("PE",axis=1)
+pptrain_labels = pptrain["PE"].copy()
+pptest_attrib = pptest.drop("PE",axis=1)
+pptest_labels = pptest["PE"].copy()
+
+scaler = StandardScaler()
+scaler.fit_transform(pptrain_attrib)
+
+#Create Default Models *************************************************************************************************************************
+
+#Decision Tree
+tree_reg = DecisionTreeRegressor(random_state=10)
+print(tree_reg.get_params())
+
+#Linear Regression
+lin_reg = LinearRegression()
+print(lin_reg.get_params())
+
+#Gaussian Process Regressor
+gpr_reg = GaussianProcessRegressor()
+print(gpr_reg.get_params())
+
+#K-Nearest Neighbors
+knn_reg = neighbors.KNeighborsRegressor()
+print(knn_reg.get_params())
+
+#Random Forest
+rf_reg = RandomForestRegressor(random_state=10)
+print(rf_reg.get_params())
+
+#Random Search and CV***************************************************************************************************************************
+
+#Decision Tree
+tree_param_grid = [{'ccp_alpha': sp_randFloat(0,1), 'criterion': ['squared_error','friedman_mse','absolute_error','poisson'], 'max_depth': sp_randInt(1,100), 'max_features': [None,'sqrt','log2'], 'max_leaf_nodes': sp_randInt(2,100), 'min_impurity_decrease': sp_randFloat(0,1), 'min_samples_leaf': sp_randInt(1,100), 'min_samples_split': sp_randInt(2,100), 'min_weight_fraction_leaf': sp_randFloat(0,0.5), 'random_state': [10], 'splitter': ['best','random']}]
+tree_hyper_search = RandomizedSearchCV(tree_reg,tree_param_grid,scoring="neg_mean_squared_error",cv=10,n_iter=10,refit=True,random_state=12)
+
+#Linear Regression
+lin_param_grid = [{'copy_X': [True], 'fit_intercept': [True, False], 'n_jobs': [None], 'normalize': ['deprecated'], 'positive': [True,False]}]
+lin_hyper_search = RandomizedSearchCV(lin_reg,lin_param_grid,scoring="neg_mean_squared_error",cv=10,n_iter=4,refit=True,random_state=12)
+
+#Gaussian Process Regressor
+gpr_param_grid = [{'alpha': sp_randFloat(1e-11,1e-9), 'copy_X_train': [True], 'kernel': [None], 'n_restarts_optimizer': sp_randInt(0,10), 'normalize_y': [True,False], 'optimizer': ['fmin_l_bfgs_b'], 'random_state': [10]}]
+gpr_hyper_search = RandomizedSearchCV(gpr_reg,gpr_param_grid,scoring="neg_mean_squared_error",cv=10,n_iter=10,refit=True,random_state=12)
+
+#K-Nearest Neighbors
+knn_param_grid = [{'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'], 'leaf_size': sp_randInt(1,100), 'metric': ['minkowski'], 'metric_params': [None], 'n_jobs': [None], 'n_neighbors': sp_randInt(1,50), 'p': sp_randInt(1,2), 'weights': ['uniform','distance']}]
+knn_hyper_search = RandomizedSearchCV(knn_reg,knn_param_grid,scoring="neg_mean_squared_error",cv=10,n_iter=10,refit=True,random_state=12)
+
+#Random Forest
+rf_param_grid = [{'bootstrap': [True,False], 'ccp_alpha': sp_randFloat(0,1), 'criterion': ['squared_error', 'absolute_error', 'poisson'], 'max_depth': sp_randInt(1,100), 'max_features': [None,'sqrt','log2'], 'max_leaf_nodes': sp_randInt(2,100), 'max_samples': [None], 'min_impurity_decrease': sp_randFloat(0,1), 'min_samples_leaf': sp_randInt(1,100), 'min_samples_split': sp_randInt(2,100), 'min_weight_fraction_leaf': sp_randFloat(0,0.5), 'n_estimators': sp_randInt(1,50), 'n_jobs': [None], 'oob_score': [False], 'random_state': [10], 'verbose': [0], 'warm_start': [False]}]
+rf_hyper_search = RandomizedSearchCV(rf_reg,rf_param_grid,scoring="neg_mean_squared_error",cv=10,n_iter=10,refit=True,random_state=12)
+
+
+#Optimal Model fit to Training Data************************************************************************************************************
+
+#Decision Tree
+final_tree = tree_hyper_search.fit(pptrain_attrib,pptrain_labels)
+print(tree_hyper_search.best_params_)
+
+#Linear Regression
+final_lin = lin_hyper_search.fit(pptrain_attrib,pptrain_labels)
+print(lin_hyper_search.best_params_)
+
+#Gaussian Process Regressor
+final_gpr = gpr_hyper_search.fit(pptrain_attrib,pptrain_labels)
+print(gpr_hyper_search.best_params_)
+
+#K-Nearest Neighbors
+final_knn = knn_hyper_search.fit(pptrain_attrib,pptrain_labels)
+print(knn_hyper_search.best_params_)
+
+#Random Forest
+final_rf = rf_hyper_search.fit(pptrain_attrib,pptrain_labels)
+print(rf_hyper_search.best_params_)
+
+#Performance on Training Data********************************************************************************************************************
+
+#Decision Tree
+final_tree_train_predictions = final_tree.predict(pptrain_attrib)
+
+final_tree_train_mse = mean_squared_error(pptrain_labels,final_tree_train_predictions)
+final_tree_train_rmse = np.sqrt(final_tree_train_mse)
+final_tree_train_r2 = r2_score(pptrain_labels,final_tree_train_predictions)
+final_tree_train_mae = mean_absolute_error(pptrain_labels,final_tree_train_predictions)
+
+#Linear Regression
+final_lin_train_predictions = final_lin.predict(pptrain_attrib)
+
+final_lin_train_mse = mean_squared_error(pptrain_labels,final_lin_train_predictions)
+final_lin_train_rmse = np.sqrt(final_lin_train_mse)
+final_lin_train_r2 = r2_score(pptrain_labels,final_lin_train_predictions)
+final_lin_train_mae = mean_absolute_error(pptrain_labels,final_lin_train_predictions)
+
+#Gaussian Process Regressor
+final_gpr_train_predictions = final_gpr.predict(pptrain_attrib)
+
+final_gpr_train_mse = mean_squared_error(pptrain_labels,final_gpr_train_predictions)
+final_gpr_train_rmse = np.sqrt(final_gpr_train_mse)
+final_gpr_train_r2 = r2_score(pptrain_labels,final_gpr_train_predictions)
+final_gpr_train_mae = mean_absolute_error(pptrain_labels,final_gpr_train_predictions)
+
+#K-Nearest Neighbors
+final_knn_train_predictions = final_knn.predict(pptrain_attrib)
+
+final_knn_train_mse = mean_squared_error(pptrain_labels,final_knn_train_predictions)
+final_knn_train_rmse = np.sqrt(final_knn_train_mse)
+final_knn_train_r2 = r2_score(pptrain_labels,final_knn_train_predictions)
+final_knn_train_mae = mean_absolute_error(pptrain_labels,final_knn_train_predictions)
+
+#Random Forest
+final_rf_train_predictions = final_rf.predict(pptrain_attrib)
+
+final_rf_train_mse = mean_squared_error(pptrain_labels,final_rf_train_predictions)
+final_rf_train_rmse = np.sqrt(final_rf_train_mse)
+final_rf_train_r2 = r2_score(pptrain_labels,final_rf_train_predictions)
+final_rf_train_mae = mean_absolute_error(pptrain_labels,final_rf_train_predictions)
+
+print("For Training Data")
+print(f"Mean Squared Error-\nDecision Tree: {final_tree_train_mse}\nLinear Regression: {final_lin_train_mse}\nGaussian Process Regressor: {final_gpr_train_mse}\nK-Nearest Neighbors: {final_knn_train_mse}\nRandom Forest: {final_rf_train_mse}\n")
+print(f"Root Mean Squared Error-\nDecision Tree: {final_tree_train_rmse}\nLinear Regression: {final_lin_train_rmse}\nGaussian Process Regressor: {final_gpr_train_rmse}\nK-Nearest Neighbors: {final_knn_train_rmse}\nRandom Forest: {final_rf_train_rmse}\n")
+print(f"R-Squared Score Score-\nDecision Tree: {final_tree_train_r2}\nLinear Regression: {final_lin_train_r2}\nGaussian Process Regressor: {final_gpr_train_r2}\nK-Nearest Neighbors: {final_knn_train_r2}\nRandom Forest: {final_rf_train_r2}\n")
+print(f"Mean Absolute Error-\nDecision Tree: {final_tree_train_mae}\nLinear Regression: {final_lin_train_mae}\nGaussian Process Regressor: {final_gpr_train_mae}\nK-Nearest Neighbors: {final_knn_train_mae}\nRandom Forest: {final_rf_train_mae}\n")
+
+#Vizualize Training Error***********************************************************************************************************************
+plt.scatter(final_tree_train_mse,1,s=100)
+plt.scatter(final_lin_train_mse,2,s=100)
+plt.scatter(final_gpr_train_mse,3,s=100)
+plt.scatter(final_knn_train_mse,4,s=100)
+plt.scatter(final_rf_train_mse,5,s=100)
+plt.xticks([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Training Mean Squared Error (Lower is better)')
+plt.show()
+
+plt.scatter(final_tree_train_rmse,1,s=100)
+plt.scatter(final_lin_train_rmse,2,s=100)
+plt.scatter(final_gpr_train_rmse,3,s=100)
+plt.scatter(final_knn_train_rmse,4,s=100)
+plt.scatter(final_rf_train_rmse,5,s=100)
+plt.xticks([0,.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Training Root Mean Squared Error (Lower is better)')
+plt.show()
+
+plt.scatter(final_tree_train_r2,1,s=100)
+plt.scatter(final_lin_train_r2,2,s=100)
+plt.scatter(final_gpr_train_r2,3,s=100)
+plt.scatter(final_knn_train_r2,4,s=100)
+plt.scatter(final_rf_train_r2,5,s=100)
+plt.xticks([0.7,0.72,0.74,0.76,0.78,0.8,0.82,0.84,0.86,0.88,0.9,0.92,0.94,0.96,0.98,1])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Training R-Squared Score (Higher is better)')
+plt.show()
+
+plt.scatter(final_tree_train_mae,1,s=100)
+plt.scatter(final_lin_train_mae,2,s=100)
+plt.scatter(final_gpr_train_mae,3,s=100)
+plt.scatter(final_knn_train_mae,4,s=100)
+plt.scatter(final_rf_train_mae,5,s=100)
+plt.xticks([0,.25,.5,.75,1,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5,4.75,5,5.25,5.5,5.75,6])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Training Mean Absolute Error (Lower is better)')
+plt.show()
+
+
+#Performance on Test Data***********************************************************************************************************************
+final_tree_test_predictions = final_tree.predict(pptest_attrib)
+
+final_tree_test_mse = mean_squared_error(pptest_labels,final_tree_test_predictions)
+final_tree_test_rmse = np.sqrt(final_tree_test_mse)
+final_tree_test_r2 = r2_score(pptest_labels,final_tree_test_predictions)
+final_tree_test_mae = mean_absolute_error(pptest_labels,final_tree_test_predictions)
+
+#Linear Regression
+final_lin_test_predictions = final_lin.predict(pptest_attrib)
+
+final_lin_test_mse = mean_squared_error(pptest_labels,final_lin_test_predictions)
+final_lin_test_rmse = np.sqrt(final_lin_test_mse)
+final_lin_test_r2 = r2_score(pptest_labels,final_lin_test_predictions)
+final_lin_test_mae = mean_absolute_error(pptest_labels,final_lin_test_predictions)
+
+#Gaussian Process Regressor
+final_gpr_test_predictions = final_gpr.predict(pptest_attrib)
+
+final_gpr_test_mse = mean_squared_error(pptest_labels,final_gpr_test_predictions)
+final_gpr_test_rmse = np.sqrt(final_gpr_test_mse)
+final_gpr_test_r2 = r2_score(pptest_labels,final_gpr_test_predictions)
+final_gpr_test_mae = mean_absolute_error(pptest_labels,final_gpr_test_predictions)
+
+#K-Nearest Neighbors
+final_knn_test_predictions = final_knn.predict(pptest_attrib)
+
+final_knn_test_mse = mean_squared_error(pptest_labels,final_knn_test_predictions)
+final_knn_test_rmse = np.sqrt(final_knn_test_mse)
+final_knn_test_r2 = r2_score(pptest_labels,final_knn_test_predictions)
+final_knn_test_mae = mean_absolute_error(pptest_labels,final_knn_test_predictions)
+
+#Random Forest
+final_rf_test_predictions = final_rf.predict(pptest_attrib)
+
+final_rf_test_mse = mean_squared_error(pptest_labels,final_rf_test_predictions)
+final_rf_test_rmse = np.sqrt(final_rf_test_mse)
+final_rf_test_r2 = r2_score(pptest_labels,final_rf_test_predictions)
+final_rf_test_mae = mean_absolute_error(pptest_labels,final_rf_test_predictions)
+
+print("For Test Data:")
+print(f"Mean Squared Error-\nDecision Tree: {final_tree_test_mse}\nLinear Regression: {final_lin_test_mse}\nGaussian Process Regressor: {final_gpr_test_mse}\nK-Nearest Neighbors: {final_knn_test_mse}\nRandom Forest: {final_rf_test_mse}\n")
+print(f"Root Mean Squared Error-\nDecision Tree: {final_tree_test_rmse}\nLinear Regression: {final_lin_test_rmse}\nGaussian Process Regressor: {final_gpr_test_rmse}\nK-Nearest Neighbors: {final_knn_test_rmse}\nRandom Forest: {final_rf_test_rmse}\n")
+print(f"R-Squared Score Score-\nDecision Tree: {final_tree_test_r2}\nLinear Regression: {final_lin_test_r2}\nGaussian Process Regressor: {final_gpr_test_r2}\nK-Nearest Neighbors: {final_knn_test_r2}\nRandom Forest: {final_rf_test_r2}\n")
+print(f"Mean Absolute Error-\nDecision Tree: {final_tree_test_mae}\nLinear Regression: {final_lin_test_mae}\nGaussian Process Regressor: {final_gpr_test_mae}\nK-Nearest Neighbors: {final_knn_test_mae}\nRandom Forest: {final_rf_test_mae}\n")
+
+
+#Vizualize Testing Error************************************************************************************************************************
+plt.scatter(final_tree_test_mse,1,s=100)
+plt.scatter(final_lin_test_mse,2,s=100)
+plt.scatter(final_gpr_test_mse,3,s=100)
+plt.scatter(final_knn_test_mse,4,s=100)
+plt.scatter(final_rf_test_mse,5,s=100)
+plt.xticks([0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Test Mean Squared Error (Lower is better)')
+plt.show()
+
+plt.scatter(final_tree_test_rmse,1,s=100)
+plt.scatter(final_lin_test_rmse,2,s=100)
+plt.scatter(final_gpr_test_rmse,3,s=100)
+plt.scatter(final_knn_test_rmse,4,s=100)
+plt.scatter(final_rf_test_rmse,5,s=100)
+plt.xticks([0,.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Test Root Mean Squared Error (Lower is better)')
+plt.show()
+
+plt.scatter(final_tree_test_r2,1,s=100)
+plt.scatter(final_lin_test_r2,2,s=100)
+plt.scatter(final_gpr_test_r2,3,s=100)
+plt.scatter(final_knn_test_r2,4,s=100)
+plt.scatter(final_rf_test_r2,5,s=100)
+plt.xticks([0.7,0.72,0.74,0.76,0.78,0.8,0.82,0.84,0.86,0.88,0.9,0.92,0.94,0.96,0.98,1])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Test R-Squared Score (Higher is better)')
+plt.show()
+
+plt.scatter(final_tree_test_mae,1,s=100)
+plt.scatter(final_lin_test_mae,2,s=100)
+plt.scatter(final_gpr_test_mae,3,s=100)
+plt.scatter(final_knn_test_mae,4,s=100)
+plt.scatter(final_rf_test_mae,5,s=100)
+plt.xticks([0,.25,.5,.75,1,1.25,1.5,1.75,2.0,2.25,2.5,2.75,3,3.25,3.5,3.75,4,4.25,4.5,4.75,5,5.25,5.5,5.75,6])
+plt.yticks([0,1,2,3,4,5,6],labels=['','Decision Tree','Linear Regression','Gaussian Process Regressor','k-Nearest Neighbor','Random Forest',''])
+plt.xlabel('Test Mean Absolute Error (Lower is better)')
+plt.show()
