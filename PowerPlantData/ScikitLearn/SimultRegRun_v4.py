@@ -10,7 +10,6 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
@@ -26,27 +25,29 @@ warnings.filterwarnings('ignore')
 # Automatically Importing All Regressions
 
 # %%
-
 estimators = all_estimators(type_filter='regressor')
 
 all_regs = []
+all_reg_names = []
 for name, RegressorClass in estimators:
     try:
         if name != 'DummyRegressor' and name != 'GaussianProcessRegressor' and name != 'QuantileRegressor' and name != 'SGDRegressor':
             print('Appending', name)
             reg = RegressorClass()
             all_regs.append(reg)
+            all_reg_names.append(name)
     except Exception as e:
         print(e)
 
 print(all_regs)
+print(all_reg_names)
 
 # %% [markdown]
 # Load and Describe Data
 
 # %%
 def load_pp_data():
-    csv_path = r"C:\Users\18123\OneDrive\Documents\IUBloomington\Machine-Learning-Project\PowerPlantData\CCPP\Folds5x2_pp.csv"
+    csv_path = os.path.abspath("Folds5x2_pp.csv")
     return pd.read_csv(csv_path)
 
 pp = load_pp_data()
@@ -81,22 +82,26 @@ scaler.fit_transform(pptrain_attrib)
 # Simultaneous Run
 
 # %%
-def comparison(modellst):
+def comparison(models,model_names):
     cv_data = []
     errors = []
     passed_models = []
-    for i in range(len(modellst)):
-        x = run(modellst[i])
+    for i in range(len(models)):
+        x = run(models[i])
         if type(x) == dict:
             cv_data += [x]
         else:
-            errors += [i]
-    for j in range(len(modellst)):
-        if j not in errors:
-            passed_models += [modellst[j]]
-    display(test_best(cv_data, passed_models))
-    return box_rmse(cv_data, passed_models), box_r2(cv_data, passed_models), box_mae(cv_data, passed_models), runtime(cv_data, passed_models)
-
+            errors += [models[i]]
+    for j in range(len(models)):
+        if models[j] not in errors:
+            passed_models += [model_names[j]]
+    print(errors)
+    print(cv_data)
+    print(passed_models)
+    figs = [test_best(cv_data, passed_models), box_rmse(cv_data, passed_models), box_r2(cv_data, passed_models), box_mae(cv_data, passed_models), runtime(cv_data, passed_models)]
+    for k in range(len(figs)):
+        figs[k].savefig(f'fig_{k}.png',bbox_inches='tight')
+    return test_best(cv_data, passed_models)
 
 def run(model):
     print(f"checking {model}")
@@ -180,19 +185,25 @@ def test_best(cv_data, passed_models):
             if x[j] == min(x):
                 best = y[j]
         predictions = best.predict(pptest_attrib)
-        rmse += [np.sqrt(mean_squared_error(pptest_labels,predictions))]
-        r2 += [r2_score(pptest_labels,predictions)]
-        mae += [mean_absolute_error(pptest_labels,predictions)]
+        rmse += [round(np.sqrt(mean_squared_error(pptest_labels,predictions)),4)]
+        r2 += [round(r2_score(pptest_labels,predictions),4)]
+        mae += [round(mean_absolute_error(pptest_labels,predictions),4)]
     columnnames = ['rmse','r2','mae']
     df = pd.DataFrame(np.array([rmse,r2,mae]).T,index=passed_models,columns=columnnames)
     sorted_df = df.sort_values(by="rmse",ascending=True)
-    final_df = sorted_df.style.format("{:.4f}")
-    return final_df
+    fig, ax = plt.subplots()
+    fig.patch.set_visible(False)
+    ax.axis('off')
+    ax.axis('tight')
+    ax.table(cellText=sorted_df.values, rowLabels=sorted_df.index, colLabels=sorted_df.columns, loc='center')
+    fig.tight_layout()
+    return fig
 
 
 y = all_regs
-x = all_regs[0:8]
-comparison(y)
-plt.show()
+y_names = all_reg_names
+x = all_regs[0:5]
+x_names = all_reg_names[0:5]
+comparison(y,y_names)
 
 
