@@ -205,10 +205,20 @@ def test_best(cv_data, passed_models):
     return fig
 
 
-y = all_regs
-y_names = all_reg_names
-x = all_regs[0:5]
-x_names = all_reg_names[0:5]
-comparison(y,y_names)
+# y = all_regs
+# y_names = all_reg_names
+# x = all_regs[0:5]
+# x_names = all_reg_names[0:5]
+# comparison(y,y_names)
 
+params = {
+    "K": 10,
+    "num_models": 15
+}
+
+if __name__=="__main__":
+    params = {
+        
+    }
+    main(params)
 
