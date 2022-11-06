@@ -14,35 +14,35 @@ from sklearn.pipeline import Pipeline
 import warnings
 warnings.filterwarnings('ignore')
 
-estimators = all_estimators(type_filter='regressor')
-forbidden_estimators = (
-    "DummyRegressor", "GaussianProcessRegressor", 
-    "QuantileRegressor", "SGDRegressor", 
-    "MultiOutputRegressor", "RegressorChain",
-    "StackingRegressor", "VotingRegressor"
-    )
+def get_all_regs():
+    estimators = all_estimators(type_filter='regressor')
+    forbidden_estimators = (
+        "DummyRegressor", "GaussianProcessRegressor", 
+        "QuantileRegressor", "SGDRegressor", 
+        "MultiOutputRegressor", "RegressorChain",
+        "StackingRegressor", "VotingRegressor"
+        )
 
-all_regs = []
-all_reg_names = []
-for name, RegressorClass in estimators:
-    try:
-        if name not in forbidden_estimators:
-            print('Appending', name)
-            reg = RegressorClass()
-            all_regs.append(reg)
-            all_reg_names.append(name)
-    except Exception as e:
-        print(e)
+    all_regs = []
+    all_reg_names = []
+    for name, RegressorClass in estimators:
+        try:
+            if name not in forbidden_estimators:
+                print('Appending', name)
+                reg = RegressorClass()
+                all_regs.append(reg)
+                all_reg_names.append(name)
+        except Exception as e:
+            print(e)
 
-print(all_regs)
-print(all_reg_names)
+    return all_regs, all_reg_names
 
 def load_data(datapath):
     csv_path = os.path.abspath(datapath)
     return pd.read_csv(csv_path)
 
-def find_strat_label(data):
-    datarscore = data.corr()
+def find_strat_label(raw_data):
+    datarscore = raw_data.corr()
     label = datarscore.columns[-1]
     datarscore = datarscore.drop(label)
     max_cor = datarscore[label].idxmax()
@@ -54,55 +54,58 @@ def find_strat_label(data):
     else:
         return max_cor
 
-def create_strat_cat():
-    strat_label = str(find_strat_label(pp))
-    description = pp.describe()
-    print(description)
+def create_strat_cat(raw_data,strat_label):
+    description = raw_data.describe()
     strat_bins = list(description.loc['min':'max',strat_label])
     strat_bins[0], strat_bins[-1] = -np.inf, np.inf
+    raw_data[f"{strat_label}_cat"] = pd.cut(raw_data[strat_label],bins=strat_bins,labels=[1,2,3,4])
+    data_w_strat_cat = raw_data
+    return data_w_strat_cat
 
-    print(strat_bins)
-    pp[f"{strat_label}_cat"] = pd.cut(pp[strat_label],bins=strat_bins,labels=[1,2,3,4])
-    return pp
-
-def data_split():
+def data_split(data, strat_label):
     split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
-    for train_index, test_index in split.split(pp,pp[f"{strat_label}_cat"]):
-        train_set = pp.loc[train_index]
-        test_set = pp.loc[test_index]
+    for train_index, test_index in split.split(data,data[f"{strat_label}_cat"]):
+        train_set = data.loc[train_index]
+        test_set = data.loc[test_index]
     for set_ in(train_set,test_set):
         set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
-    pptrain = train_set.copy()
-    pptest = test_set.copy()
+    train = train_set.copy()
+    test = test_set.copy()
 
-    pp_class = pptrain.columns[-1]
-    print(pp_class)
-    pptrain_attrib = pptrain.drop(pp_class,axis=1)
-    pptrain_labels = pptrain[pp_class].copy()
-    pptest_attrib = pptest.drop(pp_class,axis=1)
-    pptest_labels = pptest[pp_class].copy()
+    data_label = train.columns[-1]
+    train_attrib = train.drop(data_label,axis=1)
+    train_labels = train[data_label].copy()
+    test_attrib = test.drop(data_label,axis=1)
+    test_labels = test[data_label].copy()
 
-    return pptrain_attrib, pptrain_labels, pptest_attrib, pptest_labels
+    return train_attrib, train_labels, test_attrib, test_labels
 
-def scale():
+def scale(train_attrib, train_labels, test_attrib, test_labels):
     scaler = StandardScaler()
-    pptrain_attrib = scaler.fit_transform(pptrain_attrib)
-    pptest_attrib = scaler.fit_transform(pptest_attrib)
+    scaled_train_attrib = scaler.fit_transform(train_attrib)
+    scaled_test_attrib = scaler.fit_transform(test_attrib)
+    return scaled_train_attrib, train_labels, scaled_test_attrib, test_labels
 
+def data_transform(datapath):
+    raw_data = load_data(datapath)
+    strat_label = find_strat_label(raw_data)
+    data_w_strat_cat = create_strat_cat(raw_data,strat_label)
+    split_data = data_split(data_w_strat_cat, strat_label)
+    train_attrib, train_labels, test_attrib, test_labels = scale(*split_data)
+    return train_attrib, train_labels, test_attrib, test_labels
 
-num_pipeline = Pipeline([()])
 #mother function that runs the models and returns several figures showing comparison of the models
 def comparison(datapath, n_models, metric_list, n_vizualized):
-    models = all_regs[0:n_models]
-    model_names = all_reg_names[0:n_models]
-    data = load_data(datapath)
+    models = get_all_regs()[0][0:n_models]
+    model_names = get_all_regs()[1][0:n_models]
+    train_attrib, train_labels, test_attrib, test_labels = data_transform(datapath)
     cv_data = []
     errors = []
     passed_models = []
     if 'neg_mean_squared_error' not in metric_list:
         metric_list = metric_list+['neg_mean_squared_error']
     for i in range(len(models)):
-        x = run(models[i],metric_list)
+        x = run(models[i], metric_list, train_attrib, train_labels)
         if type(x) == dict:
             cv_data += [x]
         else:
@@ -110,19 +113,19 @@ def comparison(datapath, n_models, metric_list, n_vizualized):
     for j in range(len(models)):
         if models[j] not in errors:
             passed_models += [model_names[j]]
-    figs = [test_best(cv_data, passed_models, metric_list)]
+    figs = [test_best(cv_data, passed_models, metric_list, test_attrib, test_labels)]
     for metric in metric_list:
-        figs += [boxplot(cv_data, passed_models,metric,show)]
+        figs += [boxplot(cv_data, passed_models,metric,n_vizualized)]
     for k in range(len(figs)):
         figs[k].savefig(f'fig_{k}.png',bbox_inches='tight')
-    return test_best(cv_data, passed_models,metric_list)
+    pass
 
 #the function that performs cross-validation
-def run(model,metric_list):
+def run(model, metric_list, train_attrib, train_labels):
     print(f"checking {model}")
     try:
         cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-        cv_output_dict = cross_validate(model, pptrain_attrib, pptrain_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        cv_output_dict = cross_validate(model, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
         return cv_output_dict
     except:
         pass
@@ -148,7 +151,7 @@ def boxplot(cv_data, passed_models, metric, show):
 
 
 #takes the model produced by the best cv run and runs it over the test data. returns table comparing model performance on test data
-def test_best(cv_data, passed_models, metric_list):
+def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels):
     metric_columns = []
     for metric in metric_list:
         metric_columns += [[metric,[]]]
@@ -158,10 +161,10 @@ def test_best(cv_data, passed_models, metric_list):
         for j in range(len(x)):
             if x[j] == min(x):
                 best = y[j]
-        predictions = best.predict(pptest_attrib)
+        predictions = best.predict(test_attrib)
         for k in metric_columns:
             #next line won't work. need to figure out how to use statistics module to calculate metrics on test predictions
-            k[1] += [round(r2_score(pptest_labels,predictions),4)]
+            k[1] += [round(r2_score(test_labels,predictions),4)]
     columnnames = metric_list
     final_columns = []
     for m in metric_columns:
@@ -181,16 +184,9 @@ def test_best(cv_data, passed_models, metric_list):
     return fig
 
 
-y = all_regs
-y_names = all_reg_names
-n_models = 5
-x = all_regs[0:n_models]
-x_names = all_reg_names[0:n_models]
-
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
             'n_models': 5,
             'metric_list': ["neg_mean_squared_error","neg_mean_absolute_error","r2"],
             'n_vizualized': 3,
     }
 comparison(**paramdict)
-
