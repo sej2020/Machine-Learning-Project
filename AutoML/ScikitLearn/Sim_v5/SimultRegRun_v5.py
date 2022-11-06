@@ -37,11 +37,11 @@ print(all_regs)
 print(all_reg_names)
 
 def load_pp_data():
-    csv_path = os.path.abspath("Folds5x2_pp.csv")
+    csv_path = os.path.abspath("AutoML/PowerPlantData/Folds5x2_pp.csv")
     return pd.read_csv(csv_path)
 
 pp = load_pp_data()
-print(pp.describe())
+print(pp.corr())
 
 pp["AT_cat"] = pd.cut(pp["AT"],bins=[0.,10.,20.,30.,np.inf],labels=[1,2,3,4])
 
@@ -153,10 +153,10 @@ def test_best(cv_data, passed_models, metric_list):
 
 y = all_regs
 y_names = all_reg_names
-n_models = 8
+n_models = 5
 x = all_regs[0:n_models]
 x_names = all_reg_names[0:n_models]
 metric_list = ["neg_mean_squared_error","neg_mean_absolute_error","r2"]
-comparison(x,x_names,metric_list,5)
+comparison(x,x_names,metric_list,3)
 
 
