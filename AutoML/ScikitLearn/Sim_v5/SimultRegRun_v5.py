@@ -6,35 +6,30 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
-from sklearn.metrics import mean_absolute_error
+from sklearn import metrics
 from sklearn.utils import all_estimators
-from sklearn.pipeline import Pipeline
 import warnings
 warnings.filterwarnings('ignore')
 
 def get_all_regs():
     estimators = all_estimators(type_filter='regressor')
-    forbidden_estimators = (
-        "DummyRegressor", "GaussianProcessRegressor", 
+    forbidden_estimators = [
+        "DummyRegressor", "GaussianProcessRegressor", "KernelRidge", 
         "QuantileRegressor", "SGDRegressor", 
         "MultiOutputRegressor", "RegressorChain",
         "StackingRegressor", "VotingRegressor"
-        )
-
+        ]
+    print(estimators)
     all_regs = []
     all_reg_names = []
     for name, RegressorClass in estimators:
-        try:
-            if name not in forbidden_estimators:
+        if name not in forbidden_estimators:
                 print('Appending', name)
                 reg = RegressorClass()
                 all_regs.append(reg)
                 all_reg_names.append(name)
-        except Exception as e:
-            print(e)
-
+        else:
+            print(f"Skipping {name}")
     return all_regs, all_reg_names
 
 def load_data(datapath):
@@ -95,9 +90,10 @@ def data_transform(datapath):
     return train_attrib, train_labels, test_attrib, test_labels
 
 #mother function that runs the models and returns several figures showing comparison of the models
-def comparison(datapath, n_models, metric_list, n_vizualized):
-    models = get_all_regs()[0][0:n_models]
-    model_names = get_all_regs()[1][0:n_models]
+def comparison(datapath, n_models, metric_list, n_vizualized, metric_help):
+    models, model_names = get_all_regs()
+    if n_models != 'all':
+        models, model_names = models[0:n_models], model_names[0:n_models]
     train_attrib, train_labels, test_attrib, test_labels = data_transform(datapath)
     cv_data = []
     errors = []
@@ -113,16 +109,16 @@ def comparison(datapath, n_models, metric_list, n_vizualized):
     for j in range(len(models)):
         if models[j] not in errors:
             passed_models += [model_names[j]]
-    figs = [test_best(cv_data, passed_models, metric_list, test_attrib, test_labels)]
+    figs = [test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, metric_help)]
     for metric in metric_list:
-        figs += [boxplot(cv_data, passed_models,metric,n_vizualized)]
+        figs += [boxplot(cv_data, passed_models, metric, n_vizualized, metric_help)]
     for k in range(len(figs)):
         figs[k].savefig(f'fig_{k}.png',bbox_inches='tight')
     pass
 
 #the function that performs cross-validation
 def run(model, metric_list, train_attrib, train_labels):
-    print(f"checking {model}")
+    print(f"Checking {model}")
     try:
         cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
         cv_output_dict = cross_validate(model, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
@@ -132,49 +128,39 @@ def run(model, metric_list, train_attrib, train_labels):
 
 #metric must be a string
 #show is how many of top models are vizualized
-def boxplot(cv_data, passed_models, metric, show):
+def boxplot(cv_data, passed_models, metric, show, metric_help):
     boxfig = plt.figure(constrained_layout=True)
     df = pd.DataFrame()
     for i,j in zip(cv_data,passed_models):
-        if metric[:3] == 'neg':
-            df[j] = list(i['test_'+metric]*-1)
-        else:
-            df[j] = list(i['test_'+metric])
-
-    metric_dict = {"r2": False, "neg_mean_squared_error": True,"neg_mean_absolute_error": True}
-    sorted_index = df.median().sort_values(ascending=not metric_dict[metric]).index
+            df[j] = list(i['test_'+metric]*metric_help[metric][1])
+    sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
     df_sorted = df_sorted=df[sorted_index]
-    df_sorted.iloc[:, :show].boxplot(vert=False,grid=False)
+    df_sorted.iloc[:,show:].boxplot(vert=False,grid=False)
     plt.xlabel(f'CV {metric}')
     plt.ylabel('Models')
     return boxfig
 
 
 #takes the model produced by the best cv run and runs it over the test data. returns table comparing model performance on test data
-def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels):
+def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, metric_help):
     metric_columns = []
     for metric in metric_list:
         metric_columns += [[metric,[]]]
     for i in cv_data:
-        x = list((np.sqrt(i['test_neg_mean_squared_error']*-1)))
+        x = list(i['test_neg_mean_squared_error']*-1)
         y = list(i['estimator'])
         for j in range(len(x)):
             if x[j] == min(x):
                 best = y[j]
         predictions = best.predict(test_attrib)
         for k in metric_columns:
-            #next line won't work. need to figure out how to use statistics module to calculate metrics on test predictions
-            k[1] += [round(r2_score(test_labels,predictions),4)]
+            k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
     columnnames = metric_list
     final_columns = []
     for m in metric_columns:
         final_columns += [m[1]]
     df = pd.DataFrame(np.array(final_columns).T,index=passed_models,columns=columnnames)
-    if metric_list[0] != 'r2':
-        notr2 = True
-    else:
-        notr2 = False
-    sorted_df = df.sort_values(by=metric_list[0],ascending=notr2)
+    sorted_df = df.sort_values(by=metric_list[0],ascending=metric_help[metric][0])
     fig, ax = plt.subplots()
     fig.patch.set_visible(False)
     ax.axis('off')
@@ -185,8 +171,19 @@ def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels):
 
 
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
-            'n_models': 5,
-            'metric_list': ["neg_mean_squared_error","neg_mean_absolute_error","r2"],
-            'n_vizualized': 3,
-    }
+            'n_models': 'all',
+            'metric_list': ['neg_root_mean_squared_error','neg_mean_absolute_error','r2'],
+            'n_vizualized': 20,
+            'metric_help': {'explained_variance': [True, 1, metrics.explained_variance_score], 'max_error': [False, 1, metrics.max_error],
+                            'neg_mean_absolute_error': [False, -1, metrics.mean_absolute_error], 'neg_mean_squared_error': [False, -1, metrics.mean_squared_error],
+                            'neg_root_mean_squared_error': [False, -1, metrics.mean_squared_error], 'neg_mean_squared_log_error': [False, -1, metrics.mean_squared_log_error],
+                            'neg_median_absolute_error': [False, -1, metrics.median_absolute_error], 'r2': [True, 1, metrics.r2_score],
+                            'neg_mean_poisson_deviance': [False, -1, metrics.mean_poisson_deviance], 'neg_mean_gamma_deviance': [False, -1, metrics.mean_gamma_deviance],
+                            'neg_mean_absolute_percentage_error': [False, -1, metrics.mean_absolute_percentage_error], 'd2_absolute_error_score': [True, 1, metrics.d2_absolute_error_score],
+                            'd2_pinball_score': [True, 1, metrics.d2_pinball_score], 'd2_tweedie_score': [True, 1, metrics.d2_tweedie_score]
+                        }
+        }
+
 comparison(**paramdict)
+
+#GENERAL FORM of metric_help: {'metric':[ higher score is better? , positive or negative score values, accociated stat function ] } 
