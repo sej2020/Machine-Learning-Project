@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error
 from sklearn.utils import all_estimators
+from sklearn.pipeline import Pipeline
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -36,11 +37,9 @@ for name, RegressorClass in estimators:
 print(all_regs)
 print(all_reg_names)
 
-def load_pp_data():
-    csv_path = os.path.abspath("AutoML/PowerPlantData/Folds5x2_pp.csv")
+def load_data(datapath):
+    csv_path = os.path.abspath(datapath)
     return pd.read_csv(csv_path)
-
-pp = load_pp_data()
 
 def find_strat_label(data):
     datarscore = data.corr()
@@ -55,39 +54,48 @@ def find_strat_label(data):
     else:
         return max_cor
 
-strat_label = str(find_strat_label(pp))
-description = pp.describe()
-print(description)
-strat_bins = list(description.loc['min':'max',strat_label])
-strat_bins[0], strat_bins[-1] = -np.inf, np.inf
+def create_strat_cat():
+    strat_label = str(find_strat_label(pp))
+    description = pp.describe()
+    print(description)
+    strat_bins = list(description.loc['min':'max',strat_label])
+    strat_bins[0], strat_bins[-1] = -np.inf, np.inf
 
-print(strat_bins)
-pp[f"{strat_label}_cat"] = pd.cut(pp[strat_label],bins=strat_bins,labels=[1,2,3,4])
+    print(strat_bins)
+    pp[f"{strat_label}_cat"] = pd.cut(pp[strat_label],bins=strat_bins,labels=[1,2,3,4])
+    return pp
 
-split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
-for train_index, test_index in split.split(pp,pp[f"{strat_label}_cat"]):
-    train_set = pp.loc[train_index]
-    test_set = pp.loc[test_index]
+def data_split():
+    split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
+    for train_index, test_index in split.split(pp,pp[f"{strat_label}_cat"]):
+        train_set = pp.loc[train_index]
+        test_set = pp.loc[test_index]
+    for set_ in(train_set,test_set):
+        set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
+    pptrain = train_set.copy()
+    pptest = test_set.copy()
 
-for set_ in(train_set,test_set):
-    set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
+    pp_class = pptrain.columns[-1]
+    print(pp_class)
+    pptrain_attrib = pptrain.drop(pp_class,axis=1)
+    pptrain_labels = pptrain[pp_class].copy()
+    pptest_attrib = pptest.drop(pp_class,axis=1)
+    pptest_labels = pptest[pp_class].copy()
 
-pptrain = train_set.copy()
-pptest = test_set.copy()
+    return pptrain_attrib, pptrain_labels, pptest_attrib, pptest_labels
 
-pp_class = pptrain.columns[-1]
-print(pp_class)
-pptrain_attrib = pptrain.drop(pp_class,axis=1)
-pptrain_labels = pptrain[pp_class].copy()
-pptest_attrib = pptest.drop(pp_class,axis=1)
-pptest_labels = pptest[pp_class].copy()
+def scale():
+    scaler = StandardScaler()
+    pptrain_attrib = scaler.fit_transform(pptrain_attrib)
+    pptest_attrib = scaler.fit_transform(pptest_attrib)
 
-scaler = StandardScaler()
-pptrain_attrib = scaler.fit_transform(pptrain_attrib)
-pptest_atrib = scaler.fit_transform(pptest_attrib)
 
+num_pipeline = Pipeline([()])
 #mother function that runs the models and returns several figures showing comparison of the models
-def comparison(models,model_names,metric_list,show):
+def comparison(datapath, n_models, metric_list, n_vizualized):
+    models = all_regs[0:n_models]
+    model_names = all_reg_names[0:n_models]
+    data = load_data(datapath)
     cv_data = []
     errors = []
     passed_models = []
@@ -178,7 +186,11 @@ y_names = all_reg_names
 n_models = 5
 x = all_regs[0:n_models]
 x_names = all_reg_names[0:n_models]
-metric_list = ["neg_mean_squared_error","neg_mean_absolute_error","r2"]
-comparison(x,x_names,metric_list,3)
 
+paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
+            'n_models': 5,
+            'metric_list': ["neg_mean_squared_error","neg_mean_absolute_error","r2"],
+            'n_vizualized': 3,
+    }
+comparison(**paramdict)
 
