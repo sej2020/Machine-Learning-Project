@@ -41,28 +41,50 @@ def load_pp_data():
     return pd.read_csv(csv_path)
 
 pp = load_pp_data()
-print(pp.corr())
 
-pp["AT_cat"] = pd.cut(pp["AT"],bins=[0.,10.,20.,30.,np.inf],labels=[1,2,3,4])
+def find_strat_label(data):
+    datarscore = data.corr()
+    label = datarscore.columns[-1]
+    datarscore = datarscore.drop(label)
+    max_cor = datarscore[label].idxmax()
+    min_cor = datarscore[label].idxmin()
+    max_cor_val = datarscore[label].max()
+    min_cor_val = datarscore[label].min()
+    if abs(min_cor_val) > max_cor_val:
+        return min_cor
+    else:
+        return max_cor
+
+strat_label = str(find_strat_label(pp))
+description = pp.describe()
+print(description)
+strat_bins = list(description.loc['min':'max',strat_label])
+strat_bins[0], strat_bins[-1] = -np.inf, np.inf
+
+print(strat_bins)
+pp[f"{strat_label}_cat"] = pd.cut(pp[strat_label],bins=strat_bins,labels=[1,2,3,4])
 
 split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
-for train_index, test_index in split.split(pp,pp["AT_cat"]):
+for train_index, test_index in split.split(pp,pp[f"{strat_label}_cat"]):
     train_set = pp.loc[train_index]
     test_set = pp.loc[test_index]
 
 for set_ in(train_set,test_set):
-    set_.drop("AT_cat",axis=1,inplace=True)
+    set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
 
 pptrain = train_set.copy()
 pptest = test_set.copy()
 
-pptrain_attrib = pptrain.drop("PE",axis=1)
-pptrain_labels = pptrain["PE"].copy()
-pptest_attrib = pptest.drop("PE",axis=1)
-pptest_labels = pptest["PE"].copy()
+pp_class = pptrain.columns[-1]
+print(pp_class)
+pptrain_attrib = pptrain.drop(pp_class,axis=1)
+pptrain_labels = pptrain[pp_class].copy()
+pptest_attrib = pptest.drop(pp_class,axis=1)
+pptest_labels = pptest[pp_class].copy()
 
 scaler = StandardScaler()
-scaler.fit_transform(pptrain_attrib)
+pptrain_attrib = scaler.fit_transform(pptrain_attrib)
+pptest_atrib = scaler.fit_transform(pptest_attrib)
 
 #mother function that runs the models and returns several figures showing comparison of the models
 def comparison(models,model_names,metric_list,show):
