@@ -128,14 +128,18 @@ def run(model, metric_list, train_attrib, train_labels):
 
 #metric must be a string
 #show is how many of top models are vizualized
-def boxplot(cv_data, passed_models, metric, show, metric_help):
+def boxplot(cv_data, passed_models, metric, n_vizualized, metric_help):
+    print(passed_models)
+    print(metric)
+    print(n_vizualized)
     boxfig = plt.figure(constrained_layout=True)
     df = pd.DataFrame()
     for i,j in zip(cv_data,passed_models):
             df[j] = list(i['test_'+metric]*metric_help[metric][1])
     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
     df_sorted = df_sorted=df[sorted_index]
-    df_sorted.iloc[:,show:].boxplot(vert=False,grid=False)
+    print(df_sorted)
+    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
     plt.xlabel(f'CV {metric}')
     plt.ylabel('Models')
     return boxfig
@@ -154,13 +158,16 @@ def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, met
                 best = y[j]
         predictions = best.predict(test_attrib)
         for k in metric_columns:
-            k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
+            if k[0] == 'neg_root_mean_squared_error':
+                k[1] += [round(np.sqrt(metric_help[k[0]][2](test_labels,predictions)),4)]
+            else:
+                k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
     columnnames = metric_list
     final_columns = []
     for m in metric_columns:
         final_columns += [m[1]]
     df = pd.DataFrame(np.array(final_columns).T,index=passed_models,columns=columnnames)
-    sorted_df = df.sort_values(by=metric_list[0],ascending=metric_help[metric][0])
+    sorted_df = df.sort_values(by=metric_list[0],ascending=not(metric_help[metric][0]))
     fig, ax = plt.subplots()
     fig.patch.set_visible(False)
     ax.axis('off')
@@ -171,9 +178,9 @@ def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, met
 
 
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
-            'n_models': 'all',
+            'n_models': 8,
             'metric_list': ['neg_root_mean_squared_error','neg_mean_absolute_error','r2'],
-            'n_vizualized': 20,
+            'n_vizualized': 5,
             'metric_help': {'explained_variance': [True, 1, metrics.explained_variance_score], 'max_error': [False, 1, metrics.max_error],
                             'neg_mean_absolute_error': [False, -1, metrics.mean_absolute_error], 'neg_mean_squared_error': [False, -1, metrics.mean_squared_error],
                             'neg_root_mean_squared_error': [False, -1, metrics.mean_squared_error], 'neg_mean_squared_log_error': [False, -1, metrics.mean_squared_log_error],
