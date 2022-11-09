@@ -11,7 +11,13 @@ from sklearn.utils import all_estimators
 import warnings
 warnings.filterwarnings('ignore')
 
-def get_all_regs():
+def get_all_regs() -> list:
+    """
+    This function imports all sklearn regression estimators. The function will filter all out all regressors
+    that perform poorly or take additional parameters. It will return a list of all
+    viable regressor classes and a list of the names of all the viable regressor classes. 
+    
+    """
     estimators = all_estimators(type_filter='regressor')
     forbidden_estimators = [
         "DummyRegressor", "GaussianProcessRegressor", "KernelRidge", 
@@ -19,7 +25,6 @@ def get_all_regs():
         "MultiOutputRegressor", "RegressorChain",
         "StackingRegressor", "VotingRegressor"
         ]
-    print(estimators)
     all_regs = []
     all_reg_names = []
     for name, RegressorClass in estimators:
@@ -32,32 +37,32 @@ def get_all_regs():
             print(f"Skipping {name}")
     return all_regs, all_reg_names
 
-def load_data(datapath):
+def load_data(datapath) -> pd.DataFrame:
+    """
+    This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
+    """
     csv_path = os.path.abspath(datapath)
     return pd.read_csv(csv_path)
 
-def find_strat_label(raw_data):
-    datarscore = raw_data.corr()
-    label = datarscore.columns[-1]
-    datarscore = datarscore.drop(label)
-    max_cor = datarscore[label].idxmax()
-    min_cor = datarscore[label].idxmin()
-    max_cor_val = datarscore[label].max()
-    min_cor_val = datarscore[label].min()
-    if abs(min_cor_val) > max_cor_val:
-        return min_cor
-    else:
-        return max_cor
-
-def create_strat_cat(raw_data,strat_label):
+def create_strat_cat(raw_data) -> pd.DataFrame:
+    """
+    This function will add a categorical column to the dataframe. This column is the categorical representation of the class
+    label of each instance. This will enable the data to be split according to the distribution of the class values. The appended
+    dataframe will be returned.
+    """
+    strat_label = raw_data.columns[-1]
     description = raw_data.describe()
     strat_bins = list(description.loc['min':'max',strat_label])
     strat_bins[0], strat_bins[-1] = -np.inf, np.inf
     raw_data[f"{strat_label}_cat"] = pd.cut(raw_data[strat_label],bins=strat_bins,labels=[1,2,3,4])
     data_w_strat_cat = raw_data
-    return data_w_strat_cat
+    return data_w_strat_cat, strat_label
 
-def data_split(data, strat_label):
+def data_split(data, strat_label) -> pd.DataFrame:
+    """
+    This function will split the data into training attributes, training labels, test attributes and test labels according
+    to the distribution of a categorical class label.
+    """
     split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
     for train_index, test_index in split.split(data,data[f"{strat_label}_cat"]):
         train_set = data.loc[train_index]
@@ -75,49 +80,68 @@ def data_split(data, strat_label):
 
     return train_attrib, train_labels, test_attrib, test_labels
 
-def scale(train_attrib, train_labels, test_attrib, test_labels):
+def scale(train_attrib, train_labels, test_attrib, test_labels) -> pd.DataFrame:
+    """
+    This function will perform standardization feature scaling on training instances and test instances of a dataset.
+    It will return the scaled training attributes, the training labels, the scaled test attributes, and the test labels.
+    """
     scaler = StandardScaler()
     scaled_train_attrib = scaler.fit_transform(train_attrib)
     scaled_test_attrib = scaler.fit_transform(test_attrib)
     return scaled_train_attrib, train_labels, scaled_test_attrib, test_labels
 
-def data_transform(datapath):
+def data_transform(datapath) -> pd.DataFrame:
+    """
+    This function will take a relative datapath of a dataset in csv format and return preprocessed training attributes,  
+    training labels, test attributes, and test labels of the dataset.
+    """
     raw_data = load_data(datapath)
-    strat_label = find_strat_label(raw_data)
-    data_w_strat_cat = create_strat_cat(raw_data,strat_label)
+    data_w_strat_cat, strat_label = create_strat_cat(raw_data)
     split_data = data_split(data_w_strat_cat, strat_label)
     train_attrib, train_labels, test_attrib, test_labels = scale(*split_data)
     return train_attrib, train_labels, test_attrib, test_labels
 
-#mother function that runs the models and returns several figures showing comparison of the models
-def comparison(datapath, n_models, metric_list, n_vizualized, metric_help):
-    models, model_names = get_all_regs()
-    if n_models != 'all':
-        models, model_names = models[0:n_models], model_names[0:n_models]
+def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='neg_mean_squared_errror') -> None:
+    """
+    This function will perform cross-validation training across multiple regressor types for one dataset. 
+    The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
+    specified metrics. These charts will be saved to the user's CPU as a png file. The best performing model 
+    trained on each regressor type will be tested on the set of test instances. The performance of those regs 
+    on the test instances will be recorded in a table and saved to the user's CPU as a png file.
+    """
+    regs, reg_names = get_all_regs()
+    if n_regressors != 'all':
+        regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
     train_attrib, train_labels, test_attrib, test_labels = data_transform(datapath)
     cv_data = []
     errors = []
-    passed_models = []
-    if 'neg_mean_squared_error' not in metric_list:
-        metric_list = metric_list+['neg_mean_squared_error']
-    for i in range(len(models)):
-        x = run(models[i], metric_list, train_attrib, train_labels)
+    passed_regs = []
+    if score_method not in metric_list:
+        metric_list = [score_method]+metric_list
+    #training each regressor in CV
+    for i in range(len(regs)):
+        x = run(regs[i], metric_list, train_attrib, train_labels)
         if type(x) == dict:
             cv_data += [x]
         else:
-            errors += [models[i]]
-    for j in range(len(models)):
-        if models[j] not in errors:
-            passed_models += [model_names[j]]
-    figs = [test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, metric_help)]
+            errors += [regs[i]]
+    print(f"These regressors threw errors in CV: {errors}")
+    #removing the names of the regressors that threw errors in CV
+    for j in range(len(regs)):
+        if regs[j] not in errors:
+            passed_regs += [reg_names[j]]
+    figs = [test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metric_help, score_method)]
     for metric in metric_list:
-        figs += [boxplot(cv_data, passed_models, metric, n_vizualized, metric_help)]
+        figs += [boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help)]
     for k in range(len(figs)):
         figs[k].savefig(f'fig_{k}.png',bbox_inches='tight')
     pass
 
-#the function that performs cross-validation
-def run(model, metric_list, train_attrib, train_labels):
+def run(model, metric_list, train_attrib, train_labels) -> dict:
+    """
+    This function will perform cross-validation training on a given dataset and given regressor. It will return
+    a dictionary containing cross-validation performance on various metrics.
+    """
     print(f"Checking {model}")
     try:
         cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
@@ -126,48 +150,68 @@ def run(model, metric_list, train_attrib, train_labels):
     except:
         pass
 
-#metric must be a string
-#show is how many of top models are vizualized
-def boxplot(cv_data, passed_models, metric, n_vizualized, metric_help):
-    print(passed_models)
-    print(metric)
-    print(n_vizualized)
+def boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help):
+    """
+    This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
+    The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
+    """
     boxfig = plt.figure(constrained_layout=True)
     df = pd.DataFrame()
-    for i,j in zip(cv_data,passed_models):
+    #Making CV scores on the specified metric positive and storing in a dataframe. Repeat for each regressor.
+    for i,j in zip(cv_data,passed_regs):
             df[j] = list(i['test_'+metric]*metric_help[metric][1])
+    #Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
+    # sort or a descending sort based on the metric.
     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
     df_sorted = df_sorted=df[sorted_index]
-    print(df_sorted)
+    #Creating box plot figure of best n regressors.
     df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
     plt.xlabel(f'CV {metric}')
     plt.ylabel('Models')
     return boxfig
 
-
-#takes the model produced by the best cv run and runs it over the test data. returns table comparing model performance on test data
-def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, metric_help):
+def test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metric_help, score_method):
+    """
+    This function will take the best performing model on each regressor type generated by cross-validation training and 
+    apply it to the set of test data. The performance of the regs on the test instances will be displayed on a table and
+    saved to the user's CPU as a png file. The regs will be sorted in descending order by performance on specified metrics.
+    """
+    #initializing a nested list to store the scores of each model on each metric when applied to the test set
     metric_columns = []
     for metric in metric_list:
         metric_columns += [[metric,[]]]
     for i in cv_data:
-        x = list(i['test_neg_mean_squared_error']*-1)
+        #'x' will store the list of CV scores for the given score_method metric
+        if score_method == 'neg_root_mean_squared_error':
+            x = list(np.sqrt(i['test_'+score_method]*metric_help[score_method][1]))
+        else:
+            x = list(i['test_'+score_method]*metric_help[score_method][1])
         y = list(i['estimator'])
+        #for each score in 'x', if it is the best score, that model will be stored in the 'best' variable
         for j in range(len(x)):
-            if x[j] == min(x):
-                best = y[j]
+            if metric_help[score_method][0] == True:
+                if x[j] == max(x):
+                    best = y[j]
+            else:
+                if x[j] == min(x):
+                    best = y[j]
+        #the best model will predict the test attributes
         predictions = best.predict(test_attrib)
+        #the performance of the model prediction will be stored in the 'metric_columns' list
+        # 'metric_help[k[0]][2]' is the associated statistic that will measure the difference between the test labels
+        #  and the prediction of the best model
         for k in metric_columns:
             if k[0] == 'neg_root_mean_squared_error':
                 k[1] += [round(np.sqrt(metric_help[k[0]][2](test_labels,predictions)),4)]
             else:
                 k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
+    #preparing dataframe. column names will be the metrics used. the row labels will be the regressors
     columnnames = metric_list
     final_columns = []
     for m in metric_columns:
         final_columns += [m[1]]
-    df = pd.DataFrame(np.array(final_columns).T,index=passed_models,columns=columnnames)
-    sorted_df = df.sort_values(by=metric_list[0],ascending=not(metric_help[metric][0]))
+    df = pd.DataFrame(np.array(final_columns).T,index=passed_regs,columns=columnnames)
+    sorted_df = df.sort_values(by=metric_list[0],ascending=metric_help[metric][0])
     fig, ax = plt.subplots()
     fig.patch.set_visible(False)
     ax.axis('off')
@@ -178,9 +222,9 @@ def test_best(cv_data, passed_models, metric_list, test_attrib, test_labels, met
 
 
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
-            'n_models': 8,
-            'metric_list': ['neg_root_mean_squared_error','neg_mean_absolute_error','r2'],
-            'n_vizualized': 5,
+            'n_regressors': 'all',
+            'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
+            'n_vizualized': 20,
             'metric_help': {'explained_variance': [True, 1, metrics.explained_variance_score], 'max_error': [False, 1, metrics.max_error],
                             'neg_mean_absolute_error': [False, -1, metrics.mean_absolute_error], 'neg_mean_squared_error': [False, -1, metrics.mean_squared_error],
                             'neg_root_mean_squared_error': [False, -1, metrics.mean_squared_error], 'neg_mean_squared_log_error': [False, -1, metrics.mean_squared_log_error],
@@ -188,8 +232,9 @@ paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
                             'neg_mean_poisson_deviance': [False, -1, metrics.mean_poisson_deviance], 'neg_mean_gamma_deviance': [False, -1, metrics.mean_gamma_deviance],
                             'neg_mean_absolute_percentage_error': [False, -1, metrics.mean_absolute_percentage_error], 'd2_absolute_error_score': [True, 1, metrics.d2_absolute_error_score],
                             'd2_pinball_score': [True, 1, metrics.d2_pinball_score], 'd2_tweedie_score': [True, 1, metrics.d2_tweedie_score]
-                        }
-        }
+                            },
+            'score_method': 'neg_root_mean_squared_error'
+            }
 
 comparison(**paramdict)
 
