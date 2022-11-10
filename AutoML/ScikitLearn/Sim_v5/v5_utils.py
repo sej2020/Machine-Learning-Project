@@ -10,32 +10,33 @@ from sklearn import metrics
 from sklearn.utils import all_estimators
 import warnings
 warnings.filterwarnings('ignore')
+from inspect import signature, _empty
 
 def get_all_regs() -> list:
     """
     This function imports all sklearn regression estimators. The function will filter all out all regressors
-    that perform poorly or take additional parameters. It will return a list of all
-    viable regressor classes and a list of the names of all the viable regressor classes. 
-    
+    that take additional parameters. It will return a list of all viable regressor classes and a list of the 
+    names of all the viable regressor classes. 
     """
     estimators = all_estimators(type_filter='regressor')
-    forbidden_estimators = [
-        "DummyRegressor", "GaussianProcessRegressor", "KernelRidge", 
-        "QuantileRegressor", "SGDRegressor", 
-        "MultiOutputRegressor", "RegressorChain",
-        "StackingRegressor", "VotingRegressor"
-        ]
     all_regs = []
     all_reg_names = []
+
     for name, RegressorClass in estimators:
-        if name not in forbidden_estimators:
-                print('Appending', name)
-                reg = RegressorClass()
-                all_regs.append(reg)
-                all_reg_names.append(name)
+        params = [val[1] for val in signature(RegressorClass).parameters.items()]
+        all_optional = True
+        for param in params:
+            if param.default == _empty:
+                all_optional = False
+        if all_optional:
+            print('Appending', name)
+            reg = RegressorClass()
+            all_regs.append(reg)
+            all_reg_names.append(name)
         else:
             print(f"Skipping {name}")
     return all_regs, all_reg_names
+
 
 def load_data(datapath) -> pd.DataFrame:
     """
