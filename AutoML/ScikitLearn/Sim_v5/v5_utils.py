@@ -8,6 +8,8 @@ from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 from sklearn import metrics
 from sklearn.utils import all_estimators
+from sklearn.pipeline import Pipeline
+from sklearn.impute import IterativeImputer
 import warnings
 warnings.filterwarnings('ignore')
 from inspect import signature, _empty
@@ -59,15 +61,17 @@ def create_strat_cat(raw_data) -> pd.DataFrame:
     data_w_strat_cat = raw_data
     return data_w_strat_cat, strat_label
 
-def data_split(data, strat_label) -> pd.DataFrame:
+def data_split(datapath) -> pd.DataFrame:
     """
-    This function will split the data into training attributes, training labels, test attributes and test labels according
-    to the distribution of a categorical class label.
+    This function will take a relative datapath of a dataset in csv format and will split the data into training attributes, 
+    training labels, test attributes, and test labels according to the distribution of a categorical class label.
     """
+    raw_data = load_data(datapath)
+    data_w_strat_cat, strat_label = create_strat_cat(raw_data)
     split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
-    for train_index, test_index in split.split(data,data[f"{strat_label}_cat"]):
-        train_set = data.loc[train_index]
-        test_set = data.loc[test_index]
+    for train_index, test_index in split.split(data_w_strat_cat,data_w_strat_cat[f"{strat_label}_cat"]):
+        train_set = data_w_strat_cat.loc[train_index]
+        test_set = data_w_strat_cat.loc[test_index]
     for set_ in(train_set,test_set):
         set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
     train = train_set.copy()
@@ -81,26 +85,15 @@ def data_split(data, strat_label) -> pd.DataFrame:
 
     return train_attrib, train_labels, test_attrib, test_labels
 
-def scale(train_attrib, train_labels, test_attrib, test_labels) -> pd.DataFrame:
-    """
-    This function will perform standardization feature scaling on training instances and test instances of a dataset.
-    It will return the scaled training attributes, the training labels, the scaled test attributes, and the test labels.
-    """
-    scaler = StandardScaler()
-    scaled_train_attrib = scaler.fit_transform(train_attrib)
-    scaled_test_attrib = scaler.fit_transform(test_attrib)
-    return scaled_train_attrib, train_labels, scaled_test_attrib, test_labels
-
-def data_transform(datapath) -> pd.DataFrame:
-    """
-    This function will take a relative datapath of a dataset in csv format and return preprocessed training attributes,  
-    training labels, test attributes, and test labels of the dataset.
-    """
-    raw_data = load_data(datapath)
-    data_w_strat_cat, strat_label = create_strat_cat(raw_data)
-    split_data = data_split(data_w_strat_cat, strat_label)
-    train_attrib, train_labels, test_attrib, test_labels = scale(*split_data)
-    return train_attrib, train_labels, test_attrib, test_labels
+# def scale(train_attrib, train_labels, test_attrib, test_labels) -> pd.DataFrame:
+#     """
+#     This function will perform standardization feature scaling on training instances and test instances of a dataset.
+#     It will return the scaled training attributes, the training labels, the scaled test attributes, and the test labels.
+#     """
+#     scaler = StandardScaler()
+#     scaled_train_attrib = scaler.fit_transform(train_attrib)
+#     scaled_test_attrib = scaler.fit_transform(test_attrib)
+#     return scaled_train_attrib, train_labels, scaled_test_attrib, test_labels
 
 def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='neg_mean_squared_errror') -> None:
     """
@@ -113,7 +106,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     regs, reg_names = get_all_regs()
     if n_regressors != 'all':
         regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
-    train_attrib, train_labels, test_attrib, test_labels = data_transform(datapath)
+    train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
     cv_data = []
     errors = []
     passed_regs = []
@@ -128,6 +121,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
             errors += [regs[i]]
     print(f"These regressors threw errors in CV: {errors}")
     #removing the names of the regressors that threw errors in CV
+    print(cv_data)
     for j in range(len(regs)):
         if regs[j] not in errors:
             passed_regs += [reg_names[j]]
@@ -144,9 +138,11 @@ def run(model, metric_list, train_attrib, train_labels) -> dict:
     a dictionary containing cross-validation performance on various metrics.
     """
     print(f"Checking {model}")
+    # I could create pipeline variable here and use it in cross_validate
+    pipe = Pipeline(steps=[('imputer',IterativeImputer())('scaler',StandardScaler()),('regressor',model)])
     try:
         cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-        cv_output_dict = cross_validate(model, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        cv_output_dict = cross_validate(pipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
         return cv_output_dict
     except:
         pass
