@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.getcwd())
 from v5_utils import *
 
-paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
+paramdict = {'datapath': 'AutoML/InsuranceData/insurance.csv',
             'n_regressors': 8,
             'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
             'n_vizualized': 5,

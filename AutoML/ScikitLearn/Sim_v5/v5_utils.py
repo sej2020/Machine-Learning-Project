@@ -9,7 +9,13 @@ from sklearn.model_selection import KFold
 from sklearn import metrics
 from sklearn.utils import all_estimators
 from sklearn.pipeline import Pipeline
-from sklearn.impute import IterativeImputer
+from sklearn.impute import KNNImputer
+from scipy.stats.mstats import winsorize
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import LabelEncoder
+from sklearn.compose import make_column_transformer
+
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -86,16 +92,6 @@ def data_split(datapath) -> pd.DataFrame:
 
     return train_attrib, train_labels, test_attrib, test_labels
 
-# def scale(train_attrib, train_labels, test_attrib, test_labels) -> pd.DataFrame:
-#     """
-#     This function will perform standardization feature scaling on training instances and test instances of a dataset.
-#     It will return the scaled training attributes, the training labels, the scaled test attributes, and the test labels.
-#     """
-#     scaler = StandardScaler()
-#     scaled_train_attrib = scaler.fit_transform(train_attrib)
-#     scaled_test_attrib = scaler.fit_transform(test_attrib)
-#     return scaled_train_attrib, train_labels, scaled_test_attrib, test_labels
-
 def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='neg_mean_squared_errror') -> None:
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
@@ -140,13 +136,32 @@ def run(model, metric_list, train_attrib, train_labels) -> dict:
     """
     print(f"Checking {model}")
     # I could create pipeline variable here and use it in cross_validate
-    pipe = Pipeline(steps=[('imputer',IterativeImputer())('scaler',StandardScaler()),('regressor',model)])
-    try:
-        cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-        cv_output_dict = cross_validate(pipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
-        return cv_output_dict
-    except:
-        pass
+    OutlierWinsorize = FunctionTransformer(winsorize,validate = True) 
+    CatEncoder = FunctionTransformer(encoder)
+    pipe = Pipeline(steps=[('scaler', StandardScaler()),('imputer', KNNImputer()),('wisorization', OutlierWinsorize),('encoder', CatEncoder),('regressor', model)])
+    # try:
+    cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
+    cv_output_dict = cross_validate(pipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+    return cv_output_dict
+    # except:
+    #     pass
+
+def encoder(train_attrib):
+    categorical = []
+    for i in range(len(train_attrib.axes[1])):
+        if (type(train_attrib.iat[1,i])) == object:
+            categorical += [train_attrib.axes[1][i]]
+    labelencoder = LabelEncoder()
+    for k,j in enumerate(categorical):
+        train_attrib[j+'_cat'] = labelencoder.fit_transform(train_attrib[j])
+        train_attrib.drop(j)
+        categorical[k] = [j+'_cat']
+    onehotencoder = OneHotEncoder()
+    for m in categorical:
+        enc_df = pd.DataFrame(onehotencoder.fit_transform(train_attrib[[k]]).toarray())
+        train_attrib = train_attrib.join(enc_df)
+        train_attrib.drop(m)
+    return train_attrib
 
 def boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help):
     """
