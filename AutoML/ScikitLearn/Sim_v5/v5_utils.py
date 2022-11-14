@@ -14,7 +14,8 @@ from scipy.stats.mstats import winsorize
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import make_column_transformer
+from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import PCA
 
 
 import warnings
@@ -118,7 +119,6 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
             errors += [regs[i]]
     print(f"These regressors threw errors in CV: {errors}")
     #removing the names of the regressors that threw errors in CV
-    print(cv_data)
     for j in range(len(regs)):
         if regs[j] not in errors:
             passed_regs += [reg_names[j]]
@@ -136,32 +136,24 @@ def run(model, metric_list, train_attrib, train_labels) -> dict:
     """
     print(f"Checking {model}")
     # I could create pipeline variable here and use it in cross_validate
-    OutlierWinsorize = FunctionTransformer(winsorize,validate = True) 
-    CatEncoder = FunctionTransformer(encoder)
-    pipe = Pipeline(steps=[('scaler', StandardScaler()),('imputer', KNNImputer()),('wisorization', OutlierWinsorize),('encoder', CatEncoder),('regressor', model)])
-    # try:
-    cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-    cv_output_dict = cross_validate(pipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
-    return cv_output_dict
-    # except:
-    #     pass
-
-def encoder(train_attrib):
-    categorical = []
+    cat = []
+    num = []
     for i in range(len(train_attrib.axes[1])):
-        if (type(train_attrib.iat[1,i])) == object:
-            categorical += [train_attrib.axes[1][i]]
-    labelencoder = LabelEncoder()
-    for k,j in enumerate(categorical):
-        train_attrib[j+'_cat'] = labelencoder.fit_transform(train_attrib[j])
-        train_attrib.drop(j)
-        categorical[k] = [j+'_cat']
-    onehotencoder = OneHotEncoder()
-    for m in categorical:
-        enc_df = pd.DataFrame(onehotencoder.fit_transform(train_attrib[[k]]).toarray())
-        train_attrib = train_attrib.join(enc_df)
-        train_attrib.drop(m)
-    return train_attrib
+        if (type(train_attrib.iat[1,i])) in (object,bool,str):
+            cat += [train_attrib.axes[1][i]]
+        else:
+            num += [train_attrib.axes[1][i]]
+    OutlierWinsorize = FunctionTransformer(winsorize,validate = True)
+    cat_pipe = Pipeline(steps=[('encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))])
+    num_pipe = Pipeline(steps=[('wisorization', OutlierWinsorize)])
+    ctrans = ColumnTransformer(transformers=[('categorical', cat_pipe, cat),('numeric', num_pipe, num)]) 
+    finalpipe = Pipeline(steps=[('column_transform', ctrans),('scaler',StandardScaler()),('imputer', KNNImputer()),('pca', PCA(n_components=.95)), ('regressor', model)])
+    try:
+        cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
+        cv_output_dict = cross_validate(finalpipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        return cv_output_dict
+    except:
+        pass
 
 def boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help):
     """
