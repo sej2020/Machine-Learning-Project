@@ -1,0 +1,21 @@
+from csv import reader
+from csv import writer
+import os
+
+with open(os.path.abspath('AutoML/relevent_repos.csv'),'r', encoding="utf8") as old_file:
+    old_reader = reader(old_file)
+    
+    with open(os.path.abspath('AutoML/empty.csv'),'w', encoding="utf8", newline='') as new_file:
+        new_writer = writer(new_file, delimiter=",")
+
+        i = 1
+        for row in old_reader:
+            try:
+                if int(row[10]) > 10000:
+                    new_writer.writerow(row)
+            except:
+                if i == 1:
+                    new_writer.writerow(row)
+                pass
+            i += 1
+
