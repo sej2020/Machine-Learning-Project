@@ -1,2 +1,5 @@
 # This line tells git to ignore the .DS_Store files that Mac uses for something?? in VSCode. Doesn't change anything important.
 .DS_Store
+
+# 10GB of data to filter
+libraries_data
