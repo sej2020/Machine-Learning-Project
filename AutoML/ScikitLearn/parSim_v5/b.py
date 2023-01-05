@@ -8,7 +8,7 @@ def f(x):
 if __name__ == '__main__':
     # start 4 worker processes
     with Pool(processes=4) as pool:
-
+        print(pool._processes)
         # print "[0, 1, 4,..., 81]"
         print(pool.map(f, range(10)))
 

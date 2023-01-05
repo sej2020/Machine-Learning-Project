@@ -14,7 +14,8 @@ from scipy.stats.mstats import winsorize
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import make_column_transformer
+from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import PCA
 
 
 import warnings
@@ -45,8 +46,7 @@ def get_all_regs() -> list:
         else:
             print(f"Skipping {name}")
     return all_regs, all_reg_names
-
-
+    
 def load_data(datapath) -> pd.DataFrame:
     """
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
@@ -92,6 +92,41 @@ def data_split(datapath) -> pd.DataFrame:
 
     return train_attrib, train_labels, test_attrib, test_labels
 
+def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='neg_mean_squared_errror') -> None:
+    """
+    This function will perform cross-validation training across multiple regressor types for one dataset. 
+    The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
+    specified metrics. These charts will be saved to the user's CPU as a png file. The best performing model 
+    trained on each regressor type will be tested on the set of test instances. The performance of those regs 
+    on the test instances will be recorded in a table and saved to the user's CPU as a png file.
+    """
+    regs, reg_names = get_all_regs()
+    if n_regressors != 'all':
+        regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
+    train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
+    cv_data = []
+    errors = []
+    passed_regs = []
+    if score_method not in metric_list:
+        metric_list = [score_method]+metric_list
+    #training each regressor in CV
+    for i in range(len(regs)):
+        x = run(regs[i], metric_list, train_attrib, train_labels)
+        if type(x) == dict:
+            cv_data += [x]
+        else:
+            errors += [regs[i]]
+    print(f"These regressors threw errors in CV: {errors}")
+    #removing the names of the regressors that threw errors in CV
+    for j in range(len(regs)):
+        if regs[j] not in errors:
+            passed_regs += [reg_names[j]]
+    figs = [test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metric_help, score_method)]
+    for metric in metric_list:
+        figs += [boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help)]
+    for k in range(len(figs)):
+        figs[k].savefig(f'fig_{k}.png',bbox_inches='tight')
+    pass
 
 def run(model, metric_list, train_attrib, train_labels) -> dict:
     """
@@ -100,32 +135,24 @@ def run(model, metric_list, train_attrib, train_labels) -> dict:
     """
     print(f"Checking {model}")
     # I could create pipeline variable here and use it in cross_validate
-    OutlierWinsorize = FunctionTransformer(winsorize,validate = True) 
-    CatEncoder = FunctionTransformer(encoder)
-    pipe = Pipeline(steps=[('scaler', StandardScaler()),('imputer', KNNImputer()),('wisorization', OutlierWinsorize),('encoder', CatEncoder),('regressor', model)])
-    # try:
-    cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-    cv_output_dict = cross_validate(pipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
-    return cv_output_dict
-    # except:
-    #     pass
-
-def encoder(train_attrib):
-    categorical = []
+    cat = []
+    num = []
     for i in range(len(train_attrib.axes[1])):
-        if (type(train_attrib.iat[1,i])) == object:
-            categorical += [train_attrib.axes[1][i]]
-    labelencoder = LabelEncoder()
-    for k,j in enumerate(categorical):
-        train_attrib[j+'_cat'] = labelencoder.fit_transform(train_attrib[j])
-        train_attrib.drop(j)
-        categorical[k] = [j+'_cat']
-    onehotencoder = OneHotEncoder()
-    for m in categorical:
-        enc_df = pd.DataFrame(onehotencoder.fit_transform(train_attrib[[k]]).toarray())
-        train_attrib = train_attrib.join(enc_df)
-        train_attrib.drop(m)
-    return train_attrib
+        if (type(train_attrib.iat[1,i])) in (object,bool,str):
+            cat += [train_attrib.axes[1][i]]
+        else:
+            num += [train_attrib.axes[1][i]]
+    OutlierWinsorize = FunctionTransformer(winsorize,validate = True)
+    cat_pipe = Pipeline(steps=[('encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))])
+    num_pipe = Pipeline(steps=[('wisorization', OutlierWinsorize)])
+    ctrans = ColumnTransformer(transformers=[('categorical', cat_pipe, cat),('numeric', num_pipe, num)]) 
+    finalpipe = Pipeline(steps=[('column_transform', ctrans),('scaler',StandardScaler()),('imputer', KNNImputer()),('pca', PCA(n_components=.95)), ('regressor', model)])
+    try:
+        cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
+        cv_output_dict = cross_validate(finalpipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        return cv_output_dict
+    except:
+        pass
 
 def boxplot(cv_data, passed_regs, metric, n_vizualized, metric_help):
     """
