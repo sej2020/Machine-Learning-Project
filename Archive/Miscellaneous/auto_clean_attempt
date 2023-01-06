@@ -1,0 +1,24 @@
+def run(model, metric_list, train_attrib, train_labels) -> dict:
+    """
+    This function will perform cross-validation training on a given dataset and given regressor. It will return
+    a dictionary containing cross-validation performance on various metrics.
+    """
+    print(f"Checking {model}")
+    cat = []
+    num = []
+    for i in range(len(train_attrib.axes[1])):
+        if (type(train_attrib.iat[1,i])) in (object,bool,str):
+            cat += [train_attrib.axes[1][i]]
+        else:
+            num += [train_attrib.axes[1][i]]
+    OutlierWinsorize = FunctionTransformer(winsorize,validate = True)
+    cat_pipe = Pipeline(steps=[('encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))])
+    num_pipe = Pipeline(steps=[('wisorization', OutlierWinsorize)])
+    ctrans = ColumnTransformer(transformers=[('categorical', cat_pipe, cat),('numeric', num_pipe, num)]) 
+    finalpipe = Pipeline(steps=[('column_transform', ctrans),('scaler',StandardScaler()),('imputer', KNNImputer()),('pca', PCA(n_components=.95)), ('regressor', model)])
+    try:
+        cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
+        cv_output_dict = cross_validate(finalpipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        return cv_output_dict
+    except:
+        pass
