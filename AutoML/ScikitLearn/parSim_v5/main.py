@@ -6,7 +6,7 @@ import io
 sys.path.append(os.getcwd())
 from utils import *
 
-paramdict = {'datapath': 'AutoML/EmployeeData/employees.csv',
+paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
             'n_regressors': -1,
             'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
             'n_vizualized': 5,
