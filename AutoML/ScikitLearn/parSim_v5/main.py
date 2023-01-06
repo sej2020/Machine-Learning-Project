@@ -22,21 +22,25 @@ paramdict = {'datapath': 'AutoML/EmployeeData/employees.csv',
             'score_method': 'neg_root_mean_squared_error'
             }
 
-# with cProfile.Profile() as pr:
-#     comparison(**paramdict)
-    
-# pr.dump_stats("AutoML/ScikitLearn/parSim_v5/profile_report.prof")
-# cProfile.run("comparison(**paramdict)", "AutoML/ScikitLearn/parSim_v5/profile_report")
+### Regular run ###
+start = perf_counter()
+comparison(**paramdict)
+stop = perf_counter()
 
-pr = cProfile.Profile()
-pr.enable()
+print(f"Total time to execute: {stop - start:.2f}s")
+###################
 
-my_result = comparison(**paramdict)
+### Profiling run ###
+# pr = cProfile.Profile()
+# pr.enable()
 
-pr.disable()
-s = io.StringIO()
-ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
-ps.print_stats()
+# my_result = comparison(**paramdict)
 
-with open("AutoML/ScikitLearn/parSim_v5/profile_report.prof", 'w') as f:
-    f.write(s.getvalue())
+# pr.disable()
+# s = io.StringIO()
+# ps = pstats.Stats(pr, stream=s).sort_stats('cumtime')
+# ps.print_stats()
+
+# with open("AutoML/ScikitLearn/parSim_v5/profile_report.prof", 'w') as f:
+#     f.write(s.getvalue())
+#####################

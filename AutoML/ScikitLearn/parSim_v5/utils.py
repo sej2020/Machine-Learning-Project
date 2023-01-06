@@ -16,6 +16,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.decomposition import PCA
+from time import perf_counter
+import multiprocessing as multiprocessing
 
 
 import warnings
@@ -109,15 +111,43 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     passed_regs = []
     if score_method not in metric_list:
         metric_list = [score_method]+metric_list
-    #training each regressor in CV
-    for i in range(len(regs)):
-        x = run(regs[i], metric_list, train_attrib, train_labels)
-        if type(x) == dict:
-            cv_data += [x]
-        else:
+        
+    # training each regressor in CV --- serial#######################################
+    # start = perf_counter()
+    # for i in range(len(regs)):
+    #     x = run(regs[i], metric_list, train_attrib, train_labels)
+    #     if type(x) == dict:
+    #         cv_data += [x]
+    #     else:
+    #         errors += [regs[i]]
+    # print(f"These regressors threw errors in CV: {errors}")
+    # stop = perf_counter()
+    # print(f"Time to execute regression: {stop - start:.2f}s")
+    # print(f"serial: {cv_data}")
+    # print(f"serial: {errors}")
+    # removing the names of the regressors that threw errors in CV###################
+    
+    #training each regressor in CV --- parallel#####################################
+    start = perf_counter()
+    args_lst = [(reg, metric_list, train_attrib, train_labels) for i, reg in enumerate(regs)]
+    multiprocessing.set_start_method("fork", force = True)
+    with multiprocessing.Pool() as pool:
+        results = pool.starmap(run, args_lst)
+              
+    for i, datum in enumerate(results):
+        if type(datum) != dict:
             errors += [regs[i]]
+        else:
+            cv_data += [datum]
+            
     print(f"These regressors threw errors in CV: {errors}")
-    #removing the names of the regressors that threw errors in CV
+    stop = perf_counter()
+    print(f"Time to execute regression: {stop - start:.2f}s")
+    
+    # print(f"parallel: {cv_data}")
+    print(f"parallel: {errors}")
+    #removing the names of the regressors that threw errors in CV###################
+
     for j in range(len(regs)):
         if regs[j] not in errors:
             passed_regs += [reg_names[j]]
@@ -208,6 +238,7 @@ def test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metri
             if k[0] == 'neg_root_mean_squared_error':
                 k[1] += [round(np.sqrt(metric_help[k[0]][2](test_labels,predictions)),4)]
             else:
+                print(f"{k = }")
                 k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
     #preparing dataframe. column names will be the metrics used. the row labels will be the regressors
     columnnames = metric_list
