@@ -3,19 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 from sklearn import metrics
 from sklearn.utils import all_estimators
-from sklearn.pipeline import Pipeline
-from sklearn.impute import KNNImputer
-from scipy.stats.mstats import winsorize
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.decomposition import PCA
 from time import perf_counter
 import multiprocessing as multiprocessing
 

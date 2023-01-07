@@ -3,19 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 from sklearn import metrics
 from sklearn.utils import all_estimators
-from sklearn.pipeline import Pipeline
-from sklearn.impute import KNNImputer
-from scipy.stats.mstats import winsorize
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.decomposition import PCA
 
 
 import warnings
@@ -46,8 +37,7 @@ def get_all_regs() -> list:
         else:
             print(f"Skipping {name}")
     return all_regs, all_reg_names
-
-
+    
 def load_data(datapath) -> pd.DataFrame:
     """
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
@@ -97,7 +87,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
-    specified metrics. These charts will be saved to the user's CPU as a png file. The best performing model 
+    specified metrics. These charts will be saved to the user's CWD as a png file. The best performing model 
     trained on each regressor type will be tested on the set of test instances. The performance of those regs 
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
@@ -110,7 +100,8 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     passed_regs = []
     if score_method not in metric_list:
         metric_list = [score_method]+metric_list
-    #training each regressor in CV
+        
+    # training each regressor in CV 
     for i in range(len(regs)):
         x = run(regs[i], metric_list, train_attrib, train_labels)
         if type(x) == dict:
@@ -135,22 +126,9 @@ def run(model, metric_list, train_attrib, train_labels) -> dict:
     a dictionary containing cross-validation performance on various metrics.
     """
     print(f"Checking {model}")
-    # I could create pipeline variable here and use it in cross_validate
-    cat = []
-    num = []
-    for i in range(len(train_attrib.axes[1])):
-        if (type(train_attrib.iat[1,i])) in (object,bool,str):
-            cat += [train_attrib.axes[1][i]]
-        else:
-            num += [train_attrib.axes[1][i]]
-    OutlierWinsorize = FunctionTransformer(winsorize,validate = True)
-    cat_pipe = Pipeline(steps=[('encoder', OneHotEncoder(handle_unknown='ignore', sparse=False))])
-    num_pipe = Pipeline(steps=[('wisorization', OutlierWinsorize)])
-    ctrans = ColumnTransformer(transformers=[('categorical', cat_pipe, cat),('numeric', num_pipe, num)]) 
-    finalpipe = Pipeline(steps=[('column_transform', ctrans),('scaler',StandardScaler()),('imputer', KNNImputer()),('pca', PCA(n_components=.95)), ('regressor', model)])
     try:
         cv_outer = KFold(n_splits=10, shuffle=True, random_state=2)
-        cv_output_dict = cross_validate(finalpipe, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
+        cv_output_dict = cross_validate(model, train_attrib, train_labels, scoring=metric_list, cv=cv_outer, return_estimator=True)
         return cv_output_dict
     except:
         pass
@@ -209,6 +187,7 @@ def test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metri
             if k[0] == 'neg_root_mean_squared_error':
                 k[1] += [round(np.sqrt(metric_help[k[0]][2](test_labels,predictions)),4)]
             else:
+                print(f"{k = }")
                 k[1] += [round(metric_help[k[0]][2](test_labels,predictions),4)]
     #preparing dataframe. column names will be the metrics used. the row labels will be the regressors
     columnnames = metric_list
