@@ -98,7 +98,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
-    specified metrics. These charts will be saved to the user's CPU as a png file. The best performing model 
+    specified metrics. These charts will be saved to the user's CWD as a png file. The best performing model 
     trained on each regressor type will be tested on the set of test instances. The performance of those regs 
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
