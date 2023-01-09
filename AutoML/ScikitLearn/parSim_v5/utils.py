@@ -3,19 +3,10 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import KFold
 from sklearn import metrics
 from sklearn.utils import all_estimators
-from sklearn.pipeline import Pipeline
-from sklearn.impute import KNNImputer
-from scipy.stats.mstats import winsorize
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import LabelEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.decomposition import PCA
 from time import perf_counter
 import multiprocessing as multiprocessing
 
@@ -98,7 +89,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
-    specified metrics. These charts will be saved to the user's CPU as a png file. The best performing model 
+    specified metrics. These charts will be saved to the user's CWD as a png file. The best performing model 
     trained on each regressor type will be tested on the set of test instances. The performance of those regs 
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
