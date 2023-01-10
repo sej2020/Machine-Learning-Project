@@ -22,6 +22,15 @@ def get_all_regs() -> list:
     names of all the viable regressor classes. 
     """
     estimators = all_estimators(type_filter='regressor')
+    forbidden_estimators = [
+        "DummyRegressor", "GaussianProcessRegressor", "KernelRidge", 
+        "QuantileRegressor", "SGDRegressor", 
+        "MultiOutputRegressor", "RegressorChain",
+        "StackingRegressor", "VotingRegressor","CCA()", 
+        "IsotonicRegression()", "MultiTaskElasticNet()", 
+        "MultiTaskElasticNetCV()", "MultiTaskLasso()", 
+        "MultiTaskLassoCV()", "PLSCanonical()"
+        ]
     all_regs = []
     all_reg_names = []
 
@@ -31,7 +40,7 @@ def get_all_regs() -> list:
         for param in params:
             if param.default == _empty:
                 all_optional = False
-        if all_optional:
+        if all_optional and name not in forbidden_estimators:
             print('Appending', name)
             reg = RegressorClass()
             all_regs.append(reg)
@@ -39,7 +48,7 @@ def get_all_regs() -> list:
         else:
             print(f"Skipping {name}")
     return all_regs, all_reg_names
-    
+
 def load_data(datapath) -> pd.DataFrame:
     """
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
@@ -104,39 +113,38 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
         metric_list = [score_method]+metric_list
         
     # training each regressor in CV --- serial#######################################
-    # start = perf_counter()
-    # for i in range(len(regs)):
-    #     x = run(regs[i], metric_list, train_attrib, train_labels)
-    #     if type(x) == dict:
-    #         cv_data += [x]
-    #     else:
-    #         errors += [regs[i]]
-    # print(f"These regressors threw errors in CV: {errors}")
-    # stop = perf_counter()
-    # print(f"Time to execute regression: {stop - start:.2f}s")
-    # print(f"serial: {cv_data}")
-    # print(f"serial: {errors}")
-    # removing the names of the regressors that threw errors in CV###################
-    
-    #training each regressor in CV --- parallel#####################################
     start = perf_counter()
-    args_lst = [(reg, metric_list, train_attrib, train_labels) for i, reg in enumerate(regs)]
-    multiprocessing.set_start_method("fork", force = True)
-    with multiprocessing.Pool() as pool:
-        results = pool.starmap(run, args_lst)
-              
-    for i, datum in enumerate(results):
-        if type(datum) != dict:
-            errors += [regs[i]]
+    for i in range(len(regs)):
+        x = run(regs[i], metric_list, train_attrib, train_labels)
+        if type(x) == dict:
+            cv_data += [x]
         else:
-            cv_data += [datum]
-            
+            errors += [regs[i]]
     print(f"These regressors threw errors in CV: {errors}")
     stop = perf_counter()
     print(f"Time to execute regression: {stop - start:.2f}s")
+    print(f"serial: {errors}")
+    # removing the names of the regressors that threw errors in CV###################
     
-    # print(f"parallel: {cv_data}")
-    print(f"parallel: {errors}")
+    #training each regressor in CV --- parallel#####################################
+    # start = perf_counter()
+    # args_lst = [(reg, metric_list, train_attrib, train_labels) for i, reg in enumerate(regs)]
+    # multiprocessing.set_start_method("fork", force = True)
+    # with multiprocessing.Pool() as pool:
+    #     results = pool.starmap(run, args_lst)
+              
+    # for i, datum in enumerate(results):
+    #     if type(datum) != dict:
+    #         errors += [regs[i]]
+    #     else:
+    #         cv_data += [datum]
+            
+    # print(f"These regressors threw errors in CV: {errors}")
+    # stop = perf_counter()
+    # print(f"Time to execute regression: {stop - start:.2f}s")
+    
+    # # print(f"parallel: {cv_data}")
+    # print(f"parallel: {errors}")
     #removing the names of the regressors that threw errors in CV###################
 
     for j in range(len(regs)):
