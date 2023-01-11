@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 from utils import *
 
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
-            'n_regressors': -1,
+            'n_regressors': 8,
             'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
             'n_vizualized': 5,
             #GENERAL FORM of metric_help: { 'metric': [ higher score is better?, positive or negative score values, accociated stat function ] } 
