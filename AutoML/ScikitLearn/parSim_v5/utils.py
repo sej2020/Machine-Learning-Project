@@ -131,13 +131,12 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     if n_regressors != 'all':
         regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
     train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
+    if score_method not in metric_list:
+        metric_list = [score_method]+metric_list
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels)
     # cv_data = [{name: [] for name in metric_list} for _ in range(len(regs))] # fix me :)))
     errors = []
     passed_regs = []
-    if score_method not in metric_list:
-        metric_list = [score_method]+metric_list
-        
     # training each regressor in CV --- serial#######################################
     # start = perf_counter()
     # for i in range(len(regs) * 10):
@@ -156,8 +155,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     
     # training each regressor in CV --- parallel#####################################
     start = perf_counter()
-    idxs = [(i // 10, i % 10) for i in range(len(regs) * 10)]
-    args_lst = [(regs[reg_idx], reg_names[reg_idx], metric_list, metric_help, cv_X_train[fold_idx], cv_y_train[fold_idx], cv_X_test[fold_idx], cv_y_test[fold_idx]) for reg_idx, fold_idx in idxs]
+    args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
     multiprocessing.set_start_method("fork", force = True)
     with multiprocessing.Pool() as pool:
         results = pool.starmap(run, args_lst)

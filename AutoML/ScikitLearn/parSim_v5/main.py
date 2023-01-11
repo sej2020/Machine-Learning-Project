@@ -23,11 +23,12 @@ paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
             }
 
 ### Regular run ###
-start = perf_counter()
-comparison(**paramdict)
-stop = perf_counter()
+if __name__=="__main__":
+    start = perf_counter()
+    comparison(**paramdict)
+    stop = perf_counter()
 
-print(f"Total time to execute: {stop - start:.2f}s")
+    print(f"Total time to execute: {stop - start:.2f}s")
 ###################
 
 ### Profiling run ###
