@@ -106,14 +106,18 @@ def gen_cv_samples(X_train_df, y_train_df):
         y_train (nd.array) - Training labels already processed
         
     Returns: 
-        nested_samples (tuples)
+        train/test data (tuples) - nested_samples gets broken down into four list
     """
     X_train, y_train = X_train_df.values, y_train_df.values
     kf = KFold(n_splits = 10, shuffle = True, random_state = 2)
     kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)]
     nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices]
+    X_tr, y_tr, X_te, y_te = [], [], [], []
+    for sample in nested_samples:
+        for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
+            var.append(sample[i])
     
-    return nested_samples
+    return (X_tr, y_tr, X_te, y_te)
 
 def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='neg_mean_squared_errror') -> None:
     """
@@ -127,11 +131,8 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     if n_regressors != 'all':
         regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
     train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
-    cv_samples = gen_cv_samples(train_attrib, train_labels)
-    cv_X_train, cv_y_train, cv_X_test, cv_y_test =              \
-        [s[0] for s in cv_samples], [s[1] for s in cv_samples], \
-        [s[2] for s in cv_samples], [s[3] for s in cv_samples]
-    cv_data = [{name: [] for name in metric_list} for _ in range(len(regs))]
+    cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels)
+    # cv_data = [{name: [] for name in metric_list} for _ in range(len(regs))] # fix me :)))
     errors = []
     passed_regs = []
     if score_method not in metric_list:
@@ -155,18 +156,20 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     
     # training each regressor in CV --- parallel#####################################
     start = perf_counter()
-    args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
+    idxs = [(i // 10, i % 10) for i in range(len(regs) * 10)]
+    args_lst = [(regs[reg_idx], reg_names[reg_idx], metric_list, metric_help, cv_X_train[fold_idx], cv_y_train[fold_idx], cv_X_test[fold_idx], cv_y_test[fold_idx]) for reg_idx, fold_idx in idxs]
     multiprocessing.set_start_method("fork", force = True)
     with multiprocessing.Pool() as pool:
         results = pool.starmap(run, args_lst)
               
-    for obj in enumerate(results):
-        if obj[1] == None:
-            errors += [regs[i // 10]]
-        else:
-            i, (datum, name) = obj
-            for i, (metric, data) in enumerate(cv_data[reg_names.index(name)].items()):
-                data.append(datum[i])
+    
+    # for obj in enumerate(results):
+    #     if obj[1] == None:
+    #         errors += [regs[i // 10]]
+    #     else:
+    #         i, (datum, name) = obj
+    #         for i, (metric, data) in enumerate(cv_data[reg_names.index(name)].items()):
+    #             data.append(datum[i])
                 
     print(f"These regressors threw errors in CV: {errors}")
     stop = perf_counter()
@@ -174,7 +177,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     
     # print(f"parallel: {cv_data}")
     print(f"parallel: {errors}")
-    return
+    # return
     # removing the names of the regressors that threw errors in CV###################
 
     for j in range(len(regs)):
@@ -218,16 +221,12 @@ def run(model, model_name, metric_list, metric_help, train_attrib, train_labels,
         #     else:
         #         reg_dict[model_name] += [metric_help[k][2](test_labels, y_pred)]
         
-        reg_dict = []
+        reg_dict = {model_name: []}
         for k in metric_list:
             calculated = metric_help[k][2](test_labels, y_pred)
-            
-            if k == 'neg_root_mean_squared_error':
-                reg_dict.append([calculated**.5])
-                
-            else: reg_dict.append([calculated])
+            reg_dict[model_name].append([calculated] if k != "neg_root_mean_squared_error" else [calculated**.5])
         
-        return reg_dict, model_name
+        return reg_dict
 
     except Exception as e:
         print(e)
@@ -260,9 +259,7 @@ def test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metri
     saved to the user's CPU as a png file. The regs will be sorted in descending order by performance on specified metrics.
     """
     #initializing a nested list to store the scores of each model on each metric when applied to the test set
-    metric_columns = []
-    for metric in metric_list:
-        metric_columns += [[metric,[]]]
+    metric_columns = [[metric,[]] for metric in metric_list]
     for i in cv_data:
         #'x' will store the list of CV scores for the given score_method metric
         print([key for key in cv_data.keys()])
@@ -275,13 +272,22 @@ def test_best(cv_data, passed_regs, metric_list, test_attrib, test_labels, metri
             x = list(i[score_method]*metric_help[score_method][1])
         y = list(i['estimator'])
         #for each score in 'x', if it is the best score, that model will be stored in the 'best' variable
-        for j in range(len(x)):
-            if metric_help[score_method][0] == True:
-                if x[j] == max(x):
-                    best = y[j]
-            else:
-                if x[j] == min(x):
-                    best = y[j]
+        ##############################################
+        ### before ###
+        # for j in range(len(x)):
+        #     if metric_help[score_method][0] == True:
+        #         if x[j] == max(x):
+        #             best = y[j]
+        #     else:
+        #         if x[j] == min(x):
+        #             best = y[j]
+        #### after ###
+        if metric_help[score_method][0] == True:
+            best = max(zip(x, y), key = lambda pair: pair[0])[1]
+        else:
+            best = min(zip(x, y), key = lambda pair: pair[0])[1]
+        
+        ##############################################
         #the best model will predict the test attributes
         predictions = best.predict(test_attrib)
         #the performance of the model prediction will be stored in the 'metric_columns' list
