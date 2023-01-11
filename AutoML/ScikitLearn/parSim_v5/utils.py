@@ -156,7 +156,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     start = perf_counter()
 # # # # # # why integer division for the regressors but modulus for the cv data
     args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
-    multiprocessing.set_start_method("fork", force = True)
+    multiprocessing.set_start_method("spawn", force = True)
     with multiprocessing.Pool() as pool:
         results = pool.starmap(run, args_lst)
               

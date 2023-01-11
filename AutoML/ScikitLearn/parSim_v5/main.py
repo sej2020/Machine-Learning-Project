@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 from utils import *
 
 paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
-            'n_regressors': 8,
+            'n_regressors': -1,
             'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
             'n_vizualized': 5,
             #GENERAL FORM of metric_help: { 'metric': [ higher score is better?, positive or negative score values, accociated stat function ] } 
@@ -23,11 +23,12 @@ paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
             }
 
 ### Regular run ###
-start = perf_counter()
-comparison(**paramdict)
-stop = perf_counter()
+if __name__=="__main__":
+    start = perf_counter()
+    comparison(**paramdict)
+    stop = perf_counter()
 
-print(f"Total time to execute: {stop - start:.2f}s")
+    print(f"Total time to execute: {stop - start:.2f}s")
 ###################
 
 ### Profiling run ###
