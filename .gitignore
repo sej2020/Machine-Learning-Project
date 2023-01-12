@@ -3,3 +3,6 @@
 
 # 10GB of data to filter
 libraries_data
+
+# testing pytorch
+pytorch_test
