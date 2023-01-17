@@ -4,9 +4,10 @@ import cProfile
 import pstats
 import io
 sys.path.append(os.getcwd())
-from utils import *
+# from utils import *
+from samutils import*
 
-paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
+paramdict = {'datapath': 'PowerPlantData\Folds5x2_pp.csv',
             'n_regressors': -1,
             'metric_list': ['neg_mean_squared_error','neg_mean_absolute_error','r2'],
             'n_vizualized': 5,
@@ -25,7 +26,7 @@ paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    comparison(**paramdict)
+    print(comparison(**paramdict))
     stop = perf_counter()
 
     print(f"Total time to execute: {stop - start:.2f}s")
