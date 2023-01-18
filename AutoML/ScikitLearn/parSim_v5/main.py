@@ -8,7 +8,7 @@ sys.path.append(os.getcwd())
 from samutils import*
 
 paramdict = {'datapath': 'PowerPlantData\Folds5x2_pp.csv',
-            'n_regressors': 8,
+            'n_regressors': -1,
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared'],
             'n_vizualized': 5,
             #GENERAL FORM of metric_help: { 'metric': [ higher score is better?, positive or negative score values, accociated stat function ] } 
