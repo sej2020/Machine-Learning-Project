@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 # from utils import *
 from samutils import*
 
-paramdict = {'datapath': 'PowerPlantData\Folds5x2_pp.csv',
+paramdict = {'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv',
             'n_regressors': -1,
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared'],
             'n_vizualized': 5,

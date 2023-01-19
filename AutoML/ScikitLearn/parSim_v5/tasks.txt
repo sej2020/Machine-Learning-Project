@@ -1,0 +1,31 @@
+Task List:
+
+    Run large-scale experiment
+        - Port code to Quartz
+        - Save timing details and experiment metadata
+        - Create visualization & identify optimal n_workers
+        - Create profile report on final program
+
+    Make boxplot() functional
+
+    Parametrize EVERYTHING
+
+    Spruce up graphics w/ matplotlib styling
+
+    Refactor performance metrics (make exclusively scipy and / or implement metrics ourselves)
+
+    Test program on different datasets
+
+    Work on saving model / loading model
+
+    Use Pathlib w/ PurePaths for linux / mac / windows priority
+
+    Roll up for loops if it is nicer
+
+    Add comments everywhere
+
+    Make this a distributable package
+        - Remove unnecessary code
+        - Create requirements.txt
+        - Test it on other systems
+        - Package / publish it?
