@@ -132,9 +132,9 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
 
     metric_list = [score_method] + metric_list
-    for i, item in enumerate(list[1:]):
-        if item == list[0]:
-            del list[i+1]
+    for i, item in enumerate(metric_list[1:]):
+        if item == metric_list[0]:
+            del metric_list[i+1]
 
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels)
     start = perf_counter()
