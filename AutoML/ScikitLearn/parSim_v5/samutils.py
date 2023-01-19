@@ -140,16 +140,17 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     start = perf_counter()
     args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
     multiprocessing.set_start_method("spawn")
-    with multiprocessing.Pool() as pool:
+    with multiprocessing.Pool(processes=1) as pool:
         results = pool.starmap(run, args_lst)
                          
     org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
     for r in results:
         if type(r) == dict:
-            if list(r.keys())[0] in org_results:
-                org_results[list(r.keys())[0]] += [r]
+            reg_name = list(r.keys())[0]
+            if reg_name in org_results:
+                org_results[reg_name] += [r]
             else:
-                org_results[list(r.keys())[0]] = [r]
+                org_results[reg_name] = [r]
 
     fin_org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of only successful CV runs
     for k,v in org_results.items():
