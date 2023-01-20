@@ -1,6 +1,6 @@
 Task List:
 
-    Run large-scale experiment
+    ✓ Run large-scale experiment
         - Port code to Quartz
         - Save timing details and experiment metadata
         - Create visualization & identify optimal n_workers
