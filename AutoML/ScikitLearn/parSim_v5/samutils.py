@@ -115,7 +115,7 @@ def gen_cv_samples(X_train_df, y_train_df):
     for sample in nested_samples:
         for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
             var.append(sample[i])
-    
+
     return (X_tr, y_tr, X_te, y_te)
 
 def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='Root Mean Squared Error') -> None:
@@ -144,23 +144,19 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
         results = pool.starmap(run, args_lst)
                          
     org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
-    for r in results:
-        if type(r) == dict:
-            reg_name = list(r.keys())[0]
+    for single_reg_dict in results:
+        if type(single_reg_dict) == dict:
+            reg_name = list(single_reg_dict.keys())[0]
             if reg_name in org_results:
-                org_results[reg_name] += [r]
+                org_results[reg_name] += [single_reg_dict]
             else:
-                org_results[reg_name] = [r]
+                org_results[reg_name] = [single_reg_dict]
 
-    fin_org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of only successful CV runs
-    for k,v in org_results.items():
-        if len(v) == 10:
-            fin_org_results[k] = v
+    fin_org_results = {k: v for k,v in org_results.items() if len(v) == 10}
 
     stop = perf_counter()
     print(f"Time to execute regression: {stop - start:.2f}s")
 
-    # figs = [test_best(results, metric_list, test_attrib, test_labels, metric_help)]
     figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help)]
 
     # for index in len(range(metric_list)):
@@ -225,11 +221,15 @@ def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_hel
     output = []
     for k,v in fin_org_results.items():
         rows.append(k)
-        scores = []
-        models = []
-        for dict in v:
-            scores.append(list(dict.values())[0][0])
-            models.append(list(dict.values())[0][-1])
+        # scores = []
+        # models = []
+        # for dict in v:
+        #     scores.append(list(dict.values())[0][0])
+        #     models.append(list(dict.values())[0][-1])
+        
+        scores = [list(dict.values())[0][0] for dict in v]
+        models = [list(dict.values())[0][-1] for dict in v]
+
         if metric_help[metric_list[0]][0] == True:
             best = max(zip(scores, models), key = lambda pair: pair[0])[1]
         else:
@@ -241,7 +241,7 @@ def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_hel
         for m in metric_list:
             calculated = metric_help[m][2](test_labels, best_predict)
             single_reg_output.append(round(calculated if m != 'Root Mean Squared Error' else calculated**.5,4))
-        
+
         output.append(single_reg_output)
 
     df = pd.DataFrame(data=output, index=rows, columns=columns)
