@@ -167,7 +167,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     #     figs += [boxplot(results, reg_names, metric_list, n_vizualized, metric_help, index)]
 
     for k in range(len(figs)):
-        figs[k].savefig(f'ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
+        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
 
     return f'time: {stop-start}, fin_org_results length: {len(fin_org_results)}'
     
