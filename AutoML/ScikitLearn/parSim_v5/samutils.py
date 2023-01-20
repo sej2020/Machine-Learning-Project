@@ -189,25 +189,25 @@ def run(model, model_name, metric_list, metric_help, train_attrib, train_labels,
         pass
 
 
-def boxplot(results, reg_names, metric_list, n_vizualized, metric_help, index):
-    """
-    This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
-    The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
-    """
-    boxfig = plt.figure(constrained_layout=True)
-    df = pd.DataFrame()
-    #Making CV scores on the specified metric positive and storing in a dataframe. Repeat for each regressor.
-    for i,j in zip(cv_data,passed_regs):
-            df[j] = list(i['test_'+metric]*metric_help[metric][1])
-    #Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
-    # sort or a descending sort based on the metric.
-    sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
-    df_sorted = df_sorted=df[sorted_index]
-    #Creating box plot figure of best n regressors.
-    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
-    plt.xlabel(f'CV {metric}')
-    plt.ylabel('Models')
-    return boxfig
+# def boxplot(results, reg_names, metric_list, n_vizualized, metric_help, index):
+#     """
+#     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
+#     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
+#     """
+#     boxfig = plt.figure(constrained_layout=True)
+#     df = pd.DataFrame()
+#     #Making CV scores on the specified metric positive and storing in a dataframe. Repeat for each regressor.
+#     for i,j in zip(cv_data,passed_regs):
+#             df[j] = list(i['test_'+metric]*metric_help[metric][1])
+#     #Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
+#     # sort or a descending sort based on the metric.
+#     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
+#     df_sorted = df_sorted=df[sorted_index]
+#     #Creating box plot figure of best n regressors.
+#     df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
+#     plt.xlabel(f'CV {metric}')
+#     plt.ylabel('Models')
+#     return boxfig
 
 
 def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help):
