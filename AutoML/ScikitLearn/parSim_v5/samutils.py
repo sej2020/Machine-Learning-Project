@@ -127,8 +127,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
     regs, reg_names = get_all_regs()
-    if n_regressors != 'all':
-        regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
+    regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
     train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
 
     metric_list = [score_method] + metric_list
@@ -140,7 +139,7 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     start = perf_counter()
     args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
     multiprocessing.set_start_method("spawn")
-    with multiprocessing.Pool(processes=1) as pool:
+    with multiprocessing.Pool(processes=8) as pool:
         results = pool.starmap(run, args_lst)
                          
     org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
@@ -158,30 +157,27 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     print(f"Time to execute regression: {stop - start:.2f}s")
 
     figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help)]
-
-    # for index in len(range(metric_list)):
-    #     figs += [boxplot(results, reg_names, metric_list, n_vizualized, metric_help, index)]
-
+    for index in range(len(metric_list)):
+        figs += [boxplot(fin_org_results, metric_list, metric_help, n_vizualized, index)]
     for k in range(len(figs)):
         figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
-
-    return f'time: {stop-start}, fin_org_results length: {len(fin_org_results)}'
+    pass
     
 
-def run(model, model_name, metric_list, metric_help, train_attrib, train_labels, test_attrib, test_labels) -> dict:
+def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, test_attrib, test_labels) -> dict:
     """
     This function will perform cross-validation training on a given dataset and given regressor. It will return
     a dictionary containing cross-validation performance on various metrics.
     """
-    print(f"Checking {model}")
+    print(f"Checking {reg}")
     try:
-        model_trained = model.fit(train_attrib, train_labels)
+        model_trained = reg.fit(train_attrib, train_labels)
         y_pred = model_trained.predict(test_attrib)
-        reg_dict = {model_name: []}
+        reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k][2](test_labels, y_pred)
-            reg_dict[model_name].append(calculated if k != 'Root Mean Squared Error' else calculated**.5)
-        reg_dict[model_name].append(model_trained)
+            reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated**.5)
+        reg_dict[reg_name].append(model_trained)
         return reg_dict
 
     except Exception as e:
@@ -189,25 +185,31 @@ def run(model, model_name, metric_list, metric_help, train_attrib, train_labels,
         pass
 
 
-# def boxplot(results, reg_names, metric_list, n_vizualized, metric_help, index):
-#     """
-#     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
-#     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
-#     """
-#     boxfig = plt.figure(constrained_layout=True)
-#     df = pd.DataFrame()
-#     #Making CV scores on the specified metric positive and storing in a dataframe. Repeat for each regressor.
-#     for i,j in zip(cv_data,passed_regs):
-#             df[j] = list(i['test_'+metric]*metric_help[metric][1])
-#     #Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
-#     # sort or a descending sort based on the metric.
-#     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
-#     df_sorted = df_sorted=df[sorted_index]
-#     #Creating box plot figure of best n regressors.
-#     df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
-#     plt.xlabel(f'CV {metric}')
-#     plt.ylabel('Models')
-#     return boxfig
+def boxplot(fin_org_results, metric_list, metric_help, n_vizualized, index):
+    """
+    This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
+    The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
+    """
+    boxfig = plt.figure(constrained_layout=True)
+
+    metric = metric_list[index]
+    df = pd.DataFrame()
+    for k,v in fin_org_results.items():
+        df[k] = [list(dict.values())[0][index] for dict in v]
+
+    #Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
+    # sort or a descending sort based on the metric.
+    sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
+    df_sorted = df[sorted_index]
+
+    #Creating box plot figure of best n regressors.
+    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
+    plt.xlabel(f'CV {metric}')
+    plt.ylabel('Models')
+    return boxfig
+
+
+
 
 
 def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help):
@@ -221,11 +223,6 @@ def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_hel
     output = []
     for k,v in fin_org_results.items():
         rows.append(k)
-        # scores = []
-        # models = []
-        # for dict in v:
-        #     scores.append(list(dict.values())[0][0])
-        #     models.append(list(dict.values())[0][-1])
         
         scores = [list(dict.values())[0][0] for dict in v]
         models = [list(dict.values())[0][-1] for dict in v]

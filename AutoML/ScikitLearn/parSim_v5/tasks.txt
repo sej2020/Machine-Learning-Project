@@ -6,7 +6,7 @@ Task List:
         - Create visualization & identify optimal n_workers
         - Create profile report on final program
 
-    Make boxplot() functional
+    X - Make boxplot() functional
 
     Parametrize EVERYTHING
 

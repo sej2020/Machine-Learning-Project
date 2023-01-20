@@ -4,13 +4,12 @@ import cProfile
 import pstats
 import io
 sys.path.append(os.getcwd())
-# from utils import *
 from samutils import *
 
-paramdict = {'datapath': 'AutoML/ConductivityData/train.csv',
+paramdict = {'datapath': 'AutoML\PowerPlantData\Folds5x2_pp.csv',
             'n_regressors': -1,
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared', 'Root Mean Squared Error'],
-            'n_vizualized': 5,
+            'n_vizualized': 20,
             #GENERAL FORM of metric_help: { 'metric': [ higher score is better?, positive or negative score values, accociated stat function ] } 
             'metric_help': {'Explained Variance': [True, 1, metrics.explained_variance_score], 'Max Error': [False, 1, metrics.max_error],
                             'Mean Absolute Error': [False, -1, metrics.mean_absolute_error], 'Mean Squared Error': [False, -1, metrics.mean_squared_error],
