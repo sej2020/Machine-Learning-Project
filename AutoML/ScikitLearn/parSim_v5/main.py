@@ -4,9 +4,9 @@ import cProfile
 import pstats
 import io
 sys.path.append(os.getcwd())
-from samutils import *
+from utils import *
 
-paramdict = {'datapath': 'AutoML\PowerPlantData\Folds5x2_pp.csv',
+paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
             'n_regressors': -1,
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared', 'Root Mean Squared Error'],
             'n_vizualized': 20,
