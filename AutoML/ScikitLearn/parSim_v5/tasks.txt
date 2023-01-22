@@ -9,6 +9,16 @@ Task List:
     X - Make boxplot() functional
 
     Parametrize EVERYTHING
+        X - Train/Test size in data_split
+        X - CV Folds
+        - Regressor names
+        - maybe n_processors
+        - matplotlib boxplot themes
+        - dpi
+        X - n_vizualized for test_best
+        - formatting options for table
+        - kill time
+        - download or email
 
     Spruce up graphics w/ matplotlib styling
 
@@ -17,6 +27,7 @@ Task List:
     X - Test program on different datasets
 
     Work on saving model / loading model
+        - deliver model if you pay us
 
     Use Pathlib w/ PurePaths for linux / mac / windows priority
 

@@ -71,14 +71,14 @@ def create_strat_cat(raw_data) -> pd.DataFrame:
     data_w_strat_cat = raw_data
     return data_w_strat_cat, strat_label
 
-def data_split(datapath) -> pd.DataFrame:
+def data_split(datapath, test_set_size) -> pd.DataFrame:
     """
     This function will take a relative datapath of a dataset in csv format and will split the data into training attributes, 
     training labels, test attributes, and test labels according to the distribution of a categorical class label.
     """
     raw_data = load_data(datapath)
     data_w_strat_cat, strat_label = create_strat_cat(raw_data)
-    split = StratifiedShuffleSplit(n_splits=1,test_size=0.2,random_state=42)
+    split = StratifiedShuffleSplit(n_splits=1,test_size=test_set_size)
     for train_index, test_index in split.split(data_w_strat_cat,data_w_strat_cat[f"{strat_label}_cat"]):
         train_set = data_w_strat_cat.loc[train_index]
         test_set = data_w_strat_cat.loc[test_index]
@@ -95,10 +95,10 @@ def data_split(datapath) -> pd.DataFrame:
 
     return train_attrib, train_labels, test_attrib, test_labels
 
-def gen_cv_samples(X_train_df, y_train_df):
+def gen_cv_samples(X_train_df, y_train_df, n_cv_folds):
     """
     Generates a nested array of length k (where k is the number of cv folds)
-    Each sub-tuple contains 9 folds formed into training data and a 10th left out as test data
+    Each sub-tuple contains k folds formed into training data and the k+1 fold left out as test data
     
     Args: 
         X_train (nd.array) - Training data already processed
@@ -108,7 +108,7 @@ def gen_cv_samples(X_train_df, y_train_df):
         train/test data (tuples) - nested_samples gets broken down into four list
     """
     X_train, y_train = X_train_df.values, y_train_df.values
-    kf = KFold(n_splits = 10, shuffle = True, random_state = 2)
+    kf = KFold(n_splits = n_cv_folds, shuffle = True)
     kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)]
     nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices]
     X_tr, y_tr, X_te, y_te = [], [], [], []
@@ -118,7 +118,7 @@ def gen_cv_samples(X_train_df, y_train_df):
 
     return (X_tr, y_tr, X_te, y_te)
 
-def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, score_method='Root Mean Squared Error') -> None:
+def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
@@ -128,16 +128,16 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
     """
     regs, reg_names = get_all_regs()
     regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
-    train_attrib, train_labels, test_attrib, test_labels = data_split(datapath)
+    train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
     metric_list = [score_method] + metric_list
     for i, item in enumerate(metric_list[1:]):
         if item == metric_list[0]:
             del metric_list[i+1]
 
-    cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels)
+    cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels, n_cv_folds)
     start = perf_counter()
-    args_lst = [(regs[i // 10], reg_names[i // 10], metric_list, metric_help, cv_X_train[i % 10], cv_y_train[i % 10], cv_X_test[i % 10], cv_y_test[i % 10]) for i in range(len(regs) * 10)]
+    args_lst = [(regs[i // n_cv_folds], reg_names[i // n_cv_folds], metric_list, metric_help, cv_X_train[i % n_cv_folds], cv_y_train[i % n_cv_folds], cv_X_test[i % n_cv_folds], cv_y_test[i % n_cv_folds]) for i in range(len(regs) * n_cv_folds)]
     multiprocessing.set_start_method("spawn")
     with multiprocessing.Pool(processes=8) as pool:
         results = pool.starmap(run, args_lst)
@@ -151,14 +151,14 @@ def comparison(datapath, n_regressors, metric_list, n_vizualized, metric_help, s
             else:
                 org_results[reg_name] = [single_reg_dict]
 
-    fin_org_results = {k: v for k,v in org_results.items() if len(v) == 10}
+    fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
 
     stop = perf_counter()
     print(f"Time to execute regression: {stop - start:.2f}s")
 
-    figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help)]
+    figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
     for index in range(len(metric_list)):
-        figs += [boxplot(fin_org_results, metric_list, metric_help, n_vizualized, index)]
+        figs += [boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index)]
     for k in range(len(figs)):
         figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
     pass
@@ -185,7 +185,7 @@ def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, tes
         pass
 
 
-def boxplot(fin_org_results, metric_list, metric_help, n_vizualized, index):
+def boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index):
     """
     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
@@ -203,16 +203,13 @@ def boxplot(fin_org_results, metric_list, metric_help, n_vizualized, index):
     df_sorted = df[sorted_index]
 
     #Creating box plot figure of best n regressors.
-    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized:].boxplot(vert=False,grid=False)
+    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized_bp:].boxplot(vert=False,grid=False)
     plt.xlabel(f'CV {metric}')
     plt.ylabel('Models')
     return boxfig
 
 
-
-
-
-def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help):
+def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb):
     """
     This function will take the best performing model on each regressor type generated by cross-validation training and 
     apply it to the set of test data. The performance of the regs on the test instances will be displayed on a table and
@@ -243,13 +240,15 @@ def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_hel
 
     df = pd.DataFrame(data=output, index=rows, columns=columns)
 
-    sorted_df = df.sort_values(by=columns[0], axis=0, ascending=not(metric_help[columns[0]][0]))
-    print(sorted_df)
+    df_sorted = df.sort_values(by=columns[0], axis=0, ascending=not(metric_help[columns[0]][0]))
+    print(df_sorted)
+
+    df_sorted = df_sorted.iloc[:n_vizualized_tb]
 
     fig, ax = plt.subplots()
     fig.patch.set_visible(False)
     ax.axis('off')
     ax.axis('tight')
-    ax.table(cellText=sorted_df.values, rowLabels=sorted_df.index, colLabels=sorted_df.columns, loc='center')
+    ax.table(cellText=df_sorted.values, rowLabels=df_sorted.index, colLabels=df_sorted.columns, loc='center')
     fig.tight_layout()
     return fig
