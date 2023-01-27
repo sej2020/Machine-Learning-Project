@@ -1,7 +1,19 @@
-Task List:
 
-    ✓ Run large-scale experiment
-        - Port code to Quartz
+Task List
+----------
+
+
+Connecting to Website:
+
+    Learn Madhavan's Tech Stack
+    Set up database with Docker
+    Add event listeners and event handlers
+
+
+AutoML:
+
+    Run large-scale experiment
+        X - Port code to Quartz
         - Save timing details and experiment metadata
         - Create visualization & identify optimal n_workers
         - Create profile report on final program
@@ -11,14 +23,14 @@ Task List:
     Parametrize EVERYTHING
         X - Train/Test size in data_split
         X - CV Folds
-        - Regressor names
+        X - Regressor names
         - maybe n_processors
         - matplotlib boxplot themes
         - dpi
         X - n_vizualized for test_best
         - formatting options for table
         - kill time
-        - download or email
+        - download or email - csv or json format
 
     Spruce up graphics w/ matplotlib styling
 
@@ -27,7 +39,6 @@ Task List:
     X - Test program on different datasets
 
     Work on saving model / loading model
-        - deliver model if you pay us
 
     Use Pathlib w/ PurePaths for linux / mac / windows priority
 
@@ -40,3 +51,24 @@ Task List:
         - Create requirements.txt
         - Test it on other systems
         - Package / publish it?
+
+
+Paper:
+
+    OpenCV
+
+    User-centric comparison of libraries on MNIST
+        - max amount of abstraction offered by the library
+        - max amount of flexibility offered by the library
+        - run times
+    
+    Tables
+        - Regressors
+        - Activation functions, evaluation metrics, layer types, optimizer, loss functions
+
+    OLS
+        - Understand various solvers
+        - Come up with ideas for B-datasets
+        - Generate those datasets
+        - and then, implement experiments
+
