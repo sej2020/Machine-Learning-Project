@@ -118,7 +118,7 @@ def gen_cv_samples(X_train_df, y_train_df, n_cv_folds):
 
     return (X_tr, y_tr, X_te, y_te)
 
-def comparison(datapath, which_regressors, metric_list, metric_help, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
+def comparison(datapath, which_regressors, metric_list, metric_help, styledict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
@@ -157,9 +157,9 @@ def comparison(datapath, which_regressors, metric_list, metric_help, n_vizualize
 
     figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
     for index in range(len(metric_list)):
-        figs += [boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index)]
+        figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
     for k in range(len(figs)):
-        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=300.0)
+        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
     pass
     
 
@@ -184,7 +184,7 @@ def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, tes
         pass
 
 
-def boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index):
+def boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index):
     """
     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
@@ -207,37 +207,23 @@ def boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index):
     for column in df_final.columns:
         bp_data.append(df[column[:]].tolist())
 
-    boxfig = plt.figure(figsize =(10, 7))
+    boxfig = plt.figure()
     ax = boxfig.add_subplot(111)
-    bp = ax.boxplot(bp_data, patch_artist = True, vert = 0)
+    bp = ax.boxplot(bp_data, patch_artist = True, vert = 0, boxprops = styledict['boxprops'],
+                    flierprops = styledict['flierprops'], medianprops = styledict['medianprops'],
+                    whiskerprops = styledict['whiskerprops'], capprops = styledict['capprops']
+                    )
     
-    colors = ['#0000FF' for i in range(len(bp))]
-    for patch, color in zip(bp['boxes'], colors):
-        patch.set_facecolor(color)
-
-    for whisker in bp['whiskers']:
-        whisker.set(color ='#8B008B',
-                    linewidth = 1.5,
-                    linestyle =":")
-
-    for cap in bp['caps']:
-        cap.set(color ='#8B008B',
-                linewidth = 2)
-
-    for median in bp['medians']:
-        median.set(color ='red',
-                linewidth = 3)
-
-    for flier in bp['fliers']:
-        flier.set(marker ='D',
-                color ='#e7298a',
-                alpha = 0.5)
-        
+    for patch in bp['boxes']:
+        patch.set_facecolor(styledict['boxfill'])
+   
     ax.set_yticklabels([column for column in df_final.columns])
+    ax.yaxis.grid(styledict['grid'])
+    ax.xaxis.grid(styledict['grid'])
     
-    plt.title("Customized box plot")
+    plt.title("Cross Validation Scores")
 
-    ax.set_xlabel(f'CV {metric}')
+    ax.set_xlabel(f'{metric}')
     ax.set_ylabel('Models')
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
