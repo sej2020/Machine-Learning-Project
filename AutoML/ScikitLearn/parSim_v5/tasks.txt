@@ -25,8 +25,8 @@ AutoML:
         X - CV Folds
         X - Regressor names
         - maybe n_processors
-        - matplotlib boxplot themes
-        - dpi
+        X - matplotlib boxplot themes
+        X - dpi
         X - n_vizualized for test_best
         - formatting options for table
         - kill time
@@ -64,7 +64,11 @@ Paper:
     
     Tables
         - Regressors
-        - Activation functions, evaluation metrics, layer types, optimizer, loss functions
+        X - activation functions
+        - evaluation metrics
+        - layer types
+        - optimizer
+        - loss functions
 
     OLS
         - Understand various solvers
