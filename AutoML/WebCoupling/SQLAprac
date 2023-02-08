@@ -1,0 +1,144 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from sqlalchemy import MetaData
+from sqlalchemy import Table, Column, Integer, String
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy import insert
+from sqlalchemy import select
+from typing import List
+from typing import Optional
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import relationship
+
+engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
+metadata_obj = MetaData()
+
+# --------------------------------------------------------------------------------------------------------------------------
+### Core API
+# --------------------------------------------------------------------------------------------------------------------------
+user_table = Table("user_account", metadata_obj, 
+                    Column("id", Integer, primary_key=True), 
+                    Column("name", String(30)),
+                    Column("fullname", String)
+                    )
+
+address_table = Table("address", metadata_obj,
+                      Column("id", Integer, primary_key=True),
+                      Column("user_id", ForeignKey("user_account.id"), nullable=False),
+                      Column("email_address", String, nullable=False)
+                      )
+
+metadata_obj.create_all(engine)
+
+"""
+For management of an application database schema over the long term however, 
+a schema management tool such as Alembic, which builds upon SQLAlchemy, 
+is likely a better choice, as it can manage and orchestrate the process of 
+incrementally altering a fixed database schema over time as the design of the application changes.
+"""
+# commit as you go
+# must commit if you are updating table in any way
+with engine.connect() as conn:
+    conn.execute(text("CREATE TABLE some_table (x int, y int)"))
+    conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 1, "y": 1}, {"x": 2, "y": 4}],)
+    conn.commit()
+
+#begin once
+with engine.begin() as conn:
+    conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 6, "y": 8}, {"x": 9, "y": 10}],)
+
+with engine.connect() as conn:
+    result = conn.execute(text("SELECT x, y FROM some_table WHERE y > :y"), {"y": 2})
+    for row in result:
+        print(f"x: {row.x}  y: {row.y}")
+
+with engine.connect() as conn:
+    conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 11, "y": 12}, {"x": 13, "y": 14}],)
+    conn.commit()
+
+stmt = insert(user_table).values(name="spongebob", fullname="Spongebob Squarepants")
+# compiled = stmt.compile()
+# print(compiled.params)
+with engine.connect() as conn:
+    result = conn.execute(stmt)
+    conn.commit()
+
+with engine.connect() as conn:
+    result = conn.execute(insert(user_table), [{"name": "sandy", "fullname": "Sandy Cheeks"},{"name": "patrick", "fullname": "Patrick Star"}],)
+    conn.commit()
+
+insert_stmt = insert(address_table).returning(address_table.c.id, address_table.c.email_address)
+print(insert_stmt)
+
+select_stmt = select(user_table.c.id, user_table.c.name + "@aol.com")
+insert_stmt = insert(address_table).from_select(["user_id", "email_address"], select_stmt)
+# --------------------------------------------------------------------------------------------------------------------------
+### ORM API
+# --------------------------------------------------------------------------------------------------------------------------
+#Establishing a Declarative Base by creating new class that subclasses dec base
+class Base(DeclarativeBase):
+    pass
+
+class User(Base):
+    __tablename__ = "user_account"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(30))
+    fullname: Mapped[Optional[str]]
+
+    addresses: Mapped[List["Address"]] = relationship(back_populates="user")
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, name={self.name!r}, fullname={self.fullname!r})"
+
+class Address(Base):
+    __tablename__ = "address"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    email_address: Mapped[str]
+    user_id = mapped_column(ForeignKey("user_account.id"))
+
+    user: Mapped[User] = relationship(back_populates="addresses")
+
+    def __repr__(self) -> str:
+        return f"Address(id={self.id!r}, email_address={self.email_address!r})"
+    
+Base.metadata.create_all(engine)
+# sandy = User(name="sandy", fullname="Sandy Cheeks")
+# print(sandy)
+
+stmt = text("SELECT x,y FROM some_table WHERE y > :y ORDER BY x, y")
+with Session(engine) as session:
+    result = session.execute(stmt, {"y": 6})
+    for row in result:
+        print(f"x: {row.x}  y: {row.y}")
+
+#commit as you go
+with Session(engine) as session:
+    result = session.execute(text("UPDATE some_table SET y=:y WHERE x=:x"),[{"x": 9, "y": 11}, {"x": 13, "y": 15}])
+    session.commit()
+
+#----------------------------------------------------------------------
+"""
+Workflow for pipeline
+    1. Event Listener will watch database
+        - 1.1: when new request is added to database, ML pipeline is called with primary key of row
+    2. Pipeline Executes
+        - 2.1: parameters (column values) are selected and returned based on primary key
+        - 2.2: data file is retrieved from S3 based on key in db row
+        - 2.3: ML comparison function runs as normal
+        - 2.4: insert results into different S3 bucket
+        - 2.4: update database with completed job
+
+Considerations:
+    - tables: just 2 tables? to-be-completed and completed table?
+    - is db connection global or do we call a new db connection with each loop of event listener 
+      and a new db connection will be established by the ML pipeline?
+    - what format will results be? CSV?
+    - will the pipeline store results in S3 bucket with inserting completed job? Or will Madhavan handle this somehow?
+    - how does our pipeline retrieve from S3 bucket. key-id pair? 
+    
+"""

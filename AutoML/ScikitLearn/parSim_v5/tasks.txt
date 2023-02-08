@@ -2,13 +2,14 @@
 Task List
 ----------
 
-
 Connecting to Website:
 
     Learn Madhavan's Tech Stack
     Set up database with Docker
-    Add event listeners and event handlers
-
+    
+    - Freeze Requirements to file and make Dockerfile
+    - Stable SQL to retrieve tasks from database and update database with results
+    - Add event listeners and event handlers... wait for Madhavan
 
 AutoML:
 
@@ -24,23 +25,18 @@ AutoML:
         X - Train/Test size in data_split
         X - CV Folds
         X - Regressor names
-        - maybe n_processors
         X - matplotlib boxplot themes
         X - dpi
         X - n_vizualized for test_best
-        - formatting options for table
         - kill time
-        - download or email - csv or json format
 
-    Spruce up graphics w/ matplotlib styling
+    X - Spruce up graphics w/ matplotlib styling
 
-    Refactor performance metrics (make exclusively scipy and / or implement metrics ourselves)
+    X - Refactor performance metrics (make exclusively scipy and / or implement metrics ourselves)
 
     X - Test program on different datasets
 
     Work on saving model / loading model
-
-    Use Pathlib w/ PurePaths for linux / mac / windows priority
 
     X - Roll up for loops if it is nicer
 
