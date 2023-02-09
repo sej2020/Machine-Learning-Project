@@ -38,8 +38,9 @@ def run_linreg(cv_data, regr, regr_lib, hyperparams):
         if regr_lib == "sklearn":
             model = regr().fit(X_tr, y_tr, **hyperparams)
             pred = model.predict(X_te)
-            results = (metrics.mean_squared_error(y_te, pred)**(.5), metrics.mean_absolute_error(y_te, pred), metrics.r2_score(y_te, pred))
-            accumulator.append(results)
+            
+        results = (metrics.mean_squared_error(y_te, pred)**(.5), metrics.mean_absolute_error(y_te, pred), metrics.r2_score(y_te, pred))
+        accumulator.append(results)
             
     return accumulator
     
