@@ -28,9 +28,6 @@ def gen_cv_samples(X_train, y_train, n_cv_folds):
             var.append(sample[i])
 
     return nested_samples
-
-def run_sklearn(cv_data, regr, params):
-    pass
     
 def run_linreg(cv_data, regr, regr_lib, hyperparams):
     accumulator = []
@@ -39,12 +36,12 @@ def run_linreg(cv_data, regr, regr_lib, hyperparams):
             model = regr().fit(X_tr, y_tr, **hyperparams)
             pred = model.predict(X_te)
             
-        results = (metrics.mean_squared_error(y_te, pred)**(.5), metrics.mean_absolute_error(y_te, pred), metrics.r2_score(y_te, pred))
+        results = metrics.mean_squared_error(y_te, pred)**(.5)
         accumulator.append(results)
             
     return accumulator
     
-def main(data_path, k_folds):
+def main(data_path, libs, methods, k_folds):
     X, y = read_data(data_path)
     cv_data = gen_cv_samples(X, y, k_folds)
 
@@ -54,8 +51,13 @@ def main(data_path, k_folds):
             "stochastic_gradient_descent": linear_model.SGDRegressor
         }
     }
-    lib = "sklearn"
-    results = run_linreg(cv_data, regrs[lib]["least_squares"], lib, {})
+    
+    result_accumulator = {}
+    
+    for lib in libs:
+        for method in methods:
+            results = run_linreg(cv_data, regrs[lib][method], lib, {})
+            result_accumulator[f"{lib}-{method}"] = results
     
     print(results)
 
@@ -63,5 +65,7 @@ def main(data_path, k_folds):
 if __name__ == "__main__":
     main(
         data_path = "AutoML/ConcreteData/Concrete_Data.csv",
+        libs = ("sklearn",),
+        methods = ("least_squares",)
         k_folds = 10,
     )
