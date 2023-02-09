@@ -2,8 +2,8 @@ from sklearn import *
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import pytorch as torch
-import mxnet as mx
+import torch
+# import mxnet as mx
 
 def read_data(data_path):
     df = pd.read_csv(data_path)
@@ -32,58 +32,49 @@ def gen_cv_samples(X_train, y_train, n_cv_folds):
 
     return nested_samples
     
-def run_linreg(cv_data, regr, regr_lib, hyperparams):
+def run_linreg(cv_data, regr_name, regr, hyperparams):
     accumulator = []
     for i, (X_tr, y_tr, X_te, y_te) in enumerate(cv_data):
+        pred = None
 
-        if regr_lib == "sklearn":
+        if regr_name in ("sklearn-least_squares", "sklearn-stochastic_gradient_descent"):
             model = regr().fit(X_tr, y_tr, **hyperparams)
             pred = model.predict(X_te)
 
-        elif regr_lib == "tensorflow":
+        elif regr_name == "tensorflow-least_squares":
             model = regr(X_tr, y_tr, **hyperparams)
             pred = X_te @ model
 
-        elif regr_lib == "pytorch":
+        elif regr_name == "pytorch-least_squares":
             model = regr(X_tr, y_tr, **hyperparams)
             pred = X_te @ model
   
-        elif regr_lib == "mxnet":
+        elif regr_name == "mxnet_least_squares":
             model = regr(X_tr, y_tr, **hyperparams)
             pred = X_te @ model
                 
-            
+        
         results = metrics.mean_squared_error(y_te, pred)**(.5)
         accumulator.append(results)
             
+    print(accumulator)
     return accumulator
     
-def main(data_path, libs, methods, k_folds):
+def main(data_path, k_folds):
     X, y = read_data(data_path)
     cv_data = gen_cv_samples(X, y, k_folds)
 
     regrs = {
-        "sklearn": {
-            "least_squares": linear_model.LinearRegression,
-            "stochastic_gradient_descent": linear_model.SGDRegressor
-        },
-        "tensorflow": {
-            "least_squares": tf.linalg.lstsq,
-        },
-        "pytorch": {
-            "least_squares":  torch.linalg.lstsq,
-        },
-        "mxnet": {
-            "least_squares": mx.np.linalg.lstsq
-            }
+            "sklearn-least_squares": linear_model.LinearRegression,
+            "sklearn-stochastic_gradient_descent": linear_model.SGDRegressor,
+            "tensorflow-least_squares": tf.linalg.lstsq,
+            "pytorch-least_squares":  torch.linalg.lstsq,
+            # "mxnet_least_squares": mx.np.linalg.lstsq
     }
     
     result_accumulator = {}
-    
-    for lib in libs:
-        for method in methods:
-            results = run_linreg(cv_data, regrs[lib][method], lib, {})
-            result_accumulator[f"{lib}-{method}"] = results
+    for name, regr in regrs.items():
+        result_accumulator[name] = run_linreg(cv_data, name, regr, {})
     
     results_df = pd.DataFrame(result_accumulator)
     print(results_df)
@@ -91,11 +82,6 @@ def main(data_path, libs, methods, k_folds):
     
 if __name__ == "__main__":
     main(
-        data_path = "AutoML/ConcreteData/Concrete_Data.csv",
-        libs = ("sklearn",),
-        methods = ("least_squares",),
-        
+        data_path = "AutoML/ConcreteData/Concrete_Data.csv",    
         k_folds = 10,
     )
-
-
