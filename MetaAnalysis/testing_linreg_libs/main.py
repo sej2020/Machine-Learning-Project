@@ -59,7 +59,8 @@ def main(data_path, libs, methods, k_folds):
             results = run_linreg(cv_data, regrs[lib][method], lib, {})
             result_accumulator[f"{lib}-{method}"] = results
     
-    print(results)
+    results_df = pd.DataFrame(result_accumulator)
+    print(results_df)
 
     
 if __name__ == "__main__":
