@@ -32,20 +32,20 @@ address_table = Table("address", metadata_obj,
 
 metadata_obj.create_all(engine)
 
-# """
-# For management of an application database schema over the long term however, 
-# a schema management tool such as Alembic, which builds upon SQLAlchemy, 
-# is likely a better choice, as it can manage and orchestrate the process of 
-# incrementally altering a fixed database schema over time as the design of the application changes.
-# """
-# # commit as you go
-# # must commit if you are updating table in any way
+"""
+For management of an application database schema over the long term however, 
+a schema management tool such as Alembic, which builds upon SQLAlchemy, 
+is likely a better choice, as it can manage and orchestrate the process of 
+incrementally altering a fixed database schema over time as the design of the application changes.
+"""
+# commit as you go
+# must commit if you are updating table in any way
 # with engine.connect() as conn:
 #     conn.execute(text("CREATE TABLE some_table (x int, y int)"))
 #     conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 1, "y": 1}, {"x": 2, "y": 4}],)
 #     conn.commit()
 
-# #begin once
+#begin once
 # with engine.begin() as conn:
 #     conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 6, "y": 8}, {"x": 9, "y": 10}],)
 
@@ -58,26 +58,22 @@ metadata_obj.create_all(engine)
 #     conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 11, "y": 12}, {"x": 13, "y": 14}],)
 #     conn.commit()
 
-# stmt = insert(user_table).values(name="spongebob", fullname="Spongebob Squarepants")
-# # compiled = stmt.compile()
-# # print(compiled.params)
-# with engine.connect() as conn:
-#     result = conn.execute(stmt)
-#     conn.commit()
+stmt = insert(user_table).values(name="spongebob", fullname="Spongebob Squarepants")
+with engine.begin() as conn:
+    result = conn.execute(stmt)
 
-# with engine.connect() as conn:
-#     result = conn.execute(insert(user_table), [{"name": "sandy", "fullname": "Sandy Cheeks"},{"name": "patrick", "fullname": "Patrick Star"}],)
-#     conn.commit()
+with engine.begin() as conn:
+    result = conn.execute(insert(user_table), [{"name": "sandy", "fullname": "Sandy Cheeks"},{"name": "patrick", "fullname": "Patrick Star"}],)
 
 # insert_stmt = insert(address_table).returning(address_table.c.id, address_table.c.email_address)
 # print(insert_stmt)
 
 # select_stmt = select(user_table.c.id, user_table.c.name + "@aol.com")
 # insert_stmt = insert(address_table).from_select(["user_id", "email_address"], select_stmt)
-# # --------------------------------------------------------------------------------------------------------------------------
-# ### ORM API
-# # --------------------------------------------------------------------------------------------------------------------------
-# #Establishing a Declarative Base by creating new class that subclasses dec base
+# --------------------------------------------------------------------------------------------------------------------------
+### ORM API
+# --------------------------------------------------------------------------------------------------------------------------
+#Establishing a Declarative Base by creating new class that subclasses dec base
 # class Base(DeclarativeBase):
 #     pass
 
@@ -143,15 +139,47 @@ Considerations:
 """
 # engine = create_engine("<Database>", echo=True)
 # metadata_obj = MetaData(bind=engine)
-# MetaData.reflect(metadata_obj)
+MetaData.reflect(metadata_obj)
 
 # while listening:
 #     main_table = metadata_obj.tables['main']
-#     n_rows = select([func.count()]).select_from(main_table).scalar()
+#     n_rows = select([db.func.count()]).select_from(main_table).scalar()
 #     if n_rows > old_n_rows:
-#         call event handler
+#         call event handler(n_rows, old_n_rows)
 #     old_n_rows = n_rows
 #     pause x amount of time
 
-# event_handler():
-#     grab id from last row. call pipeline
+# event_handler(n_rows, old_n_rows):
+#     main_table = metadata_obj.tables['main']
+#     diff = old_n_rows - n_rows
+#     stmt = select(main_table.c.id).order_by(main_table.c.id.desc()).limit(diff)
+#     with engine.begin() as conn:
+#         id_result = conn.execute(stmt)
+#         # make id_result a pythonic iterable of integers
+#         for i in id_result:
+#              pipeline(id_result, main_table)
+
+## in pipeline
+#   def retrieve_params(id, main_table):
+#       stmt = select(main_table).where(main_table.c.id == id)
+#       dataset = retrieve_data(id, main_table)
+#       with engine.begin() as conn:
+#           params = conn.execute(stmt)
+#           #dict or list of results
+#           params.append(dataset)
+#           #call rest of pipeline with these params and the id
+#
+#   def retrieve_data(id, main_table):
+#       stmt = select(main_table.c.data_id).where(main_table.c.id == id)
+#       with engine.begin() as conn:
+#           result = conn.execute(stmt)
+#           #get s3 data based on result id
+#
+#   def insert_results(results):
+#       insert into s3 bucket and record the id
+#
+#   def update_results(resuls, id):
+#       main_table = metadata_obj.tables['main']
+#       stmt = main_table.update().values(return_results_field = results).where(maintable.c.id == id)
+#       with engine.begin() as conn:
+#           conn.execute(stmt)
