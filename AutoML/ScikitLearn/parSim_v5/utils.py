@@ -265,8 +265,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         test_labels (list)
 
     Returns:
-        Eventually will put csv results into s3 bucket. may or may not provide visualizations
-
+        reg_dict (dict) - dicttionary of results from cross-validation run on one regressor
     """
     print(f"Checking {reg}")
     try:
@@ -284,10 +283,20 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         pass
 
 
-def boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index):
+def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_help: dict, n_vizualized_bp: int, index: int):
     """
     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
+
+    Args:
+        fin_org_results (dict) - the final results from cross-validation
+        styledict (dict) -
+        metric_list (list) -
+        metric_help (dict) -
+        n_vizualized_bp (int) -
+        index (int) -
+    Returns:
+
     """
     boxfig = plt.figure(constrained_layout=True)
 
