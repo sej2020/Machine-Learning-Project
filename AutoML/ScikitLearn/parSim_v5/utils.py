@@ -247,7 +247,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     pass
     
 
-def run(reg: object, reg_name: str, metric_list, metric_help, train_attrib, train_labels, test_attrib, test_labels) -> dict:
+def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attrib: list, train_labels: list, test_attrib: list, test_labels: list) -> dict:
     """
     This function will perform cross-validation training on a given dataset and given regressor. It will return
     a dictionary containing cross-validation performance on various metrics.
