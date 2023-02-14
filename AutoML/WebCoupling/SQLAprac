@@ -12,25 +12,27 @@ from typing import Optional
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
 
-engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
-metadata_obj = MetaData(bind=engine)
+import boto3
+
+# engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
+# metadata_obj = MetaData(bind=engine)
 
 # # --------------------------------------------------------------------------------------------------------------------------
 # ### Core API
 # # --------------------------------------------------------------------------------------------------------------------------
-user_table = Table("user_account", metadata_obj, 
-                    Column("id", Integer, primary_key=True), 
-                    Column("name", String(30)),
-                    Column("fullname", String)
-                    )
+# user_table = Table("user_account", metadata_obj, 
+#                     Column("id", Integer, primary_key=True), 
+#                     Column("name", String(30)),
+#                     Column("fullname", String)
+#                     )
 
-address_table = Table("address", metadata_obj,
-                      Column("id", Integer, primary_key=True),
-                      Column("user_id", ForeignKey("user_account.id"), nullable=False),
-                      Column("email_address", String, nullable=False)
-                      )
+# address_table = Table("address", metadata_obj,
+#                       Column("id", Integer, primary_key=True),
+#                       Column("user_id", ForeignKey("user_account.id"), nullable=False),
+#                       Column("email_address", String, nullable=False)
+#                       )
 
-metadata_obj.create_all(engine)
+# metadata_obj.create_all(engine)
 
 """
 For management of an application database schema over the long term however, 
@@ -58,12 +60,12 @@ incrementally altering a fixed database schema over time as the design of the ap
 #     conn.execute(text("INSERT INTO some_table (x, y) VALUES (:x, :y)"), [{"x": 11, "y": 12}, {"x": 13, "y": 14}],)
 #     conn.commit()
 
-stmt = insert(user_table).values(name="spongebob", fullname="Spongebob Squarepants")
-with engine.begin() as conn:
-    result = conn.execute(stmt)
+# stmt = insert(user_table).values(name="spongebob", fullname="Spongebob Squarepants")
+# with engine.begin() as conn:
+#     result = conn.execute(stmt)
 
-with engine.begin() as conn:
-    result = conn.execute(insert(user_table), [{"name": "sandy", "fullname": "Sandy Cheeks"},{"name": "patrick", "fullname": "Patrick Star"}],)
+# with engine.begin() as conn:
+#     result = conn.execute(insert(user_table), [{"name": "sandy", "fullname": "Sandy Cheeks"},{"name": "patrick", "fullname": "Patrick Star"}],)
 
 # insert_stmt = insert(address_table).returning(address_table.c.id, address_table.c.email_address)
 # print(insert_stmt)
@@ -139,7 +141,7 @@ Considerations:
 """
 # engine = create_engine("<Database>", echo=True)
 # metadata_obj = MetaData(bind=engine)
-MetaData.reflect(metadata_obj)
+# MetaData.reflect(metadata_obj)
 
 # while listening:
 #     main_table = metadata_obj.tables['main']
@@ -170,16 +172,18 @@ MetaData.reflect(metadata_obj)
 #           #call rest of pipeline with these params and the id
 #
 #   def retrieve_data(id, main_table):
-#       stmt = select(main_table.c.data_id).where(main_table.c.id == id)
+#       s3_client = boto3.client('s3')
+#       stmt = select(main_table.c.data_object_name).where(main_table.c.id == id)
 #       with engine.begin() as conn:
-#           result = conn.execute(stmt)
-#           #get s3 data based on result id
+#           key = conn.execute(stmt)
+#           s3_file = s3_client.get_ojct(Bucket='FIXED_BUCKET_NAME', Key=key)['Body'].read()
+#           return s3_file.decode('utf-8')
 #
 #   def insert_results(results):
 #       insert into s3 bucket and record the id
 #
-#   def update_results(resuls, id):
+#   def update_results(result_data_obj_name, id):
 #       main_table = metadata_obj.tables['main']
-#       stmt = main_table.update().values(return_results_field = results).where(maintable.c.id == id)
+#       stmt = main_table.update().values(return_results_field = result_data_obj_name).where(maintable.c.id == id)
 #       with engine.begin() as conn:
 #           conn.execute(stmt)
