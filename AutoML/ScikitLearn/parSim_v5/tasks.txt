@@ -51,7 +51,7 @@ AutoML:
 
 Paper:
 
-    OpenCV
+    X - OpenCV
 
     User-centric comparison of libraries on MNIST
         - max amount of abstraction offered by the library
@@ -67,8 +67,8 @@ Paper:
         - loss functions
 
     OLS
-        - Understand various solvers
-        - Come up with ideas for B-datasets
+        X - Understand various solvers
+        X - Come up with ideas for B-datasets
         - Generate those datasets
         - and then, implement experiments
 

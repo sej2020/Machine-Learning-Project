@@ -14,7 +14,7 @@ import warnings
 warnings.filterwarnings('ignore')
 from inspect import signature, _empty
 
-def get_all_regs(which_regressors) -> list:
+def get_all_regs() -> list:
     """
     This function imports all sklearn regression estimators. The function will filter all out all regressors
     that take additional parameters. It will return a list of all viable regressor classes and a list of the 
@@ -40,7 +40,7 @@ def get_all_regs(which_regressors) -> list:
             if param.default == _empty:
                 all_optional = False
         is_cv_variant = name[-2:] == "CV"
-        if all_optional and (name not in forbidden_estimators) and not is_cv_variant and which_regressors[name] == 1:
+        if all_optional and (name not in forbidden_estimators) and not is_cv_variant:
             print('Appending', name)
             reg = RegressorClass()
             all_regs.append(reg)
@@ -118,7 +118,7 @@ def gen_cv_samples(X_train_df, y_train_df, n_cv_folds):
 
     return (X_tr, y_tr, X_te, y_te)
 
-def comparison(datapath, which_regressors, metric_list, metric_help, styledict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
+def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
     """
     This function will perform cross-validation training across multiple regressor types for one dataset. 
     The cross-validation scores will be vizualized in a box plot chart, displaying regressor performance across
@@ -126,7 +126,8 @@ def comparison(datapath, which_regressors, metric_list, metric_help, styledict, 
     trained on each regressor type will be tested on the set of test instances. The performance of those regs 
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
-    regs, reg_names = get_all_regs(which_regressors)
+    regs, reg_names = get_all_regs()
+    regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
     train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
     metric_list = [score_method] + metric_list
@@ -157,9 +158,9 @@ def comparison(datapath, which_regressors, metric_list, metric_help, styledict, 
 
     figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
     for index in range(len(metric_list)):
-        figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
+        figs += [boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index)]
     for k in range(len(figs)):
-        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
+        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
     pass
     
 
@@ -184,7 +185,7 @@ def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, tes
         pass
 
 
-def boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index):
+def boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index):
     """
     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
@@ -202,32 +203,9 @@ def boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_b
     df_sorted = df[sorted_index]
 
     #Creating box plot figure of best n regressors.
-    df_final = df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized_bp:]
-    bp_data = []
-    for column in df_final.columns:
-        bp_data.append(df[column[:]].tolist())
-
-    boxfig = plt.figure()
-    ax = boxfig.add_subplot(111)
-    bp = ax.boxplot(bp_data, patch_artist = True, vert = 0, boxprops = styledict['boxprops'],
-                    flierprops = styledict['flierprops'], medianprops = styledict['medianprops'],
-                    whiskerprops = styledict['whiskerprops'], capprops = styledict['capprops']
-                    )
-    
-    for patch in bp['boxes']:
-        patch.set_facecolor(styledict['boxfill'])
-   
-    ax.set_yticklabels([column for column in df_final.columns])
-    ax.yaxis.grid(styledict['grid'])
-    ax.xaxis.grid(styledict['grid'])
-    
-    plt.title("Cross Validation Scores")
-
-    ax.set_xlabel(f'{metric}')
-    ax.set_ylabel('Models')
-    ax.get_xaxis().tick_bottom()
-    ax.get_yaxis().tick_left()
-
+    df_sorted.iloc[:,len(df_sorted.columns)-n_vizualized_bp:].boxplot(vert=False,grid=False)
+    plt.xlabel(f'CV {metric}')
+    plt.ylabel('Models')
     return boxfig
 
 
