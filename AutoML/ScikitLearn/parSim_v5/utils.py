@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 from inspect import signature, _empty
 
 
-def get_all_regs(which_regressors: dict) -> list & list:
+def get_all_regs(which_regressors: dict) -> list:
     """
     This function imports all sklearn regression estimators. The function will filter all out all regressors
     that take additional parameters. It will return a list of all viable regressor classes and a list of the 
@@ -75,7 +75,7 @@ def load_data(datapath: str) -> pd.DataFrame:
     return pd.read_csv(csv_path)
 
 
-def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame & str:
+def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
     """
     This function will add a categorical column to the dataframe. This column is the categorical representation of the class
     label of each instance. This will enable the data to be split according to the distribution of the class values. The appended

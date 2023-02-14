@@ -1,6 +1,3 @@
-import os
-# import sys
-# sys.path.append(os.getcwd())
 from utils import *
 
 paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
