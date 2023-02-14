@@ -1,0 +1,17 @@
+In order to use this repository, you should follow a couple steps:
+
+    Install the requirements listed in the requirements.txt
+
+    Navigate to <repo_location>/AutoML/ScikitLearn/parSim_v5/main.py
+
+    This main file is where you can modify the parameters for the package
+
+    The primary parameter of interest is the 'datapath':
+        Set it to the location of a csv with the target variable in the final column
+        For a quick trial, set it to '<repo_location>/AutoML/Concrete_Data/Concrete_Data.csv'
+
+    Once you are satisfied with the parameters for the run, simply run the main file
+
+    It will use the utility function located in utils.py and run many ML models over your input data
+
+    Figures on the model output will be written to your filesystem, and information about execution will be fed to stdout
