@@ -149,15 +149,14 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
     Returns: 
         train/test data (tuples) - nested_samples gets broken down into four lists
     """
-    
     X_train, y_train = X_train_df.values, y_train_df.values
-    kf = KFold(n_splits = n_cv_folds, shuffle = True)
-    kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)]
-    nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices]
-    X_tr, y_tr, X_te, y_te = [], [], [], []
+    kf = KFold(n_splits = n_cv_folds, shuffle = True) # KFold creates a generator object, not list
+    kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)] # making list of indices to be used for folds based on KFold object
+    nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices] # unpacking train/test data @ train/test indices 
+    X_tr, y_tr, X_te, y_te = [], [], [], [] # variables which will each be of type list(np.ndarray, np.ndarray,..., np.ndarray), with k ndarray's representing each fold
     for sample in nested_samples:
         for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
-            var.append(sample[i])
+            var.append(sample[i]) # method to prevent code duplication in unpacking nested_samples into four variables
     return (X_tr, y_tr, X_te, y_te)
 
 
@@ -217,9 +216,12 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     #creating cv samples and running each regressor over these samples
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels, n_cv_folds)
     start = perf_counter()
+    # fundemental idea of args_lst is to create the cross product of all k folds with all r regressors, making k*r tasks (sets of arguments) to be passed to mp pool
+    # to do this, below list comp will use two diff indices - [i // n_cv_folds] to group all regressors of same type and [i % n_cv_folds] to split those regressors over each of the k (normally 10) folds
+    # could be done just as well with a nested for loop iterating over both regressors and folds
     args_lst = [(regs[i // n_cv_folds], reg_names[i // n_cv_folds], metric_list, metric_help, cv_X_train[i % n_cv_folds], cv_y_train[i % n_cv_folds], cv_X_test[i % n_cv_folds], cv_y_test[i % n_cv_folds]) for i in range(len(regs) * n_cv_folds)]
-    multiprocessing.set_start_method("spawn")
-    with multiprocessing.Pool(processes=8) as pool:
+    multiprocessing.set_start_method("spawn") # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
+    with multiprocessing.Pool(processes=8) as pool: # defaulting to 8 processesors
         results = pool.starmap(run, args_lst)
 
     #organizing results of cv runs into a dictionary                   
