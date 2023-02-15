@@ -1,6 +1,41 @@
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:36 | Level: ERROR | Function: run | Line: 223 | (Process Details : (28040, SpawnPoolWorker-4), Thread Details : (21740, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:36 | Level: ERROR | Function: run | Line: 223 | (Process Details : (28040, SpawnPoolWorker-4), Thread Details : (21740, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:37 | Level: ERROR | Function: run | Line: 223 | (Process Details : (12240, SpawnPoolWorker-2), Thread Details : (5952, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:37 | Level: ERROR | Function: run | Line: 223 | (Process Details : (12240, SpawnPoolWorker-2), Thread Details : (5952, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:37 | Level: ERROR | Function: run | Line: 223 | (Process Details : (12240, SpawnPoolWorker-2), Thread Details : (5952, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:37 | Level: ERROR | Function: run | Line: 223 | (Process Details : (12240, SpawnPoolWorker-2), Thread Details : (5952, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:37 | Level: ERROR | Function: run | Line: 223 | (Process Details : (30024, SpawnPoolWorker-7), Thread Details : (24260, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -11,9 +46,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -24,9 +59,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -37,9 +72,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -50,9 +85,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -63,9 +98,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -76,9 +111,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -89,9 +124,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -102,9 +137,14 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (11928, SpawnPoolWorker-6), Thread Details : (17568, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -115,9 +155,9 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
-15-02-2023 12:23:26 : ERROR : run : 190 : (Process Details : (17616, SpawnPoolWorker-5), Thread Details : (27704, MainThread))\nLog : 12034345
+------ Date: 15-02-2023 03:00:40 | Level: ERROR | Function: run | Line: 223 | (Process Details : (5604, SpawnPoolWorker-3), Thread Details : (26520, MainThread)) | ID: 123456
 Traceback (most recent call last):
-  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 184, in run
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 213, in run
     calculated = metric_help[k][2](test_labels, y_pred)
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\metrics\_regression.py", line 442, in mean_squared_error
     y_type, y_true, y_pred, multioutput = _check_reg_targets(
@@ -128,3 +168,13 @@ Traceback (most recent call last):
   File "C:\Users\18123\anaconda3\envs\research\lib\site-packages\sklearn\utils\validation.py", line 161, in _assert_all_finite
     raise ValueError(msg_err)
 ValueError: Input contains NaN.
+------ Date: 15-02-2023 03:00:44 | Level: ERROR | Function: run | Line: 223 | (Process Details : (25816, SpawnPoolWorker-8), Thread Details : (16912, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
+------ Date: 15-02-2023 03:00:47 | Level: ERROR | Function: run | Line: 223 | (Process Details : (11928, SpawnPoolWorker-6), Thread Details : (17568, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
+    y = x/0
+ZeroDivisionError: division by zero
