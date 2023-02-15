@@ -9,10 +9,16 @@ from sklearn import metrics
 from time import perf_counter
 import multiprocessing as multiprocessing
 
-
 import warnings
 warnings.filterwarnings('ignore')
 from inspect import signature, _empty
+
+import logging
+from logging import config
+
+config.fileConfig('AutoML\ScikitLearn\parSim_v5\logconfig.conf')
+
+logger = logging.getLogger(__name__)
 
 def get_all_regs() -> list:
     """
@@ -181,7 +187,7 @@ def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, tes
         return reg_dict
 
     except Exception as e:
-        print(e)
+        logging.exception(f"{12034345}")
         pass
 
 

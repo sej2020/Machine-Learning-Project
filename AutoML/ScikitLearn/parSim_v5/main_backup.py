@@ -4,10 +4,10 @@ import cProfile
 import pstats
 import io
 sys.path.append(os.getcwd())
-from utils import *
+from utils_backup import *
 
 paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
-            'n_regressors': 5,
+            'n_regressors': -1,
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared', 'Root Mean Squared Error'],
             #GENERAL FORM of metric_help: { 'metric': [ higher score is better?, positive or negative score values, accociated stat function ] } 
             'metric_help': {'Explained Variance': [True, 1, metrics.explained_variance_score], 'Max Error': [False, 1, metrics.max_error],
