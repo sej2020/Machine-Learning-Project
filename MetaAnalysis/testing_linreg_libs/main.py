@@ -68,7 +68,7 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
             
     return accumulator
     
-def main(data_path, k_folds):
+def main(data_path, k_folds, data_name):
     X, y = read_data(data_path)
     cv_data = gen_cv_samples(X, y, k_folds)
 
@@ -97,11 +97,10 @@ def main(data_path, k_folds):
     ax.legend(loc=(1, 0))
     ax.grid(True)
     plt.tight_layout()
-    plt.show()
-    
+    fig.savefig(f'MetaAnalysis/testing_linreg_libs/lin_test_{data_name}.png', bbox_inches='tight')
+
 if __name__ == "__main__":
-    main(
-        # data_path = "AutoML/ConcreteData/Concrete_Data.csv",  
-        data_path = "AutoML/ConductivityData/train.csv",
-        k_folds = 10,
-    )
+    paths = ["AutoML/ConductivityData/train.csv", "AutoML/ConcreteData/Concrete_Data.csv", "AutoML/PowerPlantData/Folds5x2_pp.csv"]
+    data_names = ["Conductivity", "Concrete", "PowerPlant"]
+    for path, data_name in zip(paths, data_names):
+        main(data_path = path, k_folds = 10, data_name = data_name)
