@@ -178,3 +178,43 @@ Traceback (most recent call last):
   File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 219, in run
     y = x/0
 ZeroDivisionError: division by zero
+------ Date: 15-02-2023 08:01:22 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (26272, MainProcess), Thread Details : (30624, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:08:48 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (18668, MainProcess), Thread Details : (30108, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:11:42 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (29076, MainProcess), Thread Details : (28324, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:13:55 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (31776, MainProcess), Thread Details : (30532, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:16:40 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (28316, MainProcess), Thread Details : (6224, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:25:06 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (21200, MainProcess), Thread Details : (31008, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:45:11 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (12216, MainProcess), Thread Details : (31836, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 08:46:20 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (27048, MainProcess), Thread Details : (22160, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError

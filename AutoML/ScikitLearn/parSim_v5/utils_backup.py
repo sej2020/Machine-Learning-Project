@@ -157,6 +157,7 @@ def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
     try: 
+        raise TypeError
         regs, reg_names = get_all_regs()
         regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
@@ -213,11 +214,6 @@ def run(reg, reg_name, metric_list, metric_help, train_attrib, train_labels, tes
             calculated = metric_help[k][2](test_labels, y_pred)
             reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated**.5)
         reg_dict[reg_name].append(model_trained)
-        import random
-        x = random.randint(1,20)
-        if x == 15:
-            y = x/0
-        return reg_dict
 
     except Exception:
         logger_root.exception(f"{123456}\n")
