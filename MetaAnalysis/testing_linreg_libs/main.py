@@ -2,8 +2,8 @@ from sklearn import *
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-# import torch
-# import mxnet as mx
+import torch
+import mxnet as mx
 
 def read_data(data_path):
     df = pd.read_csv(data_path)
@@ -37,8 +37,12 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
     for i, (X_tr, y_tr, X_te, y_te) in enumerate(cv_data):
         pred = None
 
-        if regr_name in ("sklearn-least_squares", "sklearn-stochastic_gradient_descent"):
+        if regr_name == "sklearn-least_squares":
             model = regr().fit(X_tr, y_tr, **hyperparams)
+            pred = model.predict(X_te)
+            
+        if regr_name == "sklearn-stochastic_gradient_descent":
+            model = regr(eta0=10**-10, max_iter=10**3, **hyperparams).fit(X_tr, y_tr)
             pred = model.predict(X_te)
 
         elif regr_name == "tensorflow-least_squares":
@@ -46,18 +50,17 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
             pred = X_te @ model
 
         elif regr_name == "pytorch-least_squares":
-            model = regr(X_tr, y_tr[...,np.newaxis], **hyperparams)
-            pred = X_te @ model
+            model = regr(torch.Tensor(X_tr), torch.Tensor(y_tr[...,np.newaxis]), **hyperparams).solution
+            pred = X_te @ np.array(model)
   
         elif regr_name == "mxnet_least_squares":
-            model = regr(X_tr, y_tr[...,np.newaxis], **hyperparams)
+            model = regr(X_tr, y_tr[...,np.newaxis], **hyperparams)[0]
             pred = X_te @ model
                 
         
         results = metrics.mean_squared_error(y_te, pred)**(.5)
         accumulator.append(results)
             
-    print(accumulator)
     return accumulator
     
 def main(data_path, k_folds):
@@ -68,8 +71,8 @@ def main(data_path, k_folds):
             "sklearn-least_squares": linear_model.LinearRegression,
             "sklearn-stochastic_gradient_descent": linear_model.SGDRegressor,
             "tensorflow-least_squares": tf.linalg.lstsq,
-            # "pytorch-least_squares":  torch.linalg.lstsq,
-            # "mxnet_least_squares": mx.np.linalg.lstsq
+            "pytorch-least_squares":  torch.linalg.lstsq,
+            "mxnet_least_squares": mx.np.linalg.lstsq
     }
     
     result_accumulator = {}
@@ -82,6 +85,7 @@ def main(data_path, k_folds):
     
 if __name__ == "__main__":
     main(
-        data_path = "AutoML/ConcreteData/Concrete_Data.csv",    
+        # data_path = "AutoML/ConcreteData/Concrete_Data.csv",  
+        data_path = "AutoML/ConductivityData/train.csv",
         k_folds = 10,
     )

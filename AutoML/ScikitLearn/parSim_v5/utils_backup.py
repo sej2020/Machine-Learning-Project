@@ -16,7 +16,7 @@ from inspect import signature, _empty
 import logging
 from logging import config
 
-config.fileConfig('AutoML\ScikitLearn\parSim_v5\logconfig.conf')
+config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
 
 logger_root = logging.getLogger('root')
 logger_exec = logging.getLogger('executive')

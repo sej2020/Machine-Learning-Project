@@ -218,3 +218,13 @@ Traceback (most recent call last):
   File "c:\Users\18123\OneDrive\Documents\sej2020\Machine-Learning-Project\AutoML\ScikitLearn\parSim_v5\utils_backup.py", line 160, in comparison
     raise TypeError
 TypeError
+------ Date: 15-02-2023 09:06:08 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (7484, MainProcess), Thread Details : (4442162688, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "/Users/joshuaelms/Desktop/github_repos/Machine-Learning-Project/AutoML/ScikitLearn/parSim_v5/utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
+------ Date: 15-02-2023 09:07:36 | Level: ERROR | Function: comparison | Line: 199 | (Process Details : (7552, MainProcess), Thread Details : (4594001408, MainThread)) | ID: 123456
+Traceback (most recent call last):
+  File "/Users/joshuaelms/Desktop/github_repos/Machine-Learning-Project/AutoML/ScikitLearn/parSim_v5/utils_backup.py", line 160, in comparison
+    raise TypeError
+TypeError
