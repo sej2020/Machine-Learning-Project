@@ -45,8 +45,12 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
             model = regr(eta0=10**-10, max_iter=10**3, **hyperparams).fit(X_tr, y_tr)
             pred = model.predict(X_te)
 
-        elif regr_name == "tensorflow-least_squares":
-            model = regr(X_tr, y_tr[...,np.newaxis], **hyperparams)
+        elif regr_name == "tensorflow-least_squares-fast":
+            model = regr(X_tr, y_tr[...,np.newaxis], fast=True, **hyperparams)
+            pred = X_te @ model
+            
+        elif regr_name == "tensorflow-least_squares-unfast":
+            model = regr(X_tr, y_tr[...,np.newaxis], fast=False, **hyperparams)
             pred = X_te @ model
 
         elif regr_name == "pytorch-least_squares":
@@ -54,7 +58,7 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
             pred = X_te @ np.array(model)
   
         elif regr_name == "mxnet_least_squares":
-            model = regr(X_tr, y_tr[...,np.newaxis], **hyperparams)[0]
+            model = regr(X_tr, y_tr[...,np.newaxis], rcond=None, **hyperparams)[0]
             pred = X_te @ model
                 
         
@@ -70,7 +74,8 @@ def main(data_path, k_folds):
     regrs = {
             "sklearn-least_squares": linear_model.LinearRegression,
             "sklearn-stochastic_gradient_descent": linear_model.SGDRegressor,
-            "tensorflow-least_squares": tf.linalg.lstsq,
+            "tensorflow-least_squares-fast": tf.linalg.lstsq,
+            "tensorflow-least_squares-unfast": tf.linalg.lstsq,
             "pytorch-least_squares":  torch.linalg.lstsq,
             "mxnet_least_squares": mx.np.linalg.lstsq
     }
@@ -80,7 +85,7 @@ def main(data_path, k_folds):
         result_accumulator[name] = run_linreg(cv_data, name, regr, {})
     
     results_df = pd.DataFrame(result_accumulator)
-    print(results_df)
+    results_df.to_csv("linreg_comparison_output.csv")
 
     
 if __name__ == "__main__":
