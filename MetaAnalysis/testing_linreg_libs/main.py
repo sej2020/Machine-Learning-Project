@@ -1,6 +1,7 @@
 from sklearn import *
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import tensorflow as tf
 import torch
 import mxnet as mx
@@ -87,6 +88,16 @@ def main(data_path, k_folds):
     results_df = pd.DataFrame(result_accumulator)
     results_df.to_csv("linreg_comparison_output.csv")
 
+    fig, ax = plt.subplots()
+    for color, column in zip(['red', 'green', 'blue', 'orange', 'purple', 'yellow'],results_df.columns):
+        y = results_df[column]
+        x = results_df.index.values
+        ax.scatter(x, y, c=color, alpha=0.7, label=column, edgecolors='none', marker='x')
+
+    ax.legend(loc=(1, 0))
+    ax.grid(True)
+    plt.tight_layout()
+    plt.show()
     
 if __name__ == "__main__":
     main(
