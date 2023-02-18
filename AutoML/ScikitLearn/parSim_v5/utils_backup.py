@@ -19,7 +19,6 @@ from logging import config
 config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
 
 logger_root = logging.getLogger('root')
-logger_exec = logging.getLogger('executive')
 
 def get_all_regs() -> list:
     """
@@ -58,8 +57,7 @@ def get_all_regs() -> list:
         print(f"List of approved regressors (length {len(all_reg_names)}): {all_reg_names}")
         return all_regs, all_reg_names
     
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 def load_data(datapath) -> pd.DataFrame:
@@ -69,8 +67,7 @@ def load_data(datapath) -> pd.DataFrame:
     try:
         csv_path = os.path.abspath(datapath)
         return pd.read_csv(csv_path)
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 def create_strat_cat(raw_data) -> pd.DataFrame:
@@ -88,8 +85,7 @@ def create_strat_cat(raw_data) -> pd.DataFrame:
         data_w_strat_cat = raw_data
         return data_w_strat_cat, strat_label
     
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 def data_split(datapath, test_set_size) -> pd.DataFrame:
@@ -116,8 +112,7 @@ def data_split(datapath, test_set_size) -> pd.DataFrame:
         test_labels = test[data_label].copy()
 
         return train_attrib, train_labels, test_attrib, test_labels
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 def gen_cv_samples(X_train_df, y_train_df, n_cv_folds):
@@ -144,8 +139,7 @@ def gen_cv_samples(X_train_df, y_train_df, n_cv_folds):
 
         return (X_tr, y_tr, X_te, y_te)
     
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
@@ -157,7 +151,6 @@ def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     """
     try: 
-        raise TypeError
         regs, reg_names = get_all_regs()
         regs, reg_names = regs[0:n_regressors], reg_names[0:n_regressors]
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
@@ -195,8 +188,7 @@ def comparison(datapath, n_regressors, metric_list, metric_help, n_vizualized_bp
             figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=600.0)
         pass
 
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
     
 
@@ -244,8 +236,7 @@ def boxplot(fin_org_results, metric_list, metric_help, n_vizualized_bp, index):
         plt.ylabel('Models')
         return boxfig
     
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
 
 
@@ -294,6 +285,5 @@ def test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_hel
         fig.tight_layout()
         return fig
     
-    except Exception:
-        logger_exec.exception(f"{123456}\n")
+    except Exception as e:
         pass
