@@ -514,16 +514,14 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
     del paramdict['<in_file_name_col>']
     return paramdict
 
-def update_results(result_data_obj_name, id):
+
+def update_db_w_results(result_data_obj_name, id):
     metadata_obj = MetaData(bind=engine)
     main_table = metadata_obj.tables['<main_table>']
-    stmt = main_table.update().values(return_results_field = result_data_obj_name).where(main_table.c.id == id)
+    stmt = main_table.update().values(return_results_col = result_data_obj_name).where(main_table.c.id == id)
     with engine.begin() as conn:
         conn.execute(stmt)
             
-
-
-    
 
 def email(recipient_list, message):
     try:

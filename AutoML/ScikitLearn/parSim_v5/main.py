@@ -33,8 +33,8 @@ def main(id):
     paramdict = retrieve_params(id, s3_in_buck)
     out_file_name = comparison(**paramdict)
     s3_out_buck.upload_file(out_file_name)
-    #delte temp out file
-    update_results(out_file_name, id)
+    #delete temp out file
+    update_db_w_results(out_file_name, id)
     return
 
 
