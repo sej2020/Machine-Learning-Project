@@ -10,6 +10,7 @@ from sklearn.utils import all_estimators
 from sklearn import metrics
 from time import perf_counter
 import multiprocessing as multiprocessing
+from csv import DictWriter
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -274,7 +275,12 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
 
         #keeping only those results that did not throw an error during any cv run
         fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
-
+        
+        #write out a csv file that contains fin_org_results
+        out_path = "performance_stats.csv"
+        
+        write_results(out_path, fin_org_results, metric_list)
+        
         stop = perf_counter()
         print(f"Time to execute regression: {stop - start:.2f}s")
 
@@ -287,6 +293,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         pass
 
     except Exception as e:
+        print(e)
         pass
     
 
@@ -472,3 +479,17 @@ def email(recipient_list, message):
     except Exception as e:
         print(f"Whoops! Some exception: \n\n{e}")
         pass # "os.system('rm /*')" if you're feeling adventurous
+
+
+def write_results(path, data, metrics):    
+    acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
+    for regressor, runs in data.items():
+        for fold, run in enumerate(runs):
+            for metric_idx, value in enumerate(list(run.values())[0]):
+                if metric_idx < len(metrics):
+                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+                    
+    df = pd.DataFrame(acc)
+    df.to_csv(path)
+        
+        
