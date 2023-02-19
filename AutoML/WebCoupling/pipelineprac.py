@@ -26,7 +26,7 @@ import time
 #__________________________________________________________________________________
 #----------------------------------------------------------------------------------
 engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
-metadata_obj = MetaData(bind=engine)
+metadata_obj = MetaData(bind=engine) #### brrrrrrrm brrrrrrrm
 
 requests = Table("requests", metadata_obj, 
                     Column("id", Integer, primary_key=True), 
