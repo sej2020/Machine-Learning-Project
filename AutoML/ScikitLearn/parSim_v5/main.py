@@ -41,7 +41,6 @@ def main(id):
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    # paramdict = retrieve_params(id)
     print(comparison(**paramdict))
     stop = perf_counter()
 

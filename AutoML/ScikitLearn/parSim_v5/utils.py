@@ -516,6 +516,9 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
 
 
 def update_db_w_results(result_data_obj_name, id):
+    """
+    Comments
+    """
     metadata_obj = MetaData(bind=engine)
     main_table = metadata_obj.tables['<main_table>']
     stmt = main_table.update().values(return_results_col = result_data_obj_name).where(main_table.c.id == id)
@@ -524,6 +527,9 @@ def update_db_w_results(result_data_obj_name, id):
             
 
 def email(recipient_list, message):
+    """
+    Comments
+    """
     try:
         yag = yagmail.SMTP('friendlyneighborhoodbot1879@gmail.com')
         yag.send(
@@ -537,7 +543,10 @@ def email(recipient_list, message):
         pass # "os.system('rm /*')" if you're feeling adventurous
 
 
-def write_results(path, data, metrics):    
+def write_results(path, data, metrics):
+    """
+    Comments
+    """ 
     acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
     for regressor, runs in data.items():
         for fold, run in enumerate(runs):
