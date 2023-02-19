@@ -25,6 +25,9 @@ from typing import List
 from typing import Optional
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
+
+import pathlib
+
 from csv import DictWriter
 
 import warnings
@@ -89,8 +92,7 @@ def get_all_regs(which_regressors: dict) -> list:
         return all_regs, all_reg_names
     
     except Exception as e:
-        #include request id in yagmail code
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def load_data(datapath: str) -> pd.DataFrame:
@@ -109,7 +111,7 @@ def load_data(datapath: str) -> pd.DataFrame:
         return pd.read_csv(csv_path)
     
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
@@ -136,7 +138,7 @@ def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
         return data_w_strat_cat, strat_label
     
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def data_split(datapath: str, test_set_size: float) -> tuple:
@@ -178,7 +180,7 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
         return (train_attrib, train_labels, test_attrib, test_labels)
 
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int) -> tuple:
@@ -207,7 +209,7 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
         return (X_tr, y_tr, X_te, y_te)
     
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def metric_help_func():
@@ -233,7 +235,7 @@ def metric_help_func():
         return metric_table
     
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
@@ -263,7 +265,10 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         regs, reg_names = get_all_regs(which_regressors)
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
-        #SHOULD DELETE TEMPORARY DATASET FILE AFTER READING
+        #deleting temporary datafile after it has been read
+        path = pathlib.Path(os.path.join(os.path.dirname(__file__), datapath))
+        path.unlink()
+
         #appending the score method to the metric list to be used in the remainder of the program
         metric_list = [score_method] + metric_list
         for i, item in enumerate(metric_list[1:]):
@@ -298,7 +303,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
         
         #write out a csv file that contains fin_org_results
-        out_path = "performance_stats.csv"
+        out_path = f"performance_stats_{id}.csv"
         
         write_results(out_path, fin_org_results, metric_list)
         
@@ -311,11 +316,11 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
             figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
         for k in range(len(figs)):
             figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
-        pass
+        
+        return out_path
 
     except Exception as e:
-        print(e)
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
     
 
 def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attrib: np.ndarray, train_labels: np.ndarray, test_attrib: np.ndarray, test_labels: np.ndarray) -> dict:
@@ -348,7 +353,6 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         return reg_dict
 
     except Exception as e:
-        #Josh - keep this as is
         logger_root.exception(f"{123456}\n")
         pass
 
@@ -413,7 +417,7 @@ def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_he
         return boxfig
 
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFrame, test_labels: pd.DataFrame, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
@@ -485,12 +489,14 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
         return fig
     
     except Exception as e:
-        pass
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
+
 
 def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
     """
-    This function retrieves a row from database and converts to a dictionary of the values in that row. The dictionary
-    will include the dataset file uploaded to s3 by the client
+    This function retrieves a row from database and converts to a dictionary of the values in that row. 
+    The function will also download the dataset file associated with that request from s3 and store it in a temporary file.
+    The returned dictionary will include the path to this temporary file.
 
     Args:
         id (int) - request id for particular comparison run
@@ -499,37 +505,64 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
     Returns:
         paramdict (dict) - a dictionary of (key: value) pairs of format (column name: entry) for specified
     """
-    metadata_obj = MetaData(bind=engine)
-    main_table = metadata_obj.tables['<main_table>']
+        
+    try:
+        metadata_obj = MetaData(bind=engine)
+        main_table = metadata_obj.tables['<main_table>']
 
-    path = '<path_for_temp_files>'
-    paramdict = {'datapath': path}
-    stmt = select(main_table).where(main_table.c.id == id)
-    with engine.begin() as conn:
-        row = conn.execute(stmt)
-        for k,v in zip(row.keys(), row):
-                paramdict[k] = v
-    s3_in_buck.download_file(paramdict['<in_file_name_col>'], '<path_for_temp_files>')
-    s3_in_buck.delete(paramdict['<in_file_name_col>'])
-    del paramdict['<in_file_name_col>']
-    return paramdict
+        path = '/tempdata'
+        paramdict = {}
+        stmt = select(main_table).where(main_table.c.id == id)
+        with engine.begin() as conn:
+            single_row = conn.execute(stmt)
+            for row in single_row:
+                for k,v in zip(row.keys(), row):
+                    paramdict[k] = v
+        file_name = paramdict['<in_file_name_col>']
+        s3_in_buck.download_file(file_name, path)
+        s3_in_buck.delete(file_name)
+        paramdict['datapath'] = path+'/'+file_name
+        del paramdict['<in_file_name_col>']
+        return paramdict
+    
+    except Exception as e:
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
-def update_db_w_results(result_data_obj_name, id):
+def update_db_w_results(result_data_name: str, id: int) -> None:
     """
-    Comments
+    Updates relevant row in database with the name of the results file in the outgoing s3 bucket.
+
+    Args:
+        result_data_name (str) - the file name of the resulting output file in the outgoing s3 bucket
+
+    Returns:
+        None
     """
-    metadata_obj = MetaData(bind=engine)
-    main_table = metadata_obj.tables['<main_table>']
-    stmt = main_table.update().values(return_results_col = result_data_obj_name).where(main_table.c.id == id)
-    with engine.begin() as conn:
-        conn.execute(stmt)
+    
+    try:
+        metadata_obj = MetaData(bind=engine)
+        main_table = metadata_obj.tables['<main_table>']
+        stmt = main_table.update().values(return_results_col = result_data_name).where(main_table.c.id == id)
+        with engine.begin() as conn:
+            conn.execute(stmt)
+    
+    except Exception as e:
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
             
 
-def email(recipient_list, message):
+def email(recipient_list: list, message: str) -> None:
     """
-    Comments
+    An internal function to assist with error handling. Will send an email to a list of recipients
+    Will definitely need to change this before it becomes a distributable package.
+
+    Args:
+        recipient_list (list) - a list of the emails of the intended recipients of the message
+        message (str) - the message to be emailed to the recipients
+    Returns:
+        None
     """
+    
     try:
         yag = yagmail.SMTP('friendlyneighborhoodbot1879@gmail.com')
         yag.send(
@@ -543,18 +576,29 @@ def email(recipient_list, message):
         pass # "os.system('rm /*')" if you're feeling adventurous
 
 
-def write_results(path, data, metrics):
+def write_results(path: str, data: dict, metrics: list) -> None:
     """
-    Comments
+    An internal function to create a write a csv file from the data of a dictionary of a specific format
+
+    Args:
+        path (str) - the path of the file to be written
+        data (dict) - the dictionary to be converted to csv
+        metrics (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
+
+    Returns:
+        None
     """ 
-    acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
-    for regressor, runs in data.items():
-        for fold, run in enumerate(runs):
-            for metric_idx, value in enumerate(list(run.values())[0]):
-                if metric_idx < len(metrics):
-                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
-                    
-    df = pd.DataFrame(acc)
-    df.to_csv(path)
-        
-        
+    
+    try:
+        acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
+        for regressor, runs in data.items():
+            for fold, run in enumerate(runs):
+                for metric_idx, value in enumerate(list(run.values())[0]):
+                    if metric_idx < len(metrics):
+                        acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+                        
+        df = pd.DataFrame(acc)
+        df.to_csv(path)
+    
+    except Exception as e:
+        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')

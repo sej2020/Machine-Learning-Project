@@ -28,12 +28,13 @@ paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
 
 
 def main(id):
-    s3_in_buck = S3Service('<bucket_name>')
-    s3_out_buck = S3Service('<out_bucket_name>')
+    s3_in_buck = S3Service('incoming_data')
+    s3_out_buck = S3Service('outgoing_data')
     paramdict = retrieve_params(id, s3_in_buck)
     out_file_name = comparison(**paramdict)
     s3_out_buck.upload_file(out_file_name)
-    #delete temp out file
+    path = pathlib.Path(os.path.join(os.path.dirname(__file__), out_file_name))
+    path.unlink()
     update_db_w_results(out_file_name, id)
     return
 
