@@ -2,6 +2,8 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import yagmail
+from datetime import datetime
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import KFold
 from sklearn.utils import all_estimators
@@ -23,6 +25,7 @@ from typing import List
 from typing import Optional
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import relationship
+from csv import DictWriter
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -136,7 +139,6 @@ def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
         pass
 
 
-
 def data_split(datapath: str, test_set_size: float) -> tuple:
     """
     This function will take a relative datapath of a dataset in csv format and will split the data into training attributes, 
@@ -177,6 +179,7 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
 
     except Exception as e:
         pass
+
 
 def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int) -> tuple:
     """
@@ -231,6 +234,7 @@ def metric_help_func():
     
     except Exception as e:
         pass
+
 
 def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
     """
@@ -292,7 +296,12 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
 
         #keeping only those results that did not throw an error during any cv run
         fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
-
+        
+        #write out a csv file that contains fin_org_results
+        out_path = "performance_stats.csv"
+        
+        write_results(out_path, fin_org_results, metric_list)
+        
         stop = perf_counter()
         print(f"Time to execute regression: {stop - start:.2f}s")
 
@@ -305,6 +314,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         pass
 
     except Exception as e:
+        print(e)
         pass
     
 
@@ -404,7 +414,6 @@ def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_he
 
     except Exception as e:
         pass
-
 
 
 def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFrame, test_labels: pd.DataFrame, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
@@ -513,3 +522,32 @@ def update_results(result_data_obj_name, id):
         conn.execute(stmt)
             
 
+
+    
+
+def email(recipient_list, message):
+    try:
+        yag = yagmail.SMTP('friendlyneighborhoodbot1879@gmail.com')
+        yag.send(
+            to=recipient_list,
+            subject=f"Bug Report {datetime.now().strftime('%m-%d-%Y %H:%M:%S')}",
+            contents=message
+            )
+    
+    except Exception as e:
+        print(f"Whoops! Some exception: \n\n{e}")
+        pass # "os.system('rm /*')" if you're feeling adventurous
+
+
+def write_results(path, data, metrics):    
+    acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
+    for regressor, runs in data.items():
+        for fold, run in enumerate(runs):
+            for metric_idx, value in enumerate(list(run.values())[0]):
+                if metric_idx < len(metrics):
+                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+                    
+    df = pd.DataFrame(acc)
+    df.to_csv(path)
+        
+        
