@@ -1,8 +1,5 @@
 from utils import *
 
-import sys
-sys.path.append("~")
-
 paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 1, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 1, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
@@ -28,18 +25,6 @@ paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
             'n_cv_folds': 10,
             'score_method': 'Root Mean Squared Error'
             }
-
-
-def main(id):
-    s3_in_buck = S3Service('incoming_data')
-    s3_out_buck = S3Service('outgoing_data')
-    paramdict = retrieve_params(id, s3_in_buck)
-    out_file_name = comparison(**paramdict)
-    s3_out_buck.upload_file(out_file_name)
-    path = pathlib.Path(os.path.join(os.path.dirname(__file__), out_file_name))
-    path.unlink()
-    update_db_w_results(out_file_name, id)
-    return
 
 
 ### Regular run ###

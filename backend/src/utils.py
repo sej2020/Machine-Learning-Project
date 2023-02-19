@@ -8,7 +8,6 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import KFold
 from sklearn.utils import all_estimators
 from sklearn import metrics
-from time import perf_counter
 import multiprocessing as multiprocessing
 from s3Service import S3Service
 
@@ -26,7 +25,7 @@ import logging
 from logging import config
 
 #establishing connection for database engine
-engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
+engine = create_engine("<db_object>", echo=True)
 
 #establishing error logger
 config.fileConfig('logconfig.conf')
@@ -70,13 +69,9 @@ def get_all_regs(which_regressors: dict) -> list:
                     all_optional = False
             is_cv_variant = name[-2:] == "CV"
             if all_optional and (name not in forbidden_estimators) and not is_cv_variant and which_regressors[name] == 1:
-                print('Appending', name)
                 reg = RegressorClass()
                 all_regs.append(reg)
                 all_reg_names.append(name)
-            else:
-                print(f"Skipping {name}")
-        print(f"List of approved regressors (length {len(all_reg_names)}): {all_reg_names}")
         return all_regs, all_reg_names
     
     except Exception as e:
@@ -226,7 +221,7 @@ def metric_help_func():
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
-def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp: int, n_vizualized_tb: int, test_set_size: float, n_cv_folds: int, score_method: str) -> None:
+def comparison(id: int, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp: int, n_vizualized_tb: int, test_set_size: float, n_cv_folds: int, score_method: str, datapath: str) -> str:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
     The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
@@ -235,6 +230,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     on the test instances will be recorded in a table and saved to the user's CPU as a png file.
     
     Args:
+        id (int) - request id for particular comparison run
         datapath (str) - a file path (eventually from s3 bucket) of the csv data
         which_regressors (dict) - dictionary of key:value pairs of form <'RegressorName'> : <Bool(0)|Bool(1)>
         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
@@ -244,9 +240,10 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         test_set_size (float) - a number between 0 and 1 that indicates the proportion of data to be allocated to the test set (Default: 0.2)
         n_cv_folds (int) - the number of folds for k-fold cross validation training (Default: 10)
         score_method (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
-    
+        datapath (str) - a file path to temporary dataset file retrieved from input s3 bucket
+
     Returns:
-        Eventually will put csv results into s3 bucket. may or may not provide visualizations
+        output_path (str) - the file path and basename of a temporary file containing a log of regressor performance on cross-validation runs
     """
 
     try:
@@ -254,7 +251,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
         #deleting temporary datafile after it has been read
-        path = pathlib.Path(os.path.join(os.path.dirname(__file__), datapath))
+        path = pathlib.Path(datapath)
         path.unlink()
 
         #appending the score method to the metric list to be used in the remainder of the program
@@ -263,12 +260,10 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
             if item == metric_list[0]:
                 del metric_list[i+1]
 
-
         metric_help = metric_help_func()
 
         #creating cv samples and running each regressor over these samples
         cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels, n_cv_folds)
-        start = perf_counter()
         # fundemental idea of args_lst is to create the cross product of all k folds with all r regressors, making k*r tasks (sets of arguments) to be passed to mp pool
         # to do this, below list comp will use two diff indices - [i // n_cv_folds] to group all regressors of same type and [i % n_cv_folds] to split those regressors over each of the k (normally 10) folds
         # could be done just as well with a nested for loop iterating over both regressors and folds
@@ -290,18 +285,15 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         #keeping only those results that did not throw an error during any cv run
         fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
         
-        output_path = f"perf_stats_{id}.csv"
+        output_path = f"/src/tmp/output/perf_stats_{id}.csv"
         write_results(output_path, fin_org_results, metric_list)
         
-        stop = perf_counter()
-        print(f"Time to execute regression: {stop - start:.2f}s")
-
-        #generating figures and saving to the user's CWD
-        figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
-        for index in range(len(metric_list)):
-            figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
-        for k in range(len(figs)):
-            figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
+        # #generating figures and saving to the user's CWD ******* IF WE ARE PROVIDING VISUALIZATIONS ON BACKEND
+        # figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
+        # for index in range(len(metric_list)):
+        #     figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
+        # for k in range(len(figs)):
+        #     figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
         
         return output_path
 
@@ -327,7 +319,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
     Returns:
         reg_dict (dict) - dictionary of results from cross-validation run on one regressor
     """
-    print(f"Checking {reg}")
+
     try:
         model_trained = reg.fit(train_attrib, train_labels)
         y_pred = model_trained.predict(test_attrib)
@@ -462,7 +454,6 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
         df = pd.DataFrame(data=output, index=rows, columns=columns)
 
         df_sorted = df.sort_values(by=columns[0], axis=0, ascending=not(metric_help[columns[0]][0]))
-        print(df_sorted)
 
         df_sorted = df_sorted.iloc[:n_vizualized_tb]
 
@@ -496,7 +487,7 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
         metadata_obj = MetaData(bind=engine)
         main_table = metadata_obj.tables['<main_table>']
 
-        path = '/tempdata'
+        path = '/src/tmp/input'
         paramdict = {}
         stmt = select(main_table).where(main_table.c.id == id)
         with engine.begin() as conn:
@@ -506,7 +497,7 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
                     paramdict[k] = v
         file_name = paramdict['<in_file_name_col>']
         s3_in_buck.download_file(file_name, path)
-        s3_in_buck.delete(file_name)
+        s3_in_buck.delete_file(file_name)
         paramdict['datapath'] = path+'/'+file_name
         del paramdict['<in_file_name_col>']
         return paramdict
@@ -515,12 +506,12 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
-def update_db_w_results(result_data_name: str, id: int) -> None:
+def update_db_w_results(result_file_obj: str, id: int) -> None:
     """
     Updates relevant row in database with the name of the results file in the outgoing s3 bucket.
 
     Args:
-        result_data_name (str) - the file name of the resulting output file in the outgoing s3 bucket
+        result_file_obj (str) - the file name of the resulting output file in the outgoing s3 bucket
 
     Returns:
         None
@@ -529,7 +520,7 @@ def update_db_w_results(result_data_name: str, id: int) -> None:
     try:
         metadata_obj = MetaData(bind=engine)
         main_table = metadata_obj.tables['<main_table>']
-        stmt = main_table.update().values(return_results_col = result_data_name).where(main_table.c.id == id)
+        stmt = main_table.update().values(return_results_col = result_file_obj).where(main_table.c.id == id)
         with engine.begin() as conn:
             conn.execute(stmt)
     
@@ -559,7 +550,7 @@ def email(recipient_list: list, message: str) -> None:
     
     except Exception as e:
         print(f"Whoops! Some exception: \n\n{e}")
-        pass # "os.system('rm /*')" if you're feeling adventurous
+        pass
 
 
 def write_results(path: str, data: dict, metrics: list) -> None:

@@ -10,25 +10,6 @@ from sklearn.utils import all_estimators
 from sklearn import metrics
 from time import perf_counter
 import multiprocessing as multiprocessing
-from s3Service import s3Service
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-from sqlalchemy import MetaData
-from sqlalchemy import Table, Column, Integer, String
-from sqlalchemy import ForeignKey
-from sqlalchemy import insert
-from sqlalchemy import select
-from sqlalchemy import func
-from typing import List
-from typing import Optional
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import relationship
-
-import pathlib
-
-from csv import DictWriter
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -37,8 +18,6 @@ from inspect import signature, _empty
 import logging
 from logging import config
 
-#establishing connection for database engine
-engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
 
 #establishing error logger
 config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
@@ -258,23 +237,18 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         score_method (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
     
     Returns:
-        Eventually will put csv results into s3 bucket. may or may not provide visualizations
+        Several PNG files displaying results of cross-validation and testing
     """
 
     try:
         regs, reg_names = get_all_regs(which_regressors)
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
-        #deleting temporary datafile after it has been read
-        path = pathlib.Path(os.path.join(os.path.dirname(__file__), datapath))
-        path.unlink()
-
         #appending the score method to the metric list to be used in the remainder of the program
         metric_list = [score_method] + metric_list
         for i, item in enumerate(metric_list[1:]):
             if item == metric_list[0]:
                 del metric_list[i+1]
-
 
         metric_help = metric_help_func()
 
@@ -305,8 +279,6 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         #write out a csv file that contains fin_org_results
         out_path = f"performance_stats_{id}.csv"
         
-        write_results(out_path, fin_org_results, metric_list)
-        
         stop = perf_counter()
         print(f"Time to execute regression: {stop - start:.2f}s")
 
@@ -317,7 +289,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         for k in range(len(figs)):
             figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
         
-        return out_path
+        pass
 
     except Exception as e:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
@@ -490,65 +462,6 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
     
     except Exception as e:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
-
-
-def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
-    """
-    This function retrieves a row from database and converts to a dictionary of the values in that row. 
-    The function will also download the dataset file associated with that request from s3 and store it in a temporary file.
-    The returned dictionary will include the path to this temporary file.
-
-    Args:
-        id (int) - request id for particular comparison run
-        s3 (S3Service) - s3 object with relevant bucket
-        
-    Returns:
-        paramdict (dict) - a dictionary of (key: value) pairs of format (column name: entry) for specified
-    """
-        
-    try:
-        metadata_obj = MetaData(bind=engine)
-        main_table = metadata_obj.tables['<main_table>']
-
-        path = '/tempdata'
-        paramdict = {}
-        stmt = select(main_table).where(main_table.c.id == id)
-        with engine.begin() as conn:
-            single_row = conn.execute(stmt)
-            for row in single_row:
-                for k,v in zip(row.keys(), row):
-                    paramdict[k] = v
-        file_name = paramdict['<in_file_name_col>']
-        s3_in_buck.download_file(file_name, path)
-        s3_in_buck.delete(file_name)
-        paramdict['datapath'] = path+'/'+file_name
-        del paramdict['<in_file_name_col>']
-        return paramdict
-    
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
-
-
-def update_db_w_results(result_data_name: str, id: int) -> None:
-    """
-    Updates relevant row in database with the name of the results file in the outgoing s3 bucket.
-
-    Args:
-        result_data_name (str) - the file name of the resulting output file in the outgoing s3 bucket
-
-    Returns:
-        None
-    """
-    
-    try:
-        metadata_obj = MetaData(bind=engine)
-        main_table = metadata_obj.tables['<main_table>']
-        stmt = main_table.update().values(return_results_col = result_data_name).where(main_table.c.id == id)
-        with engine.begin() as conn:
-            conn.execute(stmt)
-    
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
             
 
 def email(recipient_list: list, message: str) -> None:
@@ -574,31 +487,3 @@ def email(recipient_list: list, message: str) -> None:
     except Exception as e:
         print(f"Whoops! Some exception: \n\n{e}")
         pass # "os.system('rm /*')" if you're feeling adventurous
-
-
-def write_results(path: str, data: dict, metrics: list) -> None:
-    """
-    An internal function to create a write a csv file from the data of a dictionary of a specific format
-
-    Args:
-        path (str) - the path of the file to be written
-        data (dict) - the dictionary to be converted to csv
-        metrics (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-
-    Returns:
-        None
-    """ 
-    
-    try:
-        acc = {f"{regr}-{metric}" : [] for regr in data for metric in metrics}
-        for regressor, runs in data.items():
-            for fold, run in enumerate(runs):
-                for metric_idx, value in enumerate(list(run.values())[0]):
-                    if metric_idx < len(metrics):
-                        acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
-                        
-        df = pd.DataFrame(acc)
-        df.to_csv(path)
-    
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
