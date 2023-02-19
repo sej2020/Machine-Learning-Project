@@ -4,31 +4,30 @@ Task List
 
 Connecting to Website:
 
-    Learn Madhavan's Tech Stack
-    Set up database with Docker
+    X - Learn Madhavan's Tech Stack
     
-    - Freeze Requirements to file and make Dockerfile
-    - Stable SQL to retrieve tasks from database and update database with results
-    - Add event listeners and event handlers... wait for Madhavan
+    X - Freeze Requirements to file
+    X - Stable SQL to retrieve tasks from database and update database with results
+    X - Add event listeners and event handlers... wait for Madhavan
 
 AutoML:
 
     Run large-scale experiment
         X - Port code to Quartz
-        - Save timing details and experiment metadata
-        - Create visualization & identify optimal n_workers
-        - Create profile report on final program
+        X - Save timing details and experiment metadata
+        X - Create visualization & identify optimal n_workers
+        X - Create profile report on final program
 
     X - Make boxplot() functional
 
-    Parametrize EVERYTHING
+    X- Parametrize EVERYTHING
         X - Train/Test size in data_split
         X - CV Folds
         X - Regressor names
         X - matplotlib boxplot themes
         X - dpi
         X - n_vizualized for test_best
-        - kill time
+        ? - kill time
 
     X - Spruce up graphics w/ matplotlib styling
 
@@ -40,12 +39,12 @@ AutoML:
 
     X - Roll up for loops if it is nicer
 
-    Add comments everywhere
+    X - Add comments everywhere
 
     Make this a distributable package
-        - Remove unnecessary code
-        - Create requirements.txt
-        - Test it on other systems
+        X - Remove unnecessary code
+        X - Create requirements.txt
+        X - Test it on other systems
         - Package / publish it?
 
     Flesh out exception object for error emails, give tracebacks
