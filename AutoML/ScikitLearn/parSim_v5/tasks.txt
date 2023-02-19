@@ -48,6 +48,10 @@ AutoML:
         - Test it on other systems
         - Package / publish it?
 
+    Flesh out exception object for error emails, give tracebacks
+
+    Use modern sqlalchemy (or don't, who knows)
+
 
 Paper:
 
