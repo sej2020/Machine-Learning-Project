@@ -26,9 +26,22 @@ paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
             'score_method': 'Root Mean Squared Error'
             }
 
+
+def main(id):
+    s3_in_buck = S3Service('<bucket_name>')
+    s3_out_buck = S3Service('<out_bucket_name>')
+    paramdict = retrieve_params(id, s3_in_buck)
+    out_file_name = comparison(**paramdict)
+    s3_out_buck.upload_file(out_file_name)
+    #delte temp out file
+    update_results(out_file_name, id)
+    return
+
+
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
+    # paramdict = retrieve_params(id)
     print(comparison(**paramdict))
     stop = perf_counter()
 

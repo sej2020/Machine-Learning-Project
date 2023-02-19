@@ -8,6 +8,21 @@ from sklearn.utils import all_estimators
 from sklearn import metrics
 from time import perf_counter
 import multiprocessing as multiprocessing
+from s3Service import s3Service
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from sqlalchemy import MetaData
+from sqlalchemy import Table, Column, Integer, String
+from sqlalchemy import ForeignKey
+from sqlalchemy import insert
+from sqlalchemy import select
+from sqlalchemy import func
+from typing import List
+from typing import Optional
+from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import relationship
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -16,8 +31,11 @@ from inspect import signature, _empty
 import logging
 from logging import config
 
-config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
+#establishing connection for database engine
+engine = create_engine("sqlite+pysqlite:///:memory:", echo=True)
 
+#establishing error logger
+config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
 logger_root = logging.getLogger('root')
 
 
@@ -192,6 +210,7 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
 def metric_help_func():
     """
     Internal table to assist with any functions involving metrics
+    
     Args: 
         None 
     Returns: 
@@ -240,11 +259,13 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         regs, reg_names = get_all_regs(which_regressors)
         train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
 
+        #SHOULD DELETE TEMPORARY DATASET FILE AFTER READING
         #appending the score method to the metric list to be used in the remainder of the program
         metric_list = [score_method] + metric_list
         for i, item in enumerate(metric_list[1:]):
             if item == metric_list[0]:
                 del metric_list[i+1]
+
 
         metric_help = metric_help_func()
 
@@ -456,3 +477,39 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
     
     except Exception as e:
         pass
+
+def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
+    """
+    This function retrieves a row from database and converts to a dictionary of the values in that row. The dictionary
+    will include the dataset file uploaded to s3 by the client
+
+    Args:
+        id (int) - request id for particular comparison run
+        s3 (S3Service) - s3 object with relevant bucket
+        
+    Returns:
+        paramdict (dict) - a dictionary of (key: value) pairs of format (column name: entry) for specified
+    """
+    metadata_obj = MetaData(bind=engine)
+    main_table = metadata_obj.tables['<main_table>']
+
+    path = '<path_for_temp_files>'
+    paramdict = {'datapath': path}
+    stmt = select(main_table).where(main_table.c.id == id)
+    with engine.begin() as conn:
+        row = conn.execute(stmt)
+        for k,v in zip(row.keys(), row):
+                paramdict[k] = v
+    s3_in_buck.download_file(paramdict['<in_file_name_col>'], '<path_for_temp_files>')
+    s3_in_buck.delete(paramdict['<in_file_name_col>'])
+    del paramdict['<in_file_name_col>']
+    return paramdict
+
+def update_results(result_data_obj_name, id):
+    metadata_obj = MetaData(bind=engine)
+    main_table = metadata_obj.tables['<main_table>']
+    stmt = main_table.update().values(return_results_field = result_data_obj_name).where(main_table.c.id == id)
+    with engine.begin() as conn:
+        conn.execute(stmt)
+            
+
