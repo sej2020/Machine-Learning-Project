@@ -14,6 +14,7 @@ from s3Service import S3Service
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import select
+from sqlalchemy import insert
 
 import pathlib
 
@@ -519,8 +520,8 @@ def update_db_w_results(result_file_obj: str, id: int) -> None:
     
     try:
         metadata_obj = MetaData(bind=engine)
-        main_table = metadata_obj.tables['<main_table>']
-        stmt = main_table.update().values(return_results_col = result_file_obj).where(main_table.c.id == id)
+        results_table = metadata_obj.tables['<results_table>']
+        stmt = insert(results_table).values(id=id, output_file=result_file_obj)
         with engine.begin() as conn:
             conn.execute(stmt)
     
