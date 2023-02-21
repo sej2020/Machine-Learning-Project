@@ -509,10 +509,11 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
 
 def update_db_w_results(result_file_obj: str, id: int) -> None:
     """
-    Updates relevant row in database with the name of the results file in the outgoing s3 bucket.
+    Inserts row into results table in database with the name of the results file in the outgoing s3 bucket.
 
     Args:
         result_file_obj (str) - the file name of the resulting output file in the outgoing s3 bucket
+        id (int) - request id for particular comparison run
 
     Returns:
         None
