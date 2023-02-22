@@ -14,6 +14,7 @@ from s3Service import S3Service
 from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import select
+from sqlalchemy import insert
 
 import pathlib
 
@@ -224,23 +225,30 @@ def metric_help_func():
 def comparison(id: int, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp: int, n_vizualized_tb: int, test_set_size: float, n_cv_folds: int, score_method: str, datapath: str) -> str:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
-    The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
-    specified metrics. These charts will be saved to the user's CWD as a png file. The best performing model 
-    trained on each regressor type will be tested on the set of test instances. The performance of those regs 
-    on the test instances will be recorded in a table and saved to the user's CPU as a png file.
+
+    If visualization is on frontend:
+    The cross-validation scores will be recorded as a temporary csv file, later to be uploaded to the output s3 bucket.
+
+    If visualization is on backend:
+    The cross-validation scores will be recorded as a temporary csv file and vizualized in a box plot chart, 
+    displaying regressor performance across specified metrics. These charts will be saved in as a temporary png file. 
+    The best performing model trained on each regressor type will be tested on the set of test instances. 
+    The performance of those regs on the test instances will be recorded in a table and saved as a temporary png file. 
     
     Args:
         id (int) - request id for particular comparison run
         datapath (str) - a file path (eventually from s3 bucket) of the csv data
         which_regressors (dict) - dictionary of key:value pairs of form <'RegressorName'> : <Bool(0)|Bool(1)>
         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-        styledict (dict) - container for user to specify style of boxplots
-        n_vizualized_bp (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
-        n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
+        styledict* (dict) - container for user to specify style of boxplots
+        n_vizualized_bp* (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
+        n_vizualized_tb* (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
         test_set_size (float) - a number between 0 and 1 that indicates the proportion of data to be allocated to the test set (Default: 0.2)
         n_cv_folds (int) - the number of folds for k-fold cross validation training (Default: 10)
-        score_method (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
+        score_method* (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
         datapath (str) - a file path to temporary dataset file retrieved from input s3 bucket
+        
+        * - indicates that this parameter is relevant only if visualizations are performed on backend
 
     Returns:
         output_path (str) - the file path and basename of a temporary file containing a log of regressor performance on cross-validation runs
@@ -508,10 +516,11 @@ def retrieve_params(id: int, s3_in_buck: S3Service) -> dict:
 
 def update_db_w_results(result_file_obj: str, id: int) -> None:
     """
-    Updates relevant row in database with the name of the results file in the outgoing s3 bucket.
+    Inserts row into results table in database with the name of the results file in the outgoing s3 bucket.
 
     Args:
         result_file_obj (str) - the file name of the resulting output file in the outgoing s3 bucket
+        id (int) - request id for particular comparison run
 
     Returns:
         None
@@ -519,8 +528,8 @@ def update_db_w_results(result_file_obj: str, id: int) -> None:
     
     try:
         metadata_obj = MetaData(bind=engine)
-        main_table = metadata_obj.tables['<main_table>']
-        stmt = main_table.update().values(return_results_col = result_file_obj).where(main_table.c.id == id)
+        results_table = metadata_obj.tables['<results_table>']
+        stmt = insert(results_table).values(id=id, output_file=result_file_obj)
         with engine.begin() as conn:
             conn.execute(stmt)
     
