@@ -486,4 +486,4 @@ def email(recipient_list: list, message: str) -> None:
     
     except Exception as e:
         print(f"Whoops! Some exception: \n\n{e}")
-        pass # "os.system('rm /*')" if you're feeling adventurous
+        pass

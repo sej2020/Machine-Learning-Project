@@ -50,7 +50,7 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
             model = regr(X_tr, y_tr[...,np.newaxis], fast=True, **hyperparams)
             pred = X_te @ model
             
-        elif regr_name == "tensorflow-least_squares-unfast":
+        elif regr_name == "tensorflow-least_squares-slow":
             model = regr(X_tr, y_tr[...,np.newaxis], fast=False, **hyperparams)
             pred = X_te @ model
 
@@ -76,7 +76,7 @@ def main(data_path, k_folds, data_name):
             "sklearn-least_squares": linear_model.LinearRegression,
             "sklearn-stochastic_gradient_descent": linear_model.SGDRegressor,
             "tensorflow-least_squares-fast": tf.linalg.lstsq,
-            "tensorflow-least_squares-unfast": tf.linalg.lstsq,
+            "tensorflow-least_squares-slow": tf.linalg.lstsq,
             "pytorch-least_squares":  torch.linalg.lstsq,
             "mxnet_least_squares": mx.np.linalg.lstsq
     }
