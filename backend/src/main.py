@@ -1,3 +1,4 @@
+from src.automl_rmq_consumer import Consumer
 from utils import *
 
 def main(id):
@@ -11,6 +12,7 @@ def main(id):
     path.unlink()
     return
 
-
-if __name__=="__main__":
-  main(id)
+if __name__ == "__main__":
+    # main(id)
+    consumer = Consumer(settings.RMQ_AUTOML_REQ_IN)
+    consumer.consume()
