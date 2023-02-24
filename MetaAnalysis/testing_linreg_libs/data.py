@@ -13,24 +13,31 @@ def make_data_circle(resolution,radius):
     return pairs
 
 def make_line(data):
-    print(np.size(data))
     X = data[:,0]
     Y = data[:,1]
-    k,d = np.polyfit(X,Y,1)
-    # y_hat = k*X + d
-    # plt.gca().set_aspect('equal')
-    # plt.title(f"{d:e} {k:e}")
-    # plt.plot(X,Y,'.')
-    # plt.plot(X,y_hat)
-    # plt.show()
+    k,d = np.polynomial.polynomial.Polynomial.fit(X,Y,1)
+    y_hat = k*X + d
+    plt.gca().set_aspect('equal')
+    plt.title(f"{d:e} {k:e}")
+    plt.plot(X,Y,'.')
+    plt.plot(X,y_hat)
+    plt.show()
     return k,d
 
 #test extreme values
-# x,y = sys.float_info.max,sys.float_info.min
-# matrix1 = np.array([[x,y],[-x,-y]])
-# matrix2 = np.array([[x,x],[-x,-x]])
+x,y = sys.float_info.max,sys.float_info.min
+matrix1 = np.array([[x,y],[-x,-y]])
+matrix2 = np.array([[x,x],[-x,-x]])
 # print(make_line(matrix1))
 # print(make_line(matrix2))
 
 #test with shapes
-print(make_line(np.array(make_data_circle(resolution = 0.00000001,radius = 1))))
+print(np.array(make_data_circle(resolution = 0.2,radius = 1)))
+points = np.array(make_data_circle(resolution = 0.2,radius = 1))
+
+# def sse(array):
+#   array[]
+    
+
+
+    
