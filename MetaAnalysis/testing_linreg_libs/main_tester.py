@@ -94,6 +94,8 @@ def main(data_path, k_folds, data_name):
         x = results_df.index.values
         ax.scatter(x, y, c=color, alpha=0.7, label=column, edgecolors='none', marker='x')
 
+    ax.set_ylabel('RMSE')
+    ax.set_xlabel('CV Run')
     ax.legend(loc=(1, 0))
     ax.set_title(f'{data_name} Data')
     ax.grid(True)
@@ -101,35 +103,35 @@ def main(data_path, k_folds, data_name):
     fig.savefig(f'MetaAnalysis/testing_linreg_libs/figures/lin_test_{data_name}.png', bbox_inches='tight')
 
 
-def run_prediction(data, regr_name, regr, hyperparams):
-    for i, (X_tr, y_tr, X_te, y_te) in enumerate(data):
-        pred = None
+# def run_prediction(data, regr_name, regr, hyperparams):
+#     for i, (X_tr, y_tr, X_te, y_te) in enumerate(data):
+#         pred = None
 
-        if regr_name == "sklearn-least_squares":
-            model = regr().fit(X_tr, y_tr, **hyperparams)
-            pred = model.predict(X_te)
+#         if regr_name == "sklearn-least_squares":
+#             model = regr().fit(X_tr, y_tr, **hyperparams)
+#             pred = model.predict(X_te)
             
-        if regr_name == "sklearn-stochastic_gradient_descent":
-            model = regr(eta0=10**-10, max_iter=10**3, **hyperparams).fit(X_tr, y_tr)
-            pred = model.predict(X_te)
+#         if regr_name == "sklearn-stochastic_gradient_descent":
+#             model = regr(eta0=10**-10, max_iter=10**3, **hyperparams).fit(X_tr, y_tr)
+#             pred = model.predict(X_te)
 
-        elif regr_name == "tensorflow-least_squares-fast":
-            model = regr(X_tr, y_tr[...,np.newaxis], fast=True, **hyperparams)
-            pred = X_te @ model
+#         elif regr_name == "tensorflow-least_squares-fast":
+#             model = regr(X_tr, y_tr[...,np.newaxis], fast=True, **hyperparams)
+#             pred = X_te @ model
             
-        elif regr_name == "tensorflow-least_squares-slow":
-            model = regr(X_tr, y_tr[...,np.newaxis], fast=False, **hyperparams)
-            pred = X_te @ model
+#         elif regr_name == "tensorflow-least_squares-slow":
+#             model = regr(X_tr, y_tr[...,np.newaxis], fast=False, **hyperparams)
+#             pred = X_te @ model
 
-        elif regr_name == "pytorch-least_squares":
-            model = regr(torch.Tensor(X_tr), torch.Tensor(y_tr[...,np.newaxis]), **hyperparams).solution
-            pred = X_te @ np.array(model)
+#         elif regr_name == "pytorch-least_squares":
+#             model = regr(torch.Tensor(X_tr), torch.Tensor(y_tr[...,np.newaxis]), **hyperparams).solution
+#             pred = X_te @ np.array(model)
   
-        elif regr_name == "mxnet_least_squares":
-            model = regr(X_tr, y_tr[...,np.newaxis], rcond=None, **hyperparams)[0]
-            pred = X_te @ model
+#         elif regr_name == "mxnet_least_squares":
+#             model = regr(X_tr, y_tr[...,np.newaxis], rcond=None, **hyperparams)[0]
+#             pred = X_te @ model
             
-    return pred
+#     return pred
 
 
 
