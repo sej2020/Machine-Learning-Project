@@ -17,7 +17,7 @@ def make_data_circle(resolution,radius):
 def make_line(data):
     X = data[:,0]
     Y = data[:,1]
-    k,d = np.polynomial.polynomial.Polynomial.fit(X,Y,1)
+    k,d = np.polyfit(X,Y,1)
     y_hat = k*X + d
     plt.gca().set_aspect('equal')
     plt.title(f"{d:e} {k:e}")
@@ -35,7 +35,7 @@ matrix2 = np.array([[x,x],[-x,-x]])
 
 #test with shapes
 # print(np.array(make_data_circle(resolution = 0.2,radius = 1)))
-points = np.array(make_data_circle(resolution = 0.00001,radius = 1))
+points = np.array(make_data_circle(resolution = 0.001,radius = 1))
  
 # convert array into dataframe
 DF = pd.DataFrame(points)
