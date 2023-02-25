@@ -38,27 +38,27 @@ def run_linreg(cv_data, regr_name, regr, hyperparams):
     for i, (X_tr, y_tr, X_te, y_te) in enumerate(cv_data):
         pred = None
 
-        if regr_name == "sklearn-least_squares":
+        if regr_name == "sklearn-lst_sq":
             model = regr().fit(X_tr, y_tr, **hyperparams)
             pred = model.predict(X_te)
             
-        if regr_name == "sklearn-stochastic_gradient_descent":
+        if regr_name == "sklearn-sgd":
             model = regr(eta0=10**-10, max_iter=10**3, **hyperparams).fit(X_tr, y_tr)
             pred = model.predict(X_te)
 
-        elif regr_name == "tensorflow-least_squares-fast":
+        elif regr_name == "tf-lst_sq_fast":
             model = regr(X_tr, y_tr[...,np.newaxis], fast=True, **hyperparams)
             pred = X_te @ model
             
-        elif regr_name == "tensorflow-least_squares-slow":
+        elif regr_name == "tf-lst_sq_slow":
             model = regr(X_tr, y_tr[...,np.newaxis], fast=False, **hyperparams)
             pred = X_te @ model
 
-        elif regr_name == "pytorch-least_squares":
+        elif regr_name == "pytorch-lst_sq":
             model = regr(torch.Tensor(X_tr), torch.Tensor(y_tr[...,np.newaxis]), **hyperparams).solution
             pred = X_te @ np.array(model)
   
-        elif regr_name == "mxnet_least_squares":
+        elif regr_name == "mxnet_lst_sq":
             model = regr(X_tr, y_tr[...,np.newaxis], rcond=None, **hyperparams)[0]
             pred = X_te @ model
                 
