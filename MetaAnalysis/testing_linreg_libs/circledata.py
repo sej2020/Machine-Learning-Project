@@ -35,7 +35,7 @@ matrix2 = np.array([[x,x],[-x,-x]])
 
 #test with shapes
 # print(np.array(make_data_circle(resolution = 0.2,radius = 1)))
-points = np.array(make_data_circle(resolution = 0.001,radius = 1))
+points = np.array(make_data_circle(resolution = 0.01,radius = 1))
  
 # convert array into dataframe
 DF = pd.DataFrame(points)
