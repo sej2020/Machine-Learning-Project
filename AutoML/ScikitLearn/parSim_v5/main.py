@@ -9,8 +9,8 @@ paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
                                  'LinearSVR': 1, 'MLPRegressor': 1, 'MultiTaskElasticNet': 1, 'MultiTaskLasso': 1, 'NuSVR': 1, 
                                  'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 1, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
                                  'PoissonRegressor': 1, 'QuantileRegressor': 1, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 1, 
-                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 1, 'SVR': 1, 'TheilSenRegressor': 0, 
-                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 0
+                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 1, 'SVR': 1, 'TheilSenRegressor': 1, 
+                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
                                  },
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared', 'Root Mean Squared Error'],
             'styledict': {'boxprops': {'linestyle': '-', 'linewidth': 1, 'color': 'black'},
