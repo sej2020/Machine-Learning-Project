@@ -4,8 +4,8 @@ Task List for Week 2/27
 
 
 Web Service:
-    X - 1. Write disclaimers and instructions for user data (Sam & Josh)
-        - size: 10,000x100. maybe test to see how big of a csv file that is and tell Madhavan
+    1. Write disclaimers and instructions for user data (Sam & Josh)
+        - size: 10,000x100. maybe test to see how big of a csv file that is and tell Madhavan 8MB
         - type: no categorical data
         - content: do not submit sensitive data
         - order: single label  and label must be far righthand side of table
@@ -28,12 +28,14 @@ Web Service:
         - check for missing values
         - check for NaNs
 
-    6. Look into options for data centric error band visualization (Sam & Josh)
-
-    7. Data Imputation (Sam)
+    5.5. Data Imputation (Sam)
         - decide method
         - build pipeline
         - include new warning/instructions
+
+    6. Look into options for data centric error band visualization (Sam & Josh)
+
+    
 
 
 Research Paper:
