@@ -280,7 +280,7 @@ def metric_help_func():
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
-def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error') -> None:
+def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1) -> None:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
     The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
@@ -322,22 +322,34 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         # to do this, below list comp will use two diff indices - [i // n_cv_folds] to group all regressors of same type and [i % n_cv_folds] to split those regressors over each of the k (normally 10) folds
         # could be done just as well with a nested for loop iterating over both regressors and folds
         args_lst = [(regs[i // n_cv_folds], reg_names[i // n_cv_folds], metric_list, metric_help, cv_X_train[i % n_cv_folds], cv_y_train[i % n_cv_folds], cv_X_test[i % n_cv_folds], cv_y_test[i % n_cv_folds]) for i in range(len(regs) * n_cv_folds)]
-        multiprocessing.set_start_method("spawn") # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
-        with multiprocessing.Pool(processes=8) as pool: # defaulting to 8 processesors
-            results = pool.starmap(run, args_lst)
-
-        #organizing results of cv runs into a dictionary                   
+        
+        if n_workers == 1: # serial
+            results = [run(*args) for args in args_lst]
+           
+        else: # parallel
+            multiprocessing.set_start_method("spawn") # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
+            with multiprocessing.Pool(processes=n_workers) as pool: # defaulting to 8 processesors
+                results = pool.starmap(run, args_lst)
+                
+        #organizing results of cv runs into a dictionary          
+        failed_regs = set()         
         org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
-        for single_reg_dict in results:
-            if type(single_reg_dict) == dict:
-                reg_name = list(single_reg_dict.keys())[0]
+        for success_status, single_reg_output in results:
+            if success_status:
+                reg_name = list(single_reg_output.keys())[0]
                 if reg_name in org_results:
-                    org_results[reg_name] += [single_reg_dict]
+                    org_results[reg_name] += [single_reg_output]
                 else:
-                    org_results[reg_name] = [single_reg_dict]
+                    org_results[reg_name] = [single_reg_output]
+                    
+            else:
+                failed_regs.add(single_reg_output)
 
         #keeping only those results that did not throw an error during any cv run
-        fin_org_results = {k: v for k,v in org_results.items() if len(v) == n_cv_folds}
+        fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
+        
+        
+        print(f"The following regressors failed: {'---'.join(reg for reg in failed_regs)}")
         
         #write out a csv file that contains fin_org_results
         out_path = f"performance_stats_{id}.csv"
@@ -352,7 +364,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         for k in range(len(figs)):
             figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
         
-        pass
+        return list(failed_regs)
 
     except Exception as e:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
@@ -377,6 +389,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         reg_dict (dict) - dictionary of results from cross-validation run on one regressor
     """
     print(f"Checking {reg}")
+    success = True
     try:
         model_trained = reg.fit(train_attrib, train_labels)
         y_pred = model_trained.predict(test_attrib)
@@ -385,11 +398,12 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
             calculated = metric_help[k][2](test_labels, y_pred)
             reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated**.5)
         reg_dict[reg_name].append(model_trained)
-        return reg_dict
 
     except Exception as e:
-        logger_root.exception(f"{123456}\n")
-        pass
+        success = False
+        reg_dict = reg_name
+    
+    return success, reg_dict
 
 
 def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_help: dict, n_vizualized_bp: int, index: int) -> plt.figure:

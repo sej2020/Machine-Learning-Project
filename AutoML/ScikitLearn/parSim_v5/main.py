@@ -1,6 +1,6 @@
 from utils import *
 
-paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
+paramdict = {'datapath': 'AutoML/ConcreteData/Concrete_Data.csv',
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 1, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 1, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
                                  'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 1, 'GradientBoostingRegressor': 1, 
@@ -23,7 +23,8 @@ paramdict = {'datapath': 'AutoML\ConcreteData\Concrete_Data.csv',
             'n_vizualized_tb': 10,
             'test_set_size': 0.2,
             'n_cv_folds': 10,
-            'score_method': 'Root Mean Squared Error'
+            'score_method': 'Root Mean Squared Error',
+            'n_workers': 1
             }
 
 
