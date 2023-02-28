@@ -15,7 +15,7 @@ Nearest Neighbors:
 KNeighborsRegressor, RadiusNeighborsRegressor
 
 Tree-Based Regressors:
-DecisionTreeRegressor, BaggingRegressor, ExtraTreesRegressor, RandomForestRegressor, AdaBoostRegressor,
+DecisionTreeRegressor, BaggingRegressor, ExtraTreesRegressor, ExtraTreeRegressor, RandomForestRegressor, AdaBoostRegressor,
 HistGradientBoostingRegressor, GradientBoostingRegressor, 
 
 Miscellaneous:
