@@ -29,10 +29,10 @@ Web Service:
         - check for missing values
         - check for NaNs
 
-    6. Data Imputation (Sam)
-        - decide method
-        - build pipeline
-        - include new warning/instructions
+    6. Data Cleaning (Sam)
+        - encoding booleans
+        - normalizing
+        - imputation
 
     7. Look into options for data centric error band visualization (Sam & Josh)
 
