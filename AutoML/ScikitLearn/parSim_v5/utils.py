@@ -58,9 +58,9 @@ def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
     """
     error = set()
     if dataset.shape[0] > row_max:
-        error.add('The number of rows in the dataset exceeds 10,000. Please reduce the number of rows.')
+        error.add(f'The number of rows in the dataset exceeds {row_max}. Please reduce the number of rows.')
     if dataset.shape[1] > col_max:
-        error.add('The number of columns in the dataset exceeds 100. Please reduce the number of columns.')
+        error.add(f'The number of columns in the dataset exceeds {col_max}. Please reduce the number of columns.')
     return error
 
 
