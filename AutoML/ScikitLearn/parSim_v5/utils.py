@@ -24,6 +24,69 @@ config.fileConfig('AutoML/ScikitLearn/parSim_v5/logconfig.conf')
 logger_root = logging.getLogger('root')
 
 
+
+def validation(datapath: str) -> None:
+    """
+    This functon validates if a dataset is of all numeric type and does not exceed the dimensions of 10,000 x 100.
+    An error will be raised describing any of breech of these requirements by the dataset.
+
+    Args:
+        datapath (str) - a file path of a csv file
+    
+    Returns:
+        will return True if the dataset fits requirements; will raise an exception otherwise
+    """
+    dataset = load_data(datapath)
+    issues_w_data = [*size(dataset, 10000, 100), *dtype_check(dataset)]
+    for issue in issues_w_data:
+        if issue:
+            raise Exception(issue)
+    return True
+
+
+def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
+    """
+    This function will validate that a pandas dataframe is of dimensions less than the specified row and column maximums.
+
+    Args:
+        dataset (pd.Dataframe) - a pandas dataframe representing a dataset
+        row_max (int) - the maximum number of rows allowed for a dataset
+        col_max (int) - the maximum number of columns allowed for a dataset
+
+    Returns:
+        error (set) - a set of errors describing the way in which a dataframe exceeds the size limit
+    """
+    error = set()
+    if dataset.shape[0] > row_max:
+        error.add('The number of rows in the dataset exceeds 10,000. Please reduce the number of rows.')
+    if dataset.shape[1] > col_max:
+        error.add('The number of columns in the dataset exceeds 100. Please reduce the number of columns.')
+    return error
+
+
+def dtype_check(dataset: pd.DataFrame) -> set:
+    """
+    This function will validate the datatypes present in the dataframe. Allowable datatypes are int64 and float64. The presence
+    of any other datatype in the dataframe will cause a descriptive error to be thrown.
+
+    Args:
+        dataset (pd.Dataframe) - a pandas dataframe representing a dataset
+
+    Returns:
+        error (set) - a set of errors describing the disallowed datatypes present in the dataset
+    """
+    dtypes = dataset.dtypes.to_dict()
+    error = set()
+    for col_name, typ in dtypes.items():
+        if typ == 'bool':
+            error.add('The dataset contains a boolean column. Please convert dataset to all numeric values.')
+        if typ == 'float64' and dataset[col_name].isnull().values.any():
+            error.add('The dataset contains missing or NaN values. NaN values could be represented as "NaN", "null", "n/a", etc. Please convert dataset to all numeric values.')
+        if typ == 'O':
+            error.add('This dataset contains a categorial data column, a date/time data column, or there has been data input error. Please convert dataset to all numeric values.')
+    return error
+
+
 def get_all_regs(which_regressors: dict) -> list:
     """
     This function imports all sklearn regression estimators. The function will filter all out all regressors
@@ -79,7 +142,7 @@ def load_data(datapath: str) -> pd.DataFrame:
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
     
     Args:
-        datapath (str) - a file path (eventually from s3 bucket) of the csv data
+        datapath (str) - a file path of the csv data
     
     Returns:
         raw data (pd.DataFrame) - a pandas dataframe containing the csv data

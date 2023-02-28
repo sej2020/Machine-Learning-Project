@@ -1,0 +1,22 @@
+Linear Models:
+LinearRegression, Ridge, Lasso, ElasticNet, Lars, LassoLars, LassoLarsIC, OrthogonalMatchingPursuit, 
+BayesianRidge, ARDRegression, TransformedTargetRegressor
+
+Generalized Linear Models:
+TweedieRegressor, GammaRegressor, PoissonRegressor
+
+Linear Models Robust to Outliers:
+HuberRegressor, TheilSenRegressor, RANSACRegressor
+
+Support Vector Machines:
+NuSVR, SVR, LinearSVR
+
+Nearest Neighbors:
+KNeighborsRegressor, RadiusNeighborsRegressor
+
+Tree-Based Regressors:
+DecisionTreeRegressor, BaggingRegressor, ExtraTreesRegressor, RandomForestRegressor, AdaBoostRegressor,
+HistGradientBoostingRegressor, GradientBoostingRegressor, 
+
+Miscellaneous:
+MLPRegressor, PassiveAggressiveRegressor, PLSRegression
