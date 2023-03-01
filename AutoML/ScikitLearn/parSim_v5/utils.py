@@ -43,7 +43,7 @@ def validation(datapath: str) -> None:
     for issue in issues_w_data:
         if issue:
             raise Exception(issue)
-    return True
+    pass
 
 
 def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
@@ -312,6 +312,10 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     """
 
     try:
+
+        #validating dataset
+        validation(datapath)
+
         regs, reg_names = get_all_regs(which_regressors)
         train_attribs, train_labels, test_attribs, test_labels = data_split(datapath, test_set_size)
 
