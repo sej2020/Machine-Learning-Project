@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yagmail
 from datetime import datetime
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import KFold
 from sklearn.utils import all_estimators
 from sklearn import metrics
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import KNNImputer
 from time import perf_counter
 import multiprocessing as multiprocessing
 
@@ -137,6 +139,7 @@ def get_all_regs(which_regressors: dict) -> list:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
+
 def load_data(datapath: str) -> pd.DataFrame:
     """
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
@@ -150,34 +153,8 @@ def load_data(datapath: str) -> pd.DataFrame:
 
     try:
         csv_path = os.path.abspath(datapath)
-        return pd.read_csv(csv_path)
-    
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
-
-
-def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
-    """
-    This function will add a categorical column to the dataframe. This column is the categorical representation of the class
-    label of each instance. This will enable the data to be split according to the distribution of the class values. The appended
-    dataframe will be returned.
-
-    Args:
-        raw_data (pd.DataFrame) - a pandas dataframe containing raw data
-
-    Returns:
-        data with a stratified label category - the raw data as a pandas dataframe, with a column containing discretized label data
-        stratified category name - the name of the final column of this pandas dataframe
-    """
-
-    try:
-        strat_label = raw_data.columns[-1]
-        description = raw_data.describe()
-        strat_bins = list(description.loc['min':'max',strat_label])
-        strat_bins[0], strat_bins[-1] = -np.inf, np.inf
-        raw_data[f"{strat_label}_cat"] = pd.cut(raw_data[strat_label],bins=strat_bins,labels=[1,2,3,4])
-        data_w_strat_cat = raw_data
-        return data_w_strat_cat, strat_label
+        df = pd.read_csv(csv_path)
+        return df.iloc[:, :-1], df.iloc[:, -1]
     
     except Exception as e:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
@@ -186,7 +163,7 @@ def create_strat_cat(raw_data: pd.DataFrame) -> pd.DataFrame:
 def data_split(datapath: str, test_set_size: float) -> tuple:
     """
     This function will take a relative datapath of a dataset in csv format and will split the data into training attributes, 
-    training labels, test attributes, and test labels according to the distribution of a categorical class label.
+    training labels, test attributes.
     
     Args:
         datapath (str) - a file path (eventually from s3 bucket) of the csv data
@@ -198,28 +175,19 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
     """
 
     try:
-        #the data is loaded and the label is discretized in order to create a stratified train-test split
-        raw_data = load_data(datapath)
-        data_w_strat_cat, strat_label = create_strat_cat(raw_data)
+        #the data is loaded
+        attribs, labels = load_data(datapath)
 
         #the training and test sets are created
-        split = StratifiedShuffleSplit(n_splits=1,test_size=test_set_size)
-        for train_index, test_index in split.split(data_w_strat_cat,data_w_strat_cat[f"{strat_label}_cat"]):
-            train_set = data_w_strat_cat.loc[train_index]
-            test_set = data_w_strat_cat.loc[test_index]
-        for set_ in(train_set,test_set):
-            set_.drop(f"{strat_label}_cat",axis=1,inplace=True)
-        train = train_set.copy()
-        test = test_set.copy()
+        split = ShuffleSplit(n_splits=1,test_size=test_set_size)
+        for train_index, test_index in split.split(attribs, labels):
+            train_attribs = attribs.loc[train_index]
+            train_labels = labels.loc[train_index]
+            test_attribs = attribs.loc[test_index]
+            test_labels = labels.loc[test_index]
 
-        #the training and test sets are further split into attribute and label sets
-        data_label = train.columns[-1]
-        train_attrib = train.drop(data_label,axis=1)
-        train_labels = train[data_label].copy()
-        test_attrib = test.drop(data_label,axis=1)
-        test_labels = test[data_label].copy()
 
-        return (train_attrib, train_labels, test_attrib, test_labels)
+        return (train_attribs, train_labels, test_attribs, test_labels)
 
     except Exception as e:
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
@@ -280,6 +248,46 @@ def metric_help_func():
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
+def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array) -> tuple:
+        """
+        This function will standardize data attributes and impute NaN values via KNN-Imputation for the entire dataset.
+        
+        Args:
+            train_attribs (np.ndarray) - np.ndarray of training attributes
+            train_labels (np.ndarray) - np.ndarray of training labels
+            test_attribs (np.ndarray) - np.ndarray of test attributes
+            test_labels (np.ndarray) - np.ndarray of test labels
+
+        Returns:
+            train_attribs_prepped (np.ndarray) - np.ndarray of training attributes that have been standardized and had NaN values imputed
+            train_labels_prepped (np.ndarray) - np.ndarray of training labels that have had NaN values imputed
+            test_attribs_prepped (np.ndarray) - np.ndarray of test attributes that have been standardized and had NaN values imputed
+            test_labels_prepped (np.ndarray) - np.ndarray of test labels that have had NaN values imputed
+        """
+
+        #standardizing attributes
+        scaler = StandardScaler()
+        scaler.fit(train_attribs)
+        train_attribs = scaler.transform(train_attribs)
+        test_attribs = scaler.transform(test_attribs)
+
+        #joining attributes and labels in order to perform KNN-Imputation
+        full_train = np.concatenate((train_attribs, np.expand_dims(train_labels, axis=1)), axis=1)
+        full_test = np.concatenate((test_attribs, np.expand_dims(test_labels, axis=1)), axis=1)
+        imputer = KNNImputer()
+        imputer.fit(full_train)
+        imp_full_train = imputer.transform(full_train)
+        imp_full_test = imputer.transform(full_test)
+
+        #splitting attributes from labels once again
+        train_attribs_prepped = imp_full_train[:, :-1]
+        train_labels_prepped = imp_full_train[:, -1]
+        test_attribs_prepped = imp_full_test[:, :-1]
+        test_labels_prepped = imp_full_test[:, -1]
+
+        return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
+
+
 def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1) -> None:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
@@ -305,7 +313,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
 
     try:
         regs, reg_names = get_all_regs(which_regressors)
-        train_attrib, train_labels, test_attrib, test_labels = data_split(datapath, test_set_size)
+        train_attribs, train_labels, test_attribs, test_labels = data_split(datapath, test_set_size)
 
         #appending the score method to the metric list to be used in the remainder of the program
         metric_list = [score_method] + metric_list
@@ -316,7 +324,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         metric_help = metric_help_func()
 
         #creating cv samples and running each regressor over these samples
-        cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attrib, train_labels, n_cv_folds)
+        cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attribs, train_labels, n_cv_folds)
         start = perf_counter()
         # fundemental idea of args_lst is to create the cross product of all k folds with all r regressors, making k*r tasks (sets of arguments) to be passed to mp pool
         # to do this, below list comp will use two diff indices - [i // n_cv_folds] to group all regressors of same type and [i % n_cv_folds] to split those regressors over each of the k (normally 10) folds
@@ -325,7 +333,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         
         if n_workers == 1: # serial
             results = [run(*args) for args in args_lst]
-           
+            
         else: # parallel
             multiprocessing.set_start_method("spawn") # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
             with multiprocessing.Pool(processes=n_workers) as pool: # defaulting to 8 processesors
@@ -351,14 +359,11 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         
         print(f"The following regressors failed: {'---'.join(reg for reg in failed_regs)}")
         
-        #write out a csv file that contains fin_org_results
-        out_path = f"performance_stats_{id}.csv"
-        
         stop = perf_counter()
         print(f"Time to execute regression: {stop - start:.2f}s")
 
         #generating figures and saving to the user's CWD
-        figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
+        figs = [test_best(fin_org_results, metric_list, train_attribs.to_numpy(), train_labels.to_numpy(), test_attribs.to_numpy(), test_labels.to_numpy(), metric_help, n_vizualized_tb)]
         for index in range(len(metric_list)):
             figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
         for k in range(len(figs)):
@@ -370,7 +375,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
     
 
-def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attrib: np.ndarray, train_labels: np.ndarray, test_attrib: np.ndarray, test_labels: np.ndarray) -> dict:
+def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attribs: np.ndarray, train_labels: np.ndarray, test_attribs: np.ndarray, test_labels: np.ndarray) -> dict:
     """
     This function will perform cross-validation training on a given dataset and given regressor. It will return
     a dictionary containing cross-validation performance on various metrics.
@@ -380,9 +385,9 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         reg_name (str) - the associated scikit-learn regressor name
         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
         metric_help (dict) - a dictionary to assist with any functions involving metrics
-        train_attrib (np.ndarray) - np.ndarray of training attributes
+        train_attribs (np.ndarray) - np.ndarray of training attributes
         train_labels (np.ndarray) - np.ndarray of training labels
-        test_attrib (np.ndarray) - np.ndarray of test attributes
+        test_attribs (np.ndarray) - np.ndarray of test attributes
         test_labels (np.ndarray) - np.ndarray of test labels
 
     Returns:
@@ -391,8 +396,11 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
     print(f"Checking {reg}")
     success = True
     try:
-        model_trained = reg.fit(train_attrib, train_labels)
-        y_pred = model_trained.predict(test_attrib)
+        #preprocessing data
+        train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
+
+        model_trained = reg.fit(train_attribs, train_labels)
+        y_pred = model_trained.predict(test_attribs)
         reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k][2](test_labels, y_pred)
@@ -469,7 +477,7 @@ def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_he
         email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
-def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFrame, test_labels: pd.DataFrame, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
+def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
     """
     This function will take the best performing model on each regressor type generated by cross-validation training and 
     apply it to the set of test data. The performance of the regs on the test instances will be displayed on a table and
@@ -478,8 +486,10 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
     Args:
     fin_org_results (dict) - the final results from cross-validation
     metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-    test_attrib (pd.DataFrame) - a pandas dataframe of test set attributes
-    test_labels (pd.DataFrame) - a pandas dataframe of test set labels
+    train_attribs (pd.DataFrame) - a numpy array of training set attributes
+    test_attribs (pd.DataFrame) - a numpy array of test set attributes
+    train_labels (np.array) - a numpy array of training set labels
+    test_labels (pd.DataFrame) - a numpy array of test set labels
     metric_help (dict) - a dictionary to assist with any functions involving metrics
     n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
     
@@ -509,8 +519,10 @@ def test_best(fin_org_results: dict, metric_list: list, test_attrib: pd.DataFram
             else:
                 best = min(zip(scores, models), key = lambda pair: pair[0])[1]
 
+            #preprocessing data
+            train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
             #using the "best" model to predict the test labels
-            best_predict = best.predict(test_attrib)
+            best_predict = best.predict(test_attribs)
 
             #calculating the difference between predictions and ground-truth labels
             single_reg_output = []

@@ -18,7 +18,7 @@ Web Service:
         - come up with error code and share with Madhavan
         - function should return information on why data failed
 
-    3. Return dictionary with information about which regressors failed and why (Josh)
+    X - 3. Return dictionary with information about which regressors failed and why (Josh)
 
     X - 4. Come up with groupings for regressors to add option to front end (Sam & Josh)
         - Forbidden estimators list should now be dead so remove it
@@ -29,10 +29,9 @@ Web Service:
         - check for missing values
         - check for NaNs
 
-    6. Data Cleaning (Sam)
-        - encoding booleans
-        - normalizing
-        - imputation
+    X - 6. Data Cleaning (Sam)
+        X - standardizing
+        X - imputation
 
     7. Look into options for data centric error band visualization (Sam & Josh)
 
