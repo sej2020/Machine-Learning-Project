@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf
-# import torch
-# import mxnet as mx
+import torch
+import mxnet as mx
 import sys
 
 def read_data(data_path):

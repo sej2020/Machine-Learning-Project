@@ -2,8 +2,6 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import yagmail
-from datetime import datetime
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import KFold
 from sklearn.utils import all_estimators
@@ -522,28 +520,3 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     ax.table(cellText=df_sorted.values, rowLabels=df_sorted.index, colLabels=df_sorted.columns, loc='center')
     fig.tight_layout()
     return fig
-    
-            
-def email(recipient_list: list, message: str) -> None:
-    """
-    An internal function to assist with error handling. Will send an email to a list of recipients
-    Will definitely need to change this before it becomes a distributable package.
-
-    Args:
-        recipient_list (list) - a list of the emails of the intended recipients of the message
-        message (str) - the message to be emailed to the recipients
-    Returns:
-        None
-    """
-    
-    try:
-        yag = yagmail.SMTP('friendlyneighborhoodbot1879@gmail.com')
-        yag.send(
-            to=recipient_list,
-            subject=f"Bug Report {datetime.now().strftime('%m-%d-%Y %H:%M:%S')}",
-            contents=message
-            )
-    
-    except Exception as e:
-        print(f"Whoops! Some exception: \n\n{e}")
-        pass
