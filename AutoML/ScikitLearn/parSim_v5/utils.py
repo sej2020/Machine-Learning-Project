@@ -225,7 +225,7 @@ def metric_help_func():
     try:
         return metric_table
     
-    except Exception as e:``
+    except Exception as e:
         raise Exception("Update your version of sklearn to comply with requirements.txt")
 
 
