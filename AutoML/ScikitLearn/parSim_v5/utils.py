@@ -103,41 +103,28 @@ def get_all_regs(which_regressors: dict) -> list:
     """
 
     #importing all sklearn regressors and establishing which regressors will be ommited from the run
-    try:
-        estimators = all_estimators(type_filter='regressor')
-        forbidden_estimators = [
-            "DummyRegressor", "GaussianProcessRegressor", "KernelRidge", 
-            "QuantileRegressor", "SGDRegressor", 
-            "MultiOutputRegressor", "RegressorChain",
-            "StackingRegressor", "VotingRegressor","CCA", 
-            "IsotonicRegression", "MultiTaskElasticNet", 
-            "MultiTaskElasticNetCV", "MultiTaskLasso", 
-            "MultiTaskLassoCV", "PLSCanonical"
-            ]
-        all_regs = []
-        all_reg_names = []
 
-        #removing regressors that require additional parameters or those that are cross-validation variants of existing regressors
-        for name, RegressorClass in estimators:
-            params = [val[1] for val in signature(RegressorClass).parameters.items()]
-            all_optional = True
-            for param in params:
-                if param.default == _empty:
-                    all_optional = False
-            is_cv_variant = name[-2:] == "CV"
-            if all_optional and (name not in forbidden_estimators) and not is_cv_variant and which_regressors[name] == 1:
-                print('Appending', name)
-                reg = RegressorClass()
-                all_regs.append(reg)
-                all_reg_names.append(name)
-            else:
-                print(f"Skipping {name}")
-        print(f"List of approved regressors (length {len(all_reg_names)}): {all_reg_names}")
-        return all_regs, all_reg_names
-    
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
+    estimators = all_estimators(type_filter='regressor')
+    all_regs = []
+    all_reg_names = []
 
+    #removing regressors that require additional parameters or those that are cross-validation variants of existing regressors
+    for name, RegressorClass in estimators:
+        params = [val[1] for val in signature(RegressorClass).parameters.items()]
+        all_optional = True
+        for param in params:
+            if param.default == _empty:
+                all_optional = False
+        is_cv_variant = name[-2:] == "CV"
+        if all_optional and not is_cv_variant and which_regressors[name] == 1:
+            print('Appending', name)
+            reg = RegressorClass()
+            all_regs.append(reg)
+            all_reg_names.append(name)
+        else:
+            print(f"Skipping {name}")
+    print(f"List of approved regressors (length {len(all_reg_names)}): {all_reg_names}")
+    return all_regs, all_reg_names
 
 
 def load_data(datapath: str) -> pd.DataFrame:
@@ -174,23 +161,20 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
                                       labels, the third is test set attributes, the fourth is test set labels
     """
 
-    try:
-        #the data is loaded
-        _, attribs, labels = load_data(datapath)
+    #the data is loaded
+    _, attribs, labels = load_data(datapath)
 
-        #the training and test sets are created
-        split = ShuffleSplit(n_splits=1,test_size=test_set_size)
-        for train_index, test_index in split.split(attribs, labels):
-            train_attribs = attribs.loc[train_index]
-            train_labels = labels.loc[train_index]
-            test_attribs = attribs.loc[test_index]
-            test_labels = labels.loc[test_index]
+    #the training and test sets are created
+    split = ShuffleSplit(n_splits=1,test_size=test_set_size)
+    for train_index, test_index in split.split(attribs, labels):
+        train_attribs = attribs.loc[train_index]
+        train_labels = labels.loc[train_index]
+        test_attribs = attribs.loc[test_index]
+        test_labels = labels.loc[test_index]
 
 
-        return (train_attribs, train_labels, test_attribs, test_labels)
+    return (train_attribs, train_labels, test_attribs, test_labels)
 
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int) -> tuple:
@@ -207,19 +191,16 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
         train/test data (tuples) - nested_samples gets broken down into four lists
     """
 
-    try:
-        X_train, y_train = X_train_df.values, y_train_df.values
-        kf = KFold(n_splits = n_cv_folds, shuffle = True) # KFold creates a generator object, not list
-        kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)] # making list of indices to be used for folds based on KFold object
-        nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices] # unpacking train/test data @ train/test indices 
-        X_tr, y_tr, X_te, y_te = [], [], [], [] # variables which will each be of type list(np.ndarray, np.ndarray,..., np.ndarray), with k ndarray's representing each fold
-        for sample in nested_samples:
-            for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
-                var.append(sample[i]) # method to prevent code duplication in unpacking nested_samples into four variables
-        return (X_tr, y_tr, X_te, y_te)
+    X_train, y_train = X_train_df.values, y_train_df.values
+    kf = KFold(n_splits = n_cv_folds, shuffle = True) # KFold creates a generator object, not list
+    kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)] # making list of indices to be used for folds based on KFold object
+    nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices] # unpacking train/test data @ train/test indices 
+    X_tr, y_tr, X_te, y_te = [], [], [], [] # variables which will each be of type list(np.ndarray, np.ndarray,..., np.ndarray), with k ndarray's representing each fold
+    for sample in nested_samples:
+        for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
+            var.append(sample[i]) # method to prevent code duplication in unpacking nested_samples into four variables
+    return (X_tr, y_tr, X_te, y_te)
     
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
 
 
 def metric_help_func():
@@ -244,8 +225,8 @@ def metric_help_func():
     try:
         return metric_table
     
-    except Exception as e:
-        email(['sj110@iu.edu', 'jmelms@iu.edu'], f'ID: {id} - {e}')
+    except Exception as e:``
+        raise Exception("Update your version of sklearn to comply with requirements.txt")
 
 
 def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array) -> tuple:
