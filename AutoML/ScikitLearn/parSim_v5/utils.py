@@ -103,7 +103,6 @@ def get_all_regs(which_regressors: dict) -> list:
     """
 
     #importing all sklearn regressors and establishing which regressors will be ommited from the run
-
     estimators = all_estimators(type_filter='regressor')
     all_regs = []
     all_reg_names = []
@@ -200,7 +199,6 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
         for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
             var.append(sample[i]) # method to prevent code duplication in unpacking nested_samples into four variables
     return (X_tr, y_tr, X_te, y_te)
-    
 
 
 def metric_help_func():
@@ -269,7 +267,7 @@ def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np
         return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
 
 
-def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1) -> None:
+def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1) -> list:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
     The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
@@ -292,7 +290,6 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         Several PNG files displaying results of cross-validation and testing
     """
 
-
     #validating dataset
     validation(datapath)
 
@@ -314,7 +311,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     # to do this, below list comp will use two diff indices - [i // n_cv_folds] to group all regressors of same type and [i % n_cv_folds] to split those regressors over each of the k (normally 10) folds
     # could be done just as well with a nested for loop iterating over both regressors and folds
     args_lst = [(regs[i // n_cv_folds], reg_names[i // n_cv_folds], metric_list, metric_help, cv_X_train[i % n_cv_folds], cv_y_train[i % n_cv_folds], cv_X_test[i % n_cv_folds], cv_y_test[i % n_cv_folds]) for i in range(len(regs) * n_cv_folds)]
-    
+
     if n_workers == 1: # serial
         results = [run(*args) for args in args_lst]
         
@@ -322,9 +319,9 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         multiprocessing.set_start_method("spawn") # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
         with multiprocessing.Pool(processes=n_workers) as pool: # defaulting to 8 processesors
             results = pool.starmap(run, args_lst)
-            
-    #organizing results of cv runs into a dictionary          
-    failed_regs = set()         
+
+    #organizing results of cv runs into a dictionary
+    failed_regs = set()
     org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
     for success_status, single_reg_output in results:
         if success_status:
@@ -355,7 +352,7 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
         figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
     
     return list(failed_regs)
-    
+
 
 def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attribs: np.ndarray, train_labels: np.ndarray, test_attribs: np.ndarray, test_labels: np.ndarray) -> dict:
     """
