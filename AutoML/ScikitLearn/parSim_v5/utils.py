@@ -459,10 +459,10 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     Args:
     fin_org_results (dict) - the final results from cross-validation
     metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-    train_attribs (pd.DataFrame) - a numpy array of training set attributes
-    test_attribs (pd.DataFrame) - a numpy array of test set attributes
+    train_attribs (np.array) - a numpy array of training set attributes
+    test_attribs (np.array) - a numpy array of test set attributes
     train_labels (np.array) - a numpy array of training set labels
-    test_labels (pd.DataFrame) - a numpy array of test set labels
+    test_labels (np.array) - a numpy array of test set labels
     metric_help (dict) - a dictionary to assist with any functions involving metrics
     n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
     
