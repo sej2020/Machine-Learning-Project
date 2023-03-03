@@ -13,7 +13,7 @@ Web Service:
         - Nan: no Nans allows
         - specify missing data will cause a lot of regressors to fail
 
-    2. Raise Errors in pipeline (Josh)
+    X - 2. Raise Errors in pipeline (Josh)
         - trace function calls, line of error, and specific error
         - come up with error code and share with Madhavan
         - function should return information on why data failed
@@ -42,6 +42,7 @@ Research Paper:
 
     1. Look into errors thrown by circle data script (Sam & Josh) 
         X - plot data and lines for each library on one graphic
+        - add vizminmaxpoints experiment results to LaTex doc
 
     X - 2. Read articles Dr. Kurban sent us (Sam & Josh) 
 
