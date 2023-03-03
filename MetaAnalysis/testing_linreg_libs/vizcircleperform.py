@@ -22,7 +22,6 @@ def run_linreg(X, y, regr_name, regr):
         pred = model.predict(X)
 
     elif regr_name == "tf-lst_sq_fast":
-        print(X, y, np.ravel(y))
         model = regr(X, y, fast=True)
         pred = X @ model
         
@@ -41,7 +40,7 @@ def run_linreg(X, y, regr_name, regr):
     results = [X, pred]
             
     return results
-    
+
 
 def main(path):
     X, y = read_data(path)
