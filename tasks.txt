@@ -41,7 +41,7 @@ Web Service:
 Research Paper:
 
     1. Look into errors thrown by circle data script (Sam & Josh) 
-        - plot data and lines for each library on one graphic
+        X - plot data and lines for each library on one graphic
 
     X - 2. Read articles Dr. Kurban sent us (Sam & Josh) 
 
