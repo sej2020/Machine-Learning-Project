@@ -1,77 +1,82 @@
 
-Task List
+Task List for Week 2/27
 ----------
 
-Connecting to Website:
 
-    X - Learn Madhavan's Tech Stack
+Web Service:
+    X - 1. Write disclaimers and instructions for user data (Sam & Josh)
+        - size: 10,000x100. maybe test to see how big of a csv file that is and tell Madhavan 8MB
+        - type: no categorical data
+        - content: do not submit sensitive data
+        - order: single label  and label must be far righthand side of table
+        - headers: can be included or excluded
+        - Nan: no Nans allows
+        - specify missing data will cause a lot of regressors to fail
+
+    X - 2. Raise Errors in pipeline (Josh)
+        - trace function calls, line of error, and specific error
+        - come up with error code and share with Madhavan
+        - function should return information on why data failed
+
+    X - 3. Return dictionary with information about which regressors failed and why (Josh)
+
+    X - 4. Come up with groupings for regressors to add option to front end (Sam & Josh)
+        - Forbidden estimators list should now be dead so remove it
+
+    X - 5. Data Validation Pipeline (Sam)
+        - check for size
+        - check for categorical data
+        - check for missing values
+        - check for NaNs
+
+    X - 6. Data Cleaning (Sam)
+        X - standardizing
+        X - imputation
+
+    7. Look into options for data centric error band visualization (Sam & Josh)
+
     
-    X - Freeze Requirements to file
-    X - Stable SQL to retrieve tasks from database and update database with results
-    X - Add event listeners and event handlers... wait for Madhavan
-
-AutoML:
-
-    Run large-scale experiment
-        X - Port code to Quartz
-        X - Save timing details and experiment metadata
-        X - Create visualization & identify optimal n_workers
-        X - Create profile report on final program
-
-    X - Make boxplot() functional
-
-    X- Parametrize EVERYTHING
-        X - Train/Test size in data_split
-        X - CV Folds
-        X - Regressor names
-        X - matplotlib boxplot themes
-        X - dpi
-        X - n_vizualized for test_best
-        ? - kill time
-
-    X - Spruce up graphics w/ matplotlib styling
-
-    X - Refactor performance metrics (make exclusively scipy and / or implement metrics ourselves)
-
-    X - Test program on different datasets
-
-    Work on saving model / loading model
-
-    X - Roll up for loops if it is nicer
-
-    X - Add comments everywhere
-
-    Make this a distributable package
-        X - Remove unnecessary code
-        X - Create requirements.txt
-        X - Test it on other systems
-        - Package / publish it?
-
-    Flesh out exception object for error emails, give tracebacks
-
-    Use modern sqlalchemy (or don't, who knows)
 
 
-Paper:
+Research Paper:
 
-    X - OpenCV
+    1. Look into errors thrown by circle data script (Sam & Josh) 
+        X - plot data and lines for each library on one graphic
+        - add vizminmaxpoints experiment results to LaTex doc
 
-    User-centric comparison of libraries on MNIST
-        - max amount of abstraction offered by the library
-        - max amount of flexibility offered by the library
-        - run times
-    
-    Tables
+    X - 2. Read articles Dr. Kurban sent us (Sam & Josh) 
+
+    3. Lst Sqrs literature review (Sam & Josh)
+
+    4. Elipsoid Experiment (Sam & Josh) 
+        - generate data
+        - conduct experiment
+        - visualize appropriately
+        - record Experiment and insert into LaTex doc
+
+    5. Look into Curse of Dimensionality (Sam & Josh) 
+
+    6. Beta Data Experiments (Sam & Josh) 
+        - choose which dataset concepts to test
+        - generate data
+        - conduct experiment
+        - visualize appropriately
+        - record Experiment and insert into LaTex doc
+
+    7. Add tables to describe libraries (Sam)
         - Regressors
         X - activation functions
         - evaluation metrics
         - layer types
-        - optimizer
+        - optimizers (need Josh to locate optimizers in OpenCV before I can mark complete)
         - loss functions
 
-    OLS
-        X - Understand various solvers
-        X - Come up with ideas for B-datasets
-        - Generate those datasets
-        - and then, implement experiments
 
+In Future:
+    Allow requests to run concurrently
+    ReIntroduce TestBest pipeline
+    Use heuristic/new model to give user information on which models/regressors to deploy for which data
+    Ensemble Model
+    Report to go along with results
+    Embed a model in the webpage
+    Make visualization package
