@@ -33,7 +33,17 @@ Web Service:
         X - standardizing
         X - imputation
 
-    7. Look into options for data centric error band visualization (Sam & Josh)
+    7. Write a short paragraph about our team and work
+        - should include links to webpages and github
+        - roadmap for future of website
+        - link and describe our related work
+    
+    8. Look into options for data centric error band visualization (Sam & Josh)
+
+    9. Pickle best model to embed on webpage
+        - should be able to return to use model based on request id
+
+    10. 
 
     
 
@@ -44,13 +54,18 @@ Research Paper:
         X - plot data and lines for each library on one graphic
         - add vizminmaxpoints experiment results to LaTex doc
 
-    X - 2. Read articles Dr. Kurban sent us (Sam & Josh) 
+    2. Lst Sqrs literature review (Sam & Josh)
 
-    3. Lst Sqrs literature review (Sam & Josh)
+    3. Create Experiment Pipeline
+        - accuracy
+        - time
+        - space
+        - viz
 
     4. Elipsoid Experiment (Sam & Josh) 
         - generate data
         - conduct experiment
+            - think about adherence to big-O bounds
         - visualize appropriately
         - record Experiment and insert into LaTex doc
 

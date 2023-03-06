@@ -18,11 +18,11 @@ def make_line(data):
     Y = data[:,1]
     k,d = np.polyfit(X,Y,1)
     y_hat = k*X + d
-    # plt.gca().set_aspect('equal')
-    # plt.title(f"{d:e} {k:e}")
-    # plt.plot(X,Y,'.')
-    # plt.plot(X,y_hat)
-    # plt.show()
+    plt.gca().set_aspect('equal')
+    plt.title(f"{d:e} {k:e}")
+    plt.plot(X,Y,'.')
+    plt.plot(X,y_hat)
+    plt.show()
     return k,d
 
 #test extreme values
@@ -33,7 +33,7 @@ matrix2 = np.array([[x,x],[-x,-x]])
 # print(make_line(matrix2))
 
 #test with shapes
-print(make_line(np.array(make_data_circle(resolution = 0.0000001,radius = 1))))
+print(make_line(np.array(make_data_circle(resolution = 0.1,radius = 3))))
 
 
 
