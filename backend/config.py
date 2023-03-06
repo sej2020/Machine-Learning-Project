@@ -31,5 +31,6 @@ class Settings:
                       'MultiTaskElasticNet', 'MultiTaskLasso', 'NuSVR', 'OrthogonalMatchingPursuit', 'PLSCanonical', 'PLSRegression',
                       'PassiveAggressiveRegressor', 'PoissonRegressor', 'QuantileRegressor', 'RANSACRegressor', 'RadiusNeighborsRegressor',
                       'RandomForestRegressor', 'Ridge', 'SGDRegressor', 'SVR', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
+    METRICS_LIST = ['Mean Squared Error', 'Root Mean Squared Error', 'Mean Absolute Error', 'R-Squared']
 
 settings = Settings()

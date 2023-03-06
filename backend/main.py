@@ -16,11 +16,19 @@ from fastapi import File, UploadFile
 
 from services.rmq_services import Publisher, send_create_request_message
 from services.s3Service import S3Service
-
+from fastapi.middleware.cors import CORSMiddleware
 # from db.base import create_tables
 
 app = FastAPI()
-
+origins = [
+        "http://localhost:4200"
+        ]
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"],
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"],
+                   )
 def create_tables():
     logging.info('creating all database tables')
     print('am i coming here?')
@@ -72,7 +80,7 @@ async def get_automl_request(request_id):
         automl_request = AutoMLRequestRepository.get_request_by_id(request_id)
         data = AutoMLCreateResponseContents(request_id=request_id, request_status=automl_request.status, estimated_time_completion=0)
         if automl_request.status == 1:
-            data.result_link = f'http://localhost:8081/results?key={automl_request.resultfile}'
+            data.result_link = f'http://192.168.1.216:8081/results?key={automl_request.resultfile}'
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
