@@ -6,3 +6,6 @@ libraries_data
 
 # testing pytorch
 pytorch_test
+
+
+.gitignore

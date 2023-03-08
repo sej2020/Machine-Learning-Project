@@ -1,0 +1,141 @@
+
+// .main-container{
+//     height: 100%;
+//     width: 100%;
+//     max-width: 100vw;
+//     max-height: 100vh;
+    
+
+// }
+// .header-toolbar{
+//     background-color: #21005D;
+//     color: #FFFBFE;
+// }
+// .header-title{
+//     margin-left: 5%;
+//     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+//     font-size: xx-large;
+// }
+
+// .menu-button{
+//     background-color: white;
+// }
+
+// .sidenav-container{
+//     // border: 1px solid rgba(0, 0, 0, 0.5);
+//     width: 300px;
+//     height: 850px;
+
+// }
+
+.form-container{
+    margin-left: 10%;
+    margin-right: 10%;
+    position: relative;
+    display: flex;
+}
+// // .mat-sidenav {
+// //     width: 300px;
+// //     height: auto;
+// //   }
+
+
+
+// .mat-heading{
+//     background: #004a9f;
+//     color: white;
+// }
+
+// .mat-sidenav-items{
+//     margin: 16px;
+//     width: 200px;
+//     border-right: none;
+//     background: #002b5c;
+//     color: white;
+//     border-radius: 10px;
+//     padding: 16px;
+//     text-align: center;
+// }
+// .mat-side-nav-content{
+//     height: calc(100vh - 98px);
+//     border-radius: 10px;
+//     margin: 16px;
+//     margin-left: 32px;
+
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+
+//     font-size: 2rem;
+//     color: lightgray;
+// }
+
+// .sidenav-container{
+//     height: calc(100vh - 65px);
+// }
+mat-button{
+.icon_avatar{
+    color:antiquewhite ;
+    height: 16px;
+    width: 16px;
+}
+}
+.header-toolbar {
+    background: #004a9f;
+    color: white;
+}
+
+.mat-sidenav {
+    margin: 16px;
+    width: 300px;
+    border-right: none;
+    background: #002b5c;
+    color: white;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.content {
+    height: calc(100vh - 98px);
+    border-radius: 10px;
+    margin: 16px;
+    margin-left: 32px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: 2rem;
+    color: lightgray;
+}
+
+.side-nav-container {
+    height: calc(100vh - 65px);
+}
+
+.main-navigation-list{
+    color: aliceblue;
+
+    .nav-list {
+        padding-top: 25px;
+
+       span{
+        color: antiquewhite;
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size : larger;
+       }
+    }
+    .menu-button{
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        font-size: 1rem;
+        background-color: #004a9f;
+        padding: 5px;
+        mat-icon {
+            margin-right: 8px;
+        }
+    }
+}

@@ -1,0 +1,66 @@
+<mat-card class="card-container">
+<mat-card-title class="card-container-title">ML Auto Request Form <mat-icon (click)="openDisclaimer();">info</mat-icon></mat-card-title>
+<mat-card-content class="card-container-content">
+<form [formGroup]="mlGeneratorForm" class="form-container" (ngSubmit)="onSubmit(mlGeneratorForm.value)">
+<label class="label-name"> Regressors:</label>
+<mat-form-field class="form-field-styles">
+<mat-label>Regressors:</mat-label>
+<mat-select formControlName="regressors" multiple aria-required="true">
+    <mat-optgroup *ngFor="let rlist of regressorList" [value]="rlist">{{rlist.groupName}}
+        <mat-option *ngFor="let regressorName of rlist.regressorName" [value]="regressorName">{{regressorName}}</mat-option>
+    </mat-optgroup>
+</mat-select>
+</mat-form-field>
+<br>
+<label class="label-name"> Visualization Metrics:</label>
+<mat-form-field class="form-field-styles">
+    <mat-label>Visualization Metrics:</mat-label>
+    <mat-select formControlName="visualizationMetrics" multiple aria-required="true">
+        <mat-option *ngFor="let v of visualizationMetricsList" [value]="v">{{v}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<br>
+<label class="label-name"> Ranking Criteria:</label>
+<mat-form-field class="form-field-styles">
+    <mat-label>Ranking Criteria:</mat-label>
+    <mat-select formControlName="rankingMetrics" aria-required="true">
+        <mat-option *ngFor="let v of visualizationMetricsList" [value]="v">{{v}}</mat-option>
+    </mat-select>
+</mat-form-field>
+<br>
+<!-- <label class="label-name">Test Set Size:</label>
+<mat-form-field class="form-field-styles">
+    <mat-label>Test Set Size:</mat-label>
+    <input type="text" matInput class="matInputArea" formControlName="testSetSize" placeholder="0.2" value="0.2" aria-required="true"/>
+</mat-form-field> 
+<br> -->
+<label class="label-name">CV Folds:</label>
+<mat-form-field class="form-field-styles">
+    <mat-label>CV Folds:</mat-label>
+    <input matInput type="text"  class="matInputArea" formControlName="cvFold" placeholder="10" value="10" aria-required="true"/>
+</mat-form-field>
+<br>
+<label class="label-name">Email:</label>
+<mat-form-field class="form-field-styles">
+    <mat-label>Email:</mat-label>
+    <input matInput type="email"  class="matInputArea" formControlName="email" placeholder="abc@example.com" aria-required="true"/>
+</mat-form-field>
+<br>
+<mat-divider></mat-divider>
+<label class="label-name">Upload Data File:</label>
+<!-- <ngx-easy-dnd-upload
+[formControl]="fileUpload"
+[title]="title"
+[fileLimit]="5"
+[allowedFiles]="allowFileTypes"
+[allowMultiple]=allowMultiple
+(droppedFiles)="getDroppedFiles($event)">
+</ngx-easy-dnd-upload> -->
+<br>
+<input class="file-input" formControlName="fileUpload" type="file" placeholder="Upload datafile" (change)="onFileChange($event);">
+
+<br>
+<button mat-raised-button type="submit" color="primary" class="submit-button">Submit Request</button>
+</form>
+</mat-card-content>
+</mat-card>

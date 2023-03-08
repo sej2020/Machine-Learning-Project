@@ -1,0 +1,36 @@
+.result-page-container{
+    width: 100% ;
+    position: relative;
+    display: block;
+   
+}
+.result-page-card-container{
+    margin-top: 10%;
+    margin-left: 10%;
+    margin-right: 10%;
+    border-radius: 10px;
+    padding: 20px;
+    height: 75%;
+}
+.results-page-card-container-title{
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: xx-large;
+    color: blueviolet;
+}
+
+.results-page-card-container-content{
+    margin-top: 4%;
+    position: relative;
+    
+}   
+
+.results-page-list{
+    color: black !important;
+}
+.back-button{
+    color:black;
+    background-color: beige;
+    position: relative;
+    margin-left: 45%;
+
+}
