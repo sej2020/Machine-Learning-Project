@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import scipy as sp
+import pandas as pd
 
 def make_data_circle(radius, resolution):
     pairs = []
@@ -28,7 +29,6 @@ def make_data_ellipse(a, b, resolution):
         x = a * np.cos(angle)
         y = b * np.sin(angle)
         pairs.append([x,y])
-    print(pairs)
     return pairs
 
 def rotate(pairs, degrees):
@@ -60,6 +60,24 @@ def make_line(data):
 
 # print(make_line(np.array(make_data_ellipse(a=4, b=1, resolution=.01))))
 
-print(make_line(np.array(make_data_ellipse(a=2, b=1, resolution=.01))))
+# print(make_line(np.array(make_data_ellipse(a=2, b=1, resolution=.01))))
 
-print(make_line(np.array(rotate(make_data_ellipse(a=2, b=1, resolution=.01),30))))
+# print(make_line(np.array(rotate(make_data_ellipse(a=2, b=1, resolution=.01),30))))
+
+# np.array(make_data_circle(radius = 1, resolution=.01))
+
+# np.array(make_data_ellipse(a=4, b=1, resolution=.01))
+
+# np.array(make_data_ellipse(a=2, b=1, resolution=.01))
+
+# np.array(rotate(make_data_ellipse(a=2, b=1, resolution=.01),30))
+
+# for rad in [2,3,4]:
+#     for name, res in zip(['low', 'med-low', 'med-high', 'high'],[.01,.001,.0001,.000001]):
+#         DF = pd.DataFrame(rotate(np.array(make_data_ellipse(a=rad, b=1, resolution=res)), 30))
+#         DF.to_csv(f"BetaDataExper/Ellipse/data/ellipse_size_{str(rad)}_res_{name}_rot30.csv", index=False)
+
+#         DF = pd.DataFrame(rotate(np.array(make_data_ellipse(a=rad, b=1, resolution=res)), 45))
+#         # DF = pd.DataFrame(np.array(make_data_ellipse(a=rad, b=1, resolution=res)))
+#         DF.to_csv(f"BetaDataExper/Ellipse/data/ellipse_size_{str(rad)}_res_{name}_rot45.csv", index=False)
+#         print('Still working...')
