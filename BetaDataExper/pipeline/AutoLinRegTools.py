@@ -176,7 +176,7 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
             
     if "regressor_runtime_barchart" in figures:
         fig, ax = plt.subplots()
-        elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[regressor]["elapsed_time"] > 10 else (results_dict[regressor]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time longer than 10s, report in ms            
+        elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[regressor]["elapsed_time"] > 10 else (results_dict[regressor]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time shorter than 10s, report in ms            
         sns.barplot(x=successful_regs, y=[pair[0] for pair in elapsed], ax=ax) # get times from elapsed
         fig.suptitle(f"Runtime by model")
         ax.set_xlabel("Regressor Name")
