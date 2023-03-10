@@ -28,9 +28,17 @@ def make_data_ellipse(a, b, resolution):
         x = a * np.cos(angle)
         y = b * np.sin(angle)
         pairs.append([x,y])
+    print(pairs)
     return pairs
 
-
+def rotate(pairs, degrees):
+    theta = np.deg2rad(degrees)
+    rot_mat = [[math.cos(theta),-math.sin(theta)],[math.sin(theta),math.cos(theta)]]
+    a = np.array(rot_mat)
+    b = np.array(pairs).T
+    new_pairs = np.array(rot_mat) @ np.array(pairs).T
+    return new_pairs.T
+        
 
 def make_line(data):
     # print(np.size(data))
@@ -48,10 +56,10 @@ def make_line(data):
 
 
 #test with shapes
-print(make_line(np.array(make_data_circle(radius = 1, resolution=.01))))
+# print(make_line(np.array(make_data_circle(radius = 1, resolution=.01))))
 
-print(make_line(np.array(make_data_ellipse(a=4, b=1, resolution=.01))))
+# print(make_line(np.array(make_data_ellipse(a=4, b=1, resolution=.01))))
 
 print(make_line(np.array(make_data_ellipse(a=2, b=1, resolution=.01))))
 
-
+print(make_line(np.array(rotate(make_data_ellipse(a=2, b=1, resolution=.01),30))))
