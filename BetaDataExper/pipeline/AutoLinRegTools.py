@@ -173,6 +173,7 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
             fig.suptitle(f"{metric} performance by model")
             ax.set_xlabel("Regressor Name")
             ax.set_ylabel(f"{metric}")
+            plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/{metric}_barchart.png")
             
     if "regressor_runtime_barchart" in figures:
         fig, ax = plt.subplots()
@@ -181,6 +182,7 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
         fig.suptitle(f"Runtime by model")
         ax.set_xlabel("Regressor Name")
         ax.set_ylabel(f"Runtime in {elapsed[0][1]}")
+        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/runtime_barchart.png")
             
     if "2d_scatterplot_w_regression_line" in figures:
         fig, ax = plt.subplots()
@@ -193,8 +195,7 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
         fig.suptitle(f"Regression Over Data")
         ax.set_xlabel(f"{fields[0] if fields else 'Input Variable'}")
         ax.set_ylabel(f"{fields[1] if fields else 'Response Variable'}")
-    
-    plt.show()
+        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/regression.png")
             
     ################################
     
@@ -216,7 +217,7 @@ def main(path, params):
         print(f"{name} has model: \n{model}\n{'='*30}")
 if __name__ == "__main__":
     main(
-        path = "BetaDataExper/Circle/Circle.csv",
+        path = "BetaDataExper/Ellipse/data/ellipse_size_2_res_med-low.csv",
         params = {
             "random_seed": 100,
         }
