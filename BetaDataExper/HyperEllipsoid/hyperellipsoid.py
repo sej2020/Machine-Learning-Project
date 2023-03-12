@@ -45,11 +45,12 @@ def make_line(data):
 # print(make_line(gen_hyp_ellip([3,2,1],.001)))
 # print(make_line(rotate(gen_hyp_ellip([3,2,1],.001),30)))
 
-axes = [random.randrange(1, 10000, 1) for i in range(10000)]
+axes = [random.randrange(1, 10000, 1) for i in range(5000)]
 
-DF = pd.DataFrame(gen_hyp_ellip(axes,.001))
+data = gen_hyp_ellip(axes,.001)
+DF = pd.DataFrame(data)
 DF.to_csv(f"BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse.csv")
 
 for deg in [5,15,30,90]:
-    DF = pd.DataFrame(rotate(gen_hyp_ellip(axes,.001),deg))
+    DF = pd.DataFrame(rotate(data,deg))
     DF.to_csv(f"BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse_rot_{deg}.csv")
