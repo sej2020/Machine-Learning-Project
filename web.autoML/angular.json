@@ -39,7 +39,8 @@
               "src/assets/css/typography.module.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["src/assets/Scripts/ecSimpleTransform.min.js"
+             ]
           },
           "configurations": {
             "production": {
@@ -102,7 +103,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["src/assets/Scripts/ecSimpleTransform.min.js"]
           }
         }
       }

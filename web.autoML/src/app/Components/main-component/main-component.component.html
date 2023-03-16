@@ -24,7 +24,7 @@
 </div> -->
 
 <div class="main-container">
-    
+    <script src="src/assets/Scripts/ecSimpleTransform.min.js"></script>
     <mat-toolbar class="header-toolbar">  
         AutoML 
     </mat-toolbar>
@@ -36,7 +36,7 @@
             <div class="nav-list" *ngFor="let li of listItems">
             <button mat-button class="menu-button mat-elevation-z10">
                 <mat-icon class="icon-avatar" style="color:antiquewhite; height:24px; width:24px;">{{li.iconName}}</mat-icon>
-                <a routerLink={{li.itemLink}}><span>{{li.itemName}}</span></a>
+                <a id="{{li.itemName}}" routerLink={{li.itemLink}}><span>{{li.itemName}}</span></a>
                 
             </button>
             

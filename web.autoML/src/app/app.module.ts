@@ -24,15 +24,20 @@ import { ResultPageComponent } from './Components/result-page/result-page.compon
 import {MatDialogModule} from '@angular/material/dialog';
 import { HomepageComponent } from './Components/homepage/homepage.component';
 import { DisclaimerDialogComponent } from './Components/disclaimer-dialog/disclaimer-dialog.component';
+import { NgxEchartsModule } from 'ngx-echarts';
+import { ResultsEchartsComponent } from './Components/results-echarts/results-echarts.component';
+import * as echarts from 'echarts';
 
 @NgModule({
+  
   declarations: [
     AppComponent,
     MainComponentComponent,
     FormContainerComponent,
     ResultPageComponent,
     HomepageComponent,
-    DisclaimerDialogComponent
+    DisclaimerDialogComponent,
+    ResultsEchartsComponent
   ],
   imports: [
     BrowserModule,
@@ -55,6 +60,9 @@ import { DisclaimerDialogComponent } from './Components/disclaimer-dialog/discla
     AppRoutingModule,
     MatListModule,
     MatDialogModule,
+    NgxEchartsModule.forRoot({
+      echarts
+    })
   ],
   exports: [
     BrowserModule,

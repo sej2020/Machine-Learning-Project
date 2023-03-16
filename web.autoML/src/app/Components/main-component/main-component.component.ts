@@ -36,8 +36,12 @@ export class MainComponentComponent {
       iconName: "stacked_bar_chart",
       itemName: "View Results",
       itemLink: "/results"
+    },
+    {
+      iconName: "stacked_bar_chart",
+      itemName: "Result Visualization",
+      itemLink: "/result-charts"
     }
-
   ]
 
   ngAfterViewInit() {

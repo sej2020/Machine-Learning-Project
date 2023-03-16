@@ -1,3 +1,4 @@
+import { ResultsEchartsComponent } from './Components/results-echarts/results-echarts.component';
 import { FormContainerComponent } from './Components/form-container/form-container.component';
 import { MainComponentComponent } from './Components/main-component/main-component.component';
 import { NgModule } from '@angular/core';
@@ -8,7 +9,8 @@ import { HomepageComponent } from './Components/homepage/homepage.component';
 const routes: Routes = [{path:'', component: HomepageComponent},
                         {path:'home', component: HomepageComponent},
                         {path:'newRequest', component: FormContainerComponent},
-                        {path:'results', component: ResultPageComponent}
+                        {path:'results', component: ResultPageComponent},
+                        {path:'result-charts', component: ResultsEchartsComponent}
                       ];
 
 @NgModule({
