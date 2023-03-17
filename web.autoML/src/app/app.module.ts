@@ -62,7 +62,7 @@ import * as echarts from 'echarts';
     MatDialogModule,
     NgxEchartsModule.forRoot({
       echarts
-    })
+    }),
   ],
   exports: [
     BrowserModule,
