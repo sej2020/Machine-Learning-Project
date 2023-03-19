@@ -173,16 +173,16 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
             fig.suptitle(f"{metric} performance by model")
             ax.set_xlabel("Regressor Name")
             ax.set_ylabel(f"{metric}")
-            plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/{metric}_barchart.png")
+            plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_low_rot30/{metric}_barchart.png")
             
     if "regressor_runtime_barchart" in figures:
         fig, ax = plt.subplots()
-        elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[regressor]["elapsed_time"] > 10 else (results_dict[regressor]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time shorter than 10s, report in ms            
+        elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[successful_regs[0]]["elapsed_time"] > 10 else (results_dict[successful_regs[0]]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time shorter than 10s, report in ms            
         sns.barplot(x=successful_regs, y=[pair[0] for pair in elapsed], ax=ax) # get times from elapsed
         fig.suptitle(f"Runtime by model")
         ax.set_xlabel("Regressor Name")
         ax.set_ylabel(f"Runtime in {elapsed[0][1]}")
-        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/runtime_barchart.png")
+        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_low_rot30/runtime_barchart.png")
             
     if "2d_scatterplot_w_regression_line" in figures:
         fig, ax = plt.subplots()
@@ -192,10 +192,11 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
         for line in reg_lines:
             sns.lineplot(x=X_range.flatten(), y=line.flatten(), ax=ax)
 
+        ax.set_aspect('equal')
         fig.suptitle(f"Regression Over Data")
         ax.set_xlabel(f"{fields[0] if fields else 'Input Variable'}")
         ax.set_ylabel(f"{fields[1] if fields else 'Response Variable'}")
-        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_med-low/regression.png")
+        plt.savefig(f"BetaDataExper/pipeline/tmp_outputs/res_low_rot30/regression.png")
             
     ################################
     
@@ -217,7 +218,7 @@ def main(path, params):
         print(f"{name} has model: \n{model}\n{'='*30}")
 if __name__ == "__main__":
     main(
-        path = "BetaDataExper/Ellipse/data/ellipse_size_2_res_med-low.csv",
+        path = "BetaDataExper/Ellipse/data/ellipse_size_2_res_low_rot30.csv",
         params = {
             "random_seed": 100,
         }
