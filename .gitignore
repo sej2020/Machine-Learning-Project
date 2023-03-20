@@ -6,3 +6,6 @@ libraries_data
 
 # testing pytorch
 pytorch_test
+
+# don't upload massive output files from beta data experiments
+results.yaml
