@@ -8,15 +8,16 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 import torch
 import mxnet as mx
+import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
 
-def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="darkgrid", output_folder=os.getcwd()):
+def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="darkgrid", output_folder=os.getcwd()):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
     Args: 
-        data - pd.DataFrame or np.ndarray with target variable in final column and no categorical or missing data
+        data_path - path to file that can become a pd.DataFrame or np.ndarray with target variable in final column and no categorical or missing data
         
         include_regs - "all" to use all algorithms or a list of desired algorithms to use a subset
             options: "sklearn-lst_sq" ::: "tf-lst_sq_fast" ::: "tf-lst_sq_slow" ::: "pytorch-lst_sq" ::: "mxnet_lst_sq"
@@ -37,6 +38,8 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
         includes various useful things
         
     """
+    data = pd.read_csv(data_path).values
+    
     data, fields = data_ingestion(data)
     
     timer = set_time_type(time_type)
@@ -45,7 +48,7 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
 
     X_train, X_test, y_train, y_test = split_data(data, split_pcnt, random_seed)
     
-    figures = decide_figures(chosen_figures)
+    figures = decide_figures(data, chosen_figures)
     
     results_dict = regression_loop(X_train, y_train, X_test, timer, reg_names)
 
@@ -64,9 +67,20 @@ def linreg_pipeline(data, include_regs="all", split_pcnt=None, random_seed=None,
     
     output_folder = create_output_folder(run_number)
     
-    print(output_folder)
-    
     generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder)
+    
+    metadata = {
+        "input_data": data_path.name,
+        "completed_regs": successful_regs,
+        "split_percent": split_pcnt if split_pcnt else "No train/test split",
+        "random_seed": random_seed,
+        "timer_method": time_type,
+        "dataset_shape": f"{data.shape[0]} x {data.shape[1]}",
+    }
+    
+    dump_to_yaml(output_folder / "metadata.yaml", metadata)
+    
+    dump_to_yaml(output_folder / "results.yaml", results_dict)
     
     return results_dict
     
@@ -122,21 +136,22 @@ def split_data(data, split_pcnt, seed):
         
     return X_train, X_test, y_train, y_test
 
-def decide_figures(chosen_figures):
+def decide_figures(data, chosen_figures):
     impossible_figures = []
     possible_figures = [
         "regressor_accuracy_barchart",
         "regressor_runtime_barchart",
         "2d_scatterplot_w_regression_line",
     ]
+    
+    if data.shape[1] > 2:
+        print(f"{'-'*30}\nWarning: Your data is {data.shape[1]} dimensional, so 2D scatterplot will not be created\n{'-'*30}")
+        impossible_figures.append("2d_scatterplot_w_regression_line")
+            
     if chosen_figures == "all":
-        figures = possible_figures
+        figures = [figure_name for figure_name in possible_figures if figure_name not in impossible_figures]
         
     elif isinstance(generate_figures, (tuple, list, set)):
-        if ("2d_scatterplot_w_regression_line" in generate_figures) and data.shape[1] > 2:
-            print(f"{'-'*30}\nWarning: Your data is {data.shape[1]} dimensional, so 2D scatterplot will not be created\n{'-'*30}")
-            impossible_figures.append("2d_scatterplot_w_regression_line")
-            
         figures = [figure_name for figure_name in generate_figures if (figure_name in possible_figures) and (figure_name not in impossible_figures)]
         
     elif generate_figures == False:
@@ -186,6 +201,11 @@ def process_results(results_dict, y_test, metrics):
         for metric, formula in metrics:
             score = formula(y_test, reg_output["y_pred"])
             results_dict[reg_name][metric] = score
+
+def dump_to_yaml(path, object):
+    with open(path, "w") as f_log:
+        dump = pyaml.dump(object)
+        f_log.write(dump)
 
 def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder):
     possible_themes = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
@@ -244,14 +264,14 @@ def get_and_increment_run_counter():
     
 def create_output_folder(run_number):
     program_container = list(Path.cwd().rglob("AutoLinRegToolsD.py"))[0].parent
-    output_folder = program_container / "outputs" / f"output_{run_number}"
+    output_folder = program_container /"outputs" / f"output_{run_number}"
     output_folder.mkdir(parents=True, exist_ok=True)
     
     return output_folder
     
 def main(data_path, params):
-    data = pd.read_csv(data_path, header=None).values
-    results = linreg_pipeline(data, **params)
+    
+    results = linreg_pipeline(data_path, **params)
     reg_names = [
         "sklearn-lst_sq",
         "tf-lst_sq_fast",
@@ -262,10 +282,12 @@ def main(data_path, params):
     stuff = [results[reg]["model"] for reg in reg_names]
     for name, model in zip(reg_names, stuff):
         print(f"{name} has model: \n{model}\n{'='*30}")
+        
+    print("Run complete")
 
 if __name__ == "__main__":
     main(
-        data_path = Path("BetaDataExper/Ellipse/data/ellipse_size_2_res_low_rot30.csv"),
+        data_path = Path("BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse_rot_90.csv"),
         params = {
             "random_seed": 100,
         }
