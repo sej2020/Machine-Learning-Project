@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import math
 import pandas as pd
+import math
 import random
 
 def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
@@ -21,6 +21,21 @@ def rotate(pairs, degrees):
     rot_mat = np.identity(pairs.shape[1])
     theta = np.deg2rad(degrees)
     rot_mat[0][0], rot_mat[0][1], rot_mat[1][0], rot_mat[1][1] = math.cos(theta), -math.sin(theta), math.sin(theta), math.cos(theta)
+    new_pairs = np.array(rot_mat) @ np.array(pairs).T
+    return new_pairs.T
+
+def rotate3d(pairs, yaw, pitch, roll):
+    from math import cos, sin
+    rot_mat = np.identity(pairs.shape[1])
+    print(rot_mat)
+    alpha, beta, gamma = np.deg2rad(yaw), np.deg2rad(pitch), np.deg2rad(roll)
+    rotation = np.array([
+        [cos(alpha)*cos(beta), cos(alpha)*sin(beta)*sin(gamma)-sin(alpha)*cos(gamma), cos(alpha)*sin(beta)*cos(gamma)+sin(alpha)*sin(gamma)],
+        [sin(alpha)*cos(beta), sin(alpha)*sin(beta)*sin(gamma)+cos(alpha)*cos(gamma), sin(alpha)*sin(beta)*cos(gamma)-cos(alpha)*sin(gamma)],
+        [-sin(beta), cos(beta)*sin(gamma), cos(beta)*cos(gamma)]
+        ])
+    rot_mat[:3,:3] = rotation
+    print(rot_mat)
     new_pairs = np.array(rot_mat) @ np.array(pairs).T
     return new_pairs.T
 
@@ -50,16 +65,16 @@ lower = 100
 upper = 1000
 dimensions = 3
 resolution = 0.001
-axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+# axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
 axes = [8000, 3000, 5000]
 
 data = gen_hyp_ellip(axes,resolution)
 df = pd.DataFrame(data)
-make_line(data)
-df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid.csv", index=False, header=False)
+
+df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_3drot_0.csv", index=False, header=False)
 
 for deg in [5,15,30,90]:
-    data = rotate(data,deg)
-    df = pd.DataFrame(data)
-    make_line(data)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_rot_{deg}.csv", index=False, header=False)
+    data_rot = rotate3d(data,deg, deg, deg)
+    df = pd.DataFrame(data_rot)
+    make_line(data_rot)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_3drot_{deg}.csv", index=False, header=False)
