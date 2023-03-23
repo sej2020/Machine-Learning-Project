@@ -4,8 +4,9 @@ import math
 import pandas as pd
 import random
 
-def gen_hyp_ellip(axes: list, resolution: float):
-    norm_points = np.array([np.random.normal(loc=0.0, scale=ax, size=int(1/resolution)) for ax in axes])
+def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
+    rng = np.random.default_rng(seed)
+    norm_points = np.array([rng.normal(loc=0.0, scale=ax, size=int(1/resolution)) for ax in axes])
     numer = np.square(norm_points)
     denom = np.expand_dims(np.square(np.array(axes)), axis=1)
     radicand = np.sum(np.divide(numer, denom), axis=0)
@@ -45,12 +46,20 @@ def make_line(data):
 # print(make_line(gen_hyp_ellip([3,2,1],.001)))
 # print(make_line(rotate(gen_hyp_ellip([3,2,1],.001),30)))
 
-axes = [random.randrange(1, 10000, 1) for i in range(5000)]
+lower = 100
+upper = 1000
+dimensions = 3
+resolution = 0.001
+axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+axes = [8000, 3000, 5000]
 
-data = gen_hyp_ellip(axes,.001)
-DF = pd.DataFrame(data)
-DF.to_csv(f"BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse.csv")
+data = gen_hyp_ellip(axes,resolution)
+df = pd.DataFrame(data)
+make_line(data)
+df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid.csv", index=False, header=False)
 
 for deg in [5,15,30,90]:
-    DF = pd.DataFrame(rotate(data,deg))
-    DF.to_csv(f"BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse_rot_{deg}.csv")
+    data = rotate(data,deg)
+    df = pd.DataFrame(data)
+    make_line(data)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_rot_{deg}.csv", index=False, header=False)

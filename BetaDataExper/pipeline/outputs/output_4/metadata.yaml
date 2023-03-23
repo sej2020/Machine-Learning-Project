@@ -4,8 +4,8 @@ completed_regs:
   - tf-lst_sq_slow
   - pytorch-lst_sq
   - mxnet_lst_sq
-dataset_shape: 1000 x 5001
-input_data: big_hyper_ellipse_rot_90.csv
+dataset_shape: 1000 x 5000
+input_data: hyper_test_expert_throwback.csv # axis size range is 100-1000
 random_seed: 100
 split_percent: No train/test split
 timer_method: total

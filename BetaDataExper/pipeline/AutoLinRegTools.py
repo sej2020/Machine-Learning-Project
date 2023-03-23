@@ -38,7 +38,7 @@ def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=
         includes various useful things
         
     """
-    data = pd.read_csv(data_path).values
+    data = pd.read_csv(data_path, header=None).values
     
     data, fields = data_ingestion(data)
     
@@ -246,6 +246,8 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         ax.set_xlabel(f"{fields[0] if fields else 'X'}")
         ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
         plt.savefig(output_folder / f"regression.png")
+        
+    plt.clf()
 
 def get_and_increment_run_counter():
     program_container = list(Path.cwd().rglob("AutoLinRegTools.py"))[0].parent
@@ -287,8 +289,15 @@ def main(data_path, params):
 
 if __name__ == "__main__":
     main(
-        data_path = Path("BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse_rot_90.csv"),
+        data_path = Path("BetaDataExper/HyperEllipsoid/data/ellipsoid.csv"),
         params = {
             "random_seed": 100,
         }
     )
+    for rot in [5, 15, 30, 90]:
+        main(
+            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_rot_{rot}.csv"),
+            params = {
+                "random_seed": 100,
+            }
+        )
