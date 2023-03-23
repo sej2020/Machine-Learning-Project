@@ -287,7 +287,7 @@ def main(data_path, params):
 
 if __name__ == "__main__":
     main(
-        data_path = Path("BetaDataExper/HyperEllipsoid/data/big_hyper_ellipse_rot_90.csv"),
+        data_path = Path("./Concrete.csv"),
         params = {
             "random_seed": 100,
         }
