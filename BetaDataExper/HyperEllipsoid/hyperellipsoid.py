@@ -24,6 +24,7 @@ def rotate(pairs, degrees):
     new_pairs = np.array(rot_mat) @ np.array(pairs).T
     return new_pairs.T
 
+
 def rotate3d(pairs, yaw, pitch, roll):
     from math import cos, sin
     rot_mat = np.identity(pairs.shape[1])
@@ -51,6 +52,9 @@ def make_line(data):
     ax = fig.add_subplot(projection='3d')
     # plt.title(f"{d:e} {k:e}")
     ax.plot(X,Y,Z,'.')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
     # plt.plot(X,y_hat)
     ax.grid()
     ax.set_aspect('equal')
@@ -63,18 +67,33 @@ def make_line(data):
 
 lower = 100
 upper = 1000
-dimensions = 3
+dimensions = 10
 resolution = 0.001
-# axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
-axes = [8000, 3000, 5000]
+axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+# axes = [8000, 3000, 5000]
 
 data = gen_hyp_ellip(axes,resolution)
+data[:,[2,-1]] = data[:,[-1,2]]
 df = pd.DataFrame(data)
+df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_0.csv", index=False, header=False)
 
-df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_3drot_0.csv", index=False, header=False)
-
+data[:,[2,-1]] = data[:,[-1,2]]
 for deg in [5,15,30,90]:
-    data_rot = rotate3d(data,deg, deg, deg)
+    data_rot = rotate3d(data, deg, deg, deg)
+    data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
     df = pd.DataFrame(data_rot)
-    make_line(data_rot)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_3drot_{deg}.csv", index=False, header=False)
+    # make_line(data_rot)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{deg}.csv", index=False, header=False)
+
+# axes = [8000, 5000, 3000]
+
+# data = gen_hyp_ellip(axes, resolution)
+# make_line(data)
+# data_rot = rotate(data, 45)
+# make_line(data_rot)
+
+# print(data_rot)
+# print('*'*100)
+# data_rot[:,[1,-1]] = data_rot[:,[-1,1]]
+# make_line(data_rot)
+# print(data_rot)
