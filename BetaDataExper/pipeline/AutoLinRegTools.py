@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
     for rot in [0, 5, 15, 30, 90]:
         main(
-            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_0.csv"),
+            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{rot}.csv"),
             params = {
                 "random_seed": 100,
             }

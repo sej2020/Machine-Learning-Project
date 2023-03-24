@@ -5,7 +5,7 @@ completed_regs:
   - pytorch-lst_sq
   - mxnet_lst_sq
 dataset_shape: 1000 x 10
-input_data: hyper_ellipsoid_3drot_0.csv
+input_data: hyper_ellipsoid_3drot_15.csv
 random_seed: 100
 split_percent: No train/test split
 timer_method: total
