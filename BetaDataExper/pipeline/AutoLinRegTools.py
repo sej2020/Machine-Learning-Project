@@ -288,15 +288,10 @@ def main(data_path, params):
     print("Run complete")
 
 if __name__ == "__main__":
-    main(
-        data_path = Path("BetaDataExper/HyperEllipsoid/data/ellipsoid.csv"),
-        params = {
-            "random_seed": 100,
-        }
-    )
-    for rot in [5, 15, 30, 90]:
+
+    for rot in [0, 5, 15, 30, 90]:
         main(
-            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/ellipsoid_rot_{rot}.csv"),
+            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_0.csv"),
             params = {
                 "random_seed": 100,
             }
