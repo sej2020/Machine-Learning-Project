@@ -5,7 +5,18 @@
     margin-top: 5vh;
 }
 
-.chart-container{
-    height: 700px;
-    width: 900px;
+.chart-container {
+    height: 900px;
+    width: 1200px;
+    margin-top: 2vh;
+}
+
+.chart-input-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.requestInput {
+    flex-grow: 1;
 }

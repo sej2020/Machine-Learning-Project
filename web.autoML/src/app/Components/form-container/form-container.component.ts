@@ -120,6 +120,7 @@ public onSubmit(formData: any) {
       console.log(this.request_id);
     
   this.router.navigate(["", "results"],{relativeTo: this.route, skipLocationChange :false, state: {id: this.request_id}});
+  
   });
 }
 

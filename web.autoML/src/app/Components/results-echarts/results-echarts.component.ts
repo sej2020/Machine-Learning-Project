@@ -5,6 +5,9 @@ import { TransformComponent } from 'echarts/components';
 import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
+import { UploadRequestService } from 'src/app/Services/upload-request.service';
+import { IResults } from '../result-page/result-page.component';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -14,145 +17,124 @@ import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
 })
 export class ResultsEchartsComponent implements OnInit {
 
-  // regressorData = [[134.744, 101.139, 107.769, 83.486, 103.296, 103.997, 96.735, 91.425, 139.113, 118.779], [61.9045328587085, 52.5798970391187, 60.320216595453, 61.8208707545006, 59.9380889894142, 45.8944453371561, 55.2555857413487, 81.7090951014166, 74.4910264391988, 61.1379666741692], [19.7060123749999,
-  //   34.8677096054421, 22.1665278051947, 29.5878210025915, 28.0377016623376, 16.1137678474025, 48.667168025974, 32.0334957922077, 48.022053707013, 22.552428327922]]
+  boxplotData!: [string[]]
+  cvLineplotData!: any
+  resultsData!: IResults;
 
-  regressorData = [
-    [
-        "metricValue",
-        "regressorName",
-        "metricName"
-    ],
-    [
-        100.2,
-        "LinearRegression",
-        "MSE"
-    ],
-    [
-        9.2,
-        "LinearRegression",
-        "MSE"
-    ],
-    [
-        8.2,
-        "LinearRegression",
-        "MSE"
-    ],
-    [
-        100.2,
-        "LogisticRegression",
-        "MSE"
-    ],
-    [
-        90.2,
-        "LogisticRegression",
-        "MSE"
-    ],
-    [
-        80.2,
-        "LogisticRegression",
-        "MSE"
-    ],
-    [
-        200.2,
-        "ADP",
-        "MSE"
-    ],
-    [
-        180.2,
-        "ADP",
-        "MSE"
-    ],
-    [
-        160.2,
-        "ADP",
-        "MSE"
-    ],
-  [
-      10.2,
-      "LinearRegression",
-      "RMSE"
-  ],
-  [
-      9.2,
-      "LinearRegression",
-      "RMSE"
-  ],
-  [
-      8.2,
-      "LinearRegression",
-      "RMSE"
-  ],
-  [
-      100.2,
-      "LogisticRegression",
-      "RMSE"
-  ],
-  [
-      90.2,
-      "LogisticRegression",
-      "RMSE"
-  ],
-  [
-      80.2,
-      "LogisticRegression",
-      "RMSE"
-  ],
-  [
-      200.2,
-      "ADP",
-      "RMSE"
-  ],
-  [
-      180.2,
-      "ADP",
-      "RMSE"
-  ],
-  [
-      160.2,
-      "ADP",
-      "RMSE"
-  ]
-  ]
+  constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
-  constructor() { }
+  requestId: string = "";
+  currentMetric: string = "";
+  chartType: string = "boxplot";
 
-  requestId:string = "";
-  currentMetric:string = "MSE";
-
-  chartOptions: EChartsOption = {}
-  yAxisData: string[] = ["hello"];
-
-  fetchRawData = () => {
-    console.log("i got clicked");
-  }
-
-  onKey(event:any) {
-    this.requestId = event.target.value;  
-    console.log(this.requestId);
-  }
+  chartOptions!: EChartsOption;
+  yAxisData!: string[];
 
   ngOnInit() {
-    console.log(this.regressorData);
-    let SCRIPT_PATH = 'https://fastly.jsdelivr.net/npm/echarts-simple-transform/dist/ecSimpleTransform.min.js';
-
-    // this.yAxisData = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor'];
-
+    this.requestId = history.state.id ? history.state.id : "";
+    if (this.requestId.length > 0) {
+      this.fetchRawData();
+    }
     echarts.registerTransform(aggregate as ExternalDataTransform);
+  }
 
+  fetchRawData = () => {
+    this.uploadRequestService.getRequestStatus(this.requestId)
+      .subscribe((data: any) => {
+        this.resultsData = data;
+        this.boxplotData = this.resultsData.data['visualization_data']['boxplot']
+        this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
+        this.yAxisData = this.resultsData.data['metrics_list']
+        this.currentMetric = this.yAxisData[0]
+        this.chartOptions = this.getChartOptions(this.chartType);
+        console.log(this.chartOptions);
+      })
+  }
 
-    this.chartOptions = {
+  changeInRequestId(event: any) {
+    this.requestId = event.target.value;
+  }
+
+  changeInCurrentMetric(value: any) {
+    this.currentMetric = value;
+    this.chartOptions = this.getChartOptions(this.chartType);
+  }
+
+  changeInChartType(value: any) {
+    this.chartType = value;
+    this.chartOptions = this.getChartOptions(this.chartType);
+  }
+
+  getChartOptions(chartType: string) {
+    if (chartType === 'boxplot') {
+      return this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
+    } else {
+      return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
+    }
+  }
+
+  getCvLinePlotChartOptions(currentMetric: string, num_cv_folds: number, lineData: any) {
+    let regressorNames = Object.keys(lineData);
+    let lineYAxisData: object[] = [];
+    for (var i = 0; i < regressorNames.length; i++) {
+      lineYAxisData.push({
+        name: regressorNames[i],
+        type: 'line',
+        data: lineData[regressorNames[i]]
+      })
+    }
+
+    let cvLineplotOptions: EChartsOption = {
       title: {
-        text: 'Regressors - Mean Squared Error'
+        text: 'Regressors - ' + currentMetric
+      },
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        data: regressorNames,
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      toolbox: {
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: [...Array(num_cv_folds).keys()],
+        name: "CV Fold"
+      },
+      yAxis: {
+        type: 'value',
+        name: currentMetric
+      },
+      series: lineYAxisData
+    };
+
+    return cvLineplotOptions;
+  }
+
+  getBoxPlotCharOptions(currentMetric: string, dataSource: [string[]]) {
+    let boxplotOptions: EChartsOption = {
+      title: {
+        text: 'Regressors - ' + currentMetric
       },
       tooltip: {
         trigger: 'axis',
         confine: true
       },
-      toolbox:{
+      toolbox: {
         show: true,
-        feature:{
-          dataView:{
+        feature: {
+          dataView: {
             readOnly: false
           },
           saveAsImage: {}
@@ -161,7 +143,7 @@ export class ResultsEchartsComponent implements OnInit {
       dataset: [
         {
           id: 'raw',
-          source: this.regressorData
+          source: dataSource
         }, {
           id: 'raw_select_metric',
           fromDatasetId: 'raw',
@@ -170,7 +152,7 @@ export class ResultsEchartsComponent implements OnInit {
               type: 'filter',
               config: {
                 dimension: 'metricName',
-                value: this.currentMetric
+                value: currentMetric
               }
             }
           ]
@@ -202,17 +184,16 @@ export class ResultsEchartsComponent implements OnInit {
         }
       ],
       xAxis: {
-        name: 'metricName',
+        name: this.currentMetric,
         nameLocation: 'middle',
         nameGap: 30,
         scale: true
       },
       yAxis: {
         type: 'category',
-        // data: this.yAxisData,
-        // splitArea: {
-        //   show: true
-        // }
+        splitArea: {
+          show: true
+        }
       },
       grid: {
         bottom: 100
@@ -235,7 +216,10 @@ export class ResultsEchartsComponent implements OnInit {
           }
         }],
     };
+
+    return boxplotOptions;
   }
+
 }
 
 
