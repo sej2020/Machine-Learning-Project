@@ -90,12 +90,8 @@ def main(matrix):
 
 if __name__ == "__main__":
     x,y = sys.float_info.max,sys.float_info.min
-    matrix1 = np.array([[x,y],[-x,-y]])
-    matrix2 = np.array([[x,x],[-x,-x]])
-    matrix3 = np.array([[x,x],[y,y],[-x,-x]])
-    print('$'*200)
-    main(matrix1)
-    print('$'*200)
-    main(matrix2)
-    print('$'*200)
-    main(matrix3)
+    matrix1 = pd.DataFrame(np.array([[x,y],[-x,-y]]))
+    matrix2 = pd.DataFrame(np.array([[x,x],[-x,-x]]))
+    matrix3 = pd.DataFrame(np.array([[x,x],[y,y],[-x,-x]]))
+    for i in [matrix1, matrix2, matrix3]:
+        i.to_csv('BetaDataExper/MaxMinPoints/data/')
