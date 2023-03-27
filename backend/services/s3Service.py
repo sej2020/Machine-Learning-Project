@@ -5,10 +5,10 @@ import boto3
 from botocore.exceptions import ClientError
 
 
-logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s  %(name)s  %(levelname)s: %(message)s')
-
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s  %(name)s  %(levelname)s: %(message)s')
+logging.basicConfig()
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+# log.setLevel(logging.INFO)
 
 class S3Service:
     def __init__(self, bucket_name):
@@ -16,7 +16,7 @@ class S3Service:
         self.region = os.getenv('region') or 'us-east-1'
         self.aws_access_key_id = os.getenv('aws_access_key_id') or 'accessKey1'
         self.aws_secret_access_key = os.getenv('aws_secret_access_key') or 'verySecretKey1'
-        self.endpoint_url = os.getenv('s3_endpoint_url') or 'http://149.165.155.17:30042'
+        self.endpoint_url = os.getenv('s3_endpoint_url') or 'http://localhost:8000'
         self.s3_client = boto3.client('s3', aws_access_key_id=self.aws_access_key_id, aws_secret_access_key=self.aws_secret_access_key,
                                       region_name=self.region, endpoint_url=self.endpoint_url)
         if not self.is_bucket_available():
@@ -78,9 +78,11 @@ class S3Service:
     def download_file(self, file_name, download_path):
         try:
             log.info('downloading s3 key {} to local path {}'.format(file_name, download_path))
-            self.s3_client.download_file(self.bucket_name, file_name, download_path)
-        except ClientError as e:
+            print('downloading s3 key {} to local path {}'.format(file_name, download_path))
+            result = self.s3_client.download_file(self.bucket_name, file_name, download_path)
+        except Exception as e:
             errorMessage = "error while downloading the file {} from bucket {}: {}".format(file_name, self.bucket_name, e)
+            print(errorMessage)
             log.info(errorMessage)
             raise Exception(errorMessage)
 

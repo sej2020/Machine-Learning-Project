@@ -1,0 +1,15 @@
+/venv
+/venv1
+/venv2
+/venv3_9
+/venv_work
+/.idea
+downloads
+/uploads
+/echarts
+/main
+__pycache__/
+*.py[cod]
+backend/downloads
+backend/uploads
+*.log
