@@ -198,15 +198,20 @@ def metric_help_func():
     """
 
     metric_table = {
-        'Explained Variance':             [True, 1, metrics.explained_variance_score], 'Max Error': [False, 1, metrics.max_error],
-        'Mean Absolute Error':            [False, -1, metrics.mean_absolute_error], 'Mean Squared Error': [False, -1, metrics.mean_squared_error],
+        'Explained Variance':             [True, 1, metrics.explained_variance_score],
+        'Max Error':                      [False, 1, metrics.max_error],
+        'Mean Absolute Error':            [False, -1, metrics.mean_absolute_error],
+        'Mean Squared Error':             [False, -1, metrics.mean_squared_error],
         'Root Mean Squared Error':        [False, -1, metrics.mean_squared_error],
         'Mean Squared Log Error':         [False, -1, metrics.mean_squared_log_error],
-        'Median Absolute Error':          [False, -1, metrics.median_absolute_error], 'R-Squared': [True, 1, metrics.r2_score],
-        'Mean Poisson Deviance':          [False, -1, metrics.mean_poisson_deviance], 'Mean Gamma Deviance': [False, -1, metrics.mean_gamma_deviance],
+        'Median Absolute Error':          [False, -1, metrics.median_absolute_error],
+        'R-Squared':                      [True, 1, metrics.r2_score],
+        'Mean Poisson Deviance':          [False, -1, metrics.mean_poisson_deviance],
+        'Mean Gamma Deviance':            [False, -1, metrics.mean_gamma_deviance],
         'Mean Absolute Percentage Error': [False, -1, metrics.mean_absolute_percentage_error],
         'D-Squared Absolute Error Score': [True, 1, metrics.d2_absolute_error_score],
-        'D-Squared Pinball Score':        [True, 1, metrics.d2_pinball_score], 'D-Squared Tweedie Score': [True, 1, metrics.d2_tweedie_score]
+        'D-Squared Pinball Score':        [True, 1, metrics.d2_pinball_score],
+        'D-Squared Tweedie Score':        [True, 1, metrics.d2_tweedie_score]
         }
 
     try:
@@ -254,8 +259,56 @@ def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np
 
     return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
 
-def comparison(id: int, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp: int, n_vizualized_tb: int, test_set_size: float,
-               n_cv_folds: int, score_method: str, datapath: str, n_workers: int) -> dict:
+
+def comparison_wrapper(setting: int, conf: dict) -> dict:
+    """
+    This function is a wrapper for the comparison function. Based on the setting of the wrapper, the comparison function will either be run with
+    default parameters or with specified parameters.
+
+    Args:
+        setting (int): 1 to indicate a request from the basic user interface and 2 to indicate a request from the advanced user interface
+        conf (dict): A dictionary of hyperparameters to be sent to the run function. If the dictionary contains only an id and datapath, the other 
+                    hyperparameters will be imputed with default values.
+    """
+
+    default_conf = {'id': conf['id'],
+            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
+                                 'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
+                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
+                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+                                 'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
+                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+                                 }, 
+            'metric_list': ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
+                            'Mean Squared Log Error', 'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
+                            'Mean Absolute Percentage Error', 'D-Squared Absolute Error Score',
+                            'D-Squared Pinball Score', 'D-Squared Tweedie Score'], 
+            'n_vizualized_tb': 0, 
+            'test_set_size': 0.1,
+            'n_cv_folds': 11, 
+            'score_method': 'Root Mean Squared Error',
+            'datapath': conf['datapath'], 
+            'n_workers': 1,
+            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set'],
+                }
+    if setting == 1:
+        return comparison(**default_conf)
+    elif setting == 2:
+        return comparison(**conf)
+    else:
+        raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
+
+
+def various_training_size_fig():
+    pass
+
+
+def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_tb: int, test_set_size: float,
+               n_cv_folds: int, score_method: str, datapath: str, n_workers: int, figure_lst: list) -> dict:
     """
     This function will perform cross-validation training across several regressor types for one dataset.
 
@@ -273,16 +326,13 @@ def comparison(id: int, which_regressors: dict, metric_list: list, styledict: di
         datapath (str) - a file path (eventually from s3 bucket) of the csv data
         which_regressors (dict) - dictionary of key:value pairs of form <'RegressorName'> : <Bool(0)|Bool(1)>
         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-        styledict* (dict) - container for user to specify style of boxplots
-        n_vizualized_bp* (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
-        n_vizualized_tb* (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
+        n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
         test_set_size (float) - a number between 0 and 1 that indicates the proportion of data to be allocated to the test set (Default: 0.2)
         n_cv_folds (int) - the number of folds for k-fold cross validation training (Default: 10)
         score_method* (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
         datapath (str) - a file path to temporary dataset file retrieved from input s3 bucket
         n_workers (int) - this determines whether the 'run' function is performed serially or with multiple concurrent processors. The user selects the number of processes (Default: 1)
-
-        * - indicates that this parameter is relevant only if visualizations are performed on backend
+        figure_lst (list) - a list of the names of the figures to be generated on the frontend that require a separate process in the backend
 
     Returns:
         failed_regs (list) - a list of regressors that encountered an error in cross-validation training
@@ -301,7 +351,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, styledict: di
             del metric_list[i + 1]
 
     metric_help = metric_help_func()
-
+            
     # creating cv samples and running each regressor over these samples
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attribs, train_labels, n_cv_folds)
     # fundemental idea of args_lst is to create the cross product of all k folds with all r regressors, making k*r tasks (sets of arguments) to be passed to mp pool
@@ -337,20 +387,22 @@ def comparison(id: int, which_regressors: dict, metric_list: list, styledict: di
     fin_org_results = {k: v for k, v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
 
+    ## generating csv of results to generate figures specified in the figure_lst parameter
+    # figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': various_training_size_fig}
+    # for k,v in figure_lookup.items():
+    #     if k in figure_lst:
+    #         fig_res = v()
+    #         ### will need to make write_results extensible
+    #         write_results(f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{k}.csv", fig_res)
+
     output_path = f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{id}.csv"
     write_results(output_path, fin_org_results, metric_list)
-
-    # #generating figures and saving to the user's CWD ******* IF WE ARE PROVIDING VISUALIZATIONS ON BACKEND
-    # figs = [test_best(fin_org_results, metric_list, test_attrib, test_labels, metric_help, n_vizualized_tb)]
-    # for index in range(len(metric_list)):
-    #     figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
-    # for k in range(len(figs)):
-    #     figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
 
     return {
         'output_path': output_path,
         'failed_regs': list(failed_regs)
         }
+
 
 def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attribs: np.ndarray, train_labels: np.ndarray,
         test_attribs: np.ndarray, test_labels: np.ndarray) -> dict:
@@ -390,63 +442,65 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
 
     return success, reg_dict
 
-def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_help: dict, n_vizualized_bp: int, index: int) -> plt.figure:
-    """
-    This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
-    The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
 
-    Args:
-        fin_org_results (dict) - the final results from cross-validation
-        styledict (dict) - container for user to specify style of boxplots
-        metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-        metric_help (dict) - a dictionary to assist with any functions involving metrics
-        n_vizualized_bp (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
-        index (int) - this variable is created internally to determine which metric this particular run of boxplot will visualize
+# def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_help: dict, n_vizualized_bp: int, index: int) -> plt.figure:
+#     """
+#     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
+#     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
 
-    Returns:
-        A boxplot figure displaying the performance of a specified number of regressors on cross-validation training
-    """
+#     Args:
+#         fin_org_results (dict) - the final results from cross-validation
+#         styledict (dict) - container for user to specify style of boxplots
+#         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
+#         metric_help (dict) - a dictionary to assist with any functions involving metrics
+#         n_vizualized_bp (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
+#         index (int) - this variable is created internally to determine which metric this particular run of boxplot will visualize
 
-    boxfig = plt.figure(constrained_layout=True)
+#     Returns:
+#         A boxplot figure displaying the performance of a specified number of regressors on cross-validation training
+#     """
 
-    metric = metric_list[index]
-    df = pd.DataFrame()
-    for k, v in fin_org_results.items():
-        df[k] = [list(dict.values())[0][index] for dict in v]
+#     boxfig = plt.figure(constrained_layout=True)
 
-    # Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
-    # sort or a descending sort based on the metric.
-    sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
-    df_sorted = df[sorted_index]
+#     metric = metric_list[index]
+#     df = pd.DataFrame()
+#     for k, v in fin_org_results.items():
+#         df[k] = [list(dict.values())[0][index] for dict in v]
 
-    # Creating box plot figure of best n regressors.
-    df_final = df_sorted.iloc[:, len(df_sorted.columns) - n_vizualized_bp:]
-    bp_data = []
-    for column in df_final.columns:
-        bp_data.append(df[column[:]].tolist())
+#     # Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
+#     # sort or a descending sort based on the metric.
+#     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
+#     df_sorted = df[sorted_index]
 
-    boxfig = plt.figure()
-    ax = boxfig.add_subplot(111)
-    bp = ax.boxplot(bp_data, patch_artist=True, vert=0, boxprops=styledict['boxprops'],
-                    flierprops=styledict['flierprops'], medianprops=styledict['medianprops'],
-                    whiskerprops=styledict['whiskerprops'], capprops=styledict['capprops']
-                    )
+#     # Creating box plot figure of best n regressors.
+#     df_final = df_sorted.iloc[:, len(df_sorted.columns) - n_vizualized_bp:]
+#     bp_data = []
+#     for column in df_final.columns:
+#         bp_data.append(df[column[:]].tolist())
 
-    for patch in bp['boxes']:
-        patch.set_facecolor(styledict['boxfill'])
+#     boxfig = plt.figure()
+#     ax = boxfig.add_subplot(111)
+#     bp = ax.boxplot(bp_data, patch_artist=True, vert=0, boxprops=styledict['boxprops'],
+#                     flierprops=styledict['flierprops'], medianprops=styledict['medianprops'],
+#                     whiskerprops=styledict['whiskerprops'], capprops=styledict['capprops']
+#                     )
 
-    ax.set_yticklabels([column for column in df_final.columns])
-    ax.yaxis.grid(styledict['grid'])
-    ax.xaxis.grid(styledict['grid'])
+#     for patch in bp['boxes']:
+#         patch.set_facecolor(styledict['boxfill'])
 
-    plt.title("Cross Validation Scores")
+#     ax.set_yticklabels([column for column in df_final.columns])
+#     ax.yaxis.grid(styledict['grid'])
+#     ax.xaxis.grid(styledict['grid'])
 
-    ax.set_xlabel(f'{metric}')
-    ax.set_ylabel('Models')
-    ax.get_xaxis().tick_bottom()
-    ax.get_yaxis().tick_left()
+#     plt.title("Cross Validation Scores")
 
-    return boxfig
+#     ax.set_xlabel(f'{metric}')
+#     ax.set_ylabel('Models')
+#     ax.get_xaxis().tick_bottom()
+#     ax.get_yaxis().tick_left()
+
+#     return boxfig
+
 
 def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array, train_labels: np.array, test_attribs: np.array,
               test_labels: np.array, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
