@@ -208,16 +208,32 @@ def dump_to_yaml(path, object):
         f_log.write(dump)
 
 def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder):
+    SMALL_SIZE = 10
+    MEDIUM_SIZE = 14
+    BIGGER_SIZE = 18
+    CHONK_SIZE = 24
+    # font = {"fontname": "Times New Roman"}
+    font = {'family' : 'Times New Roman',
+            'weight' : 'bold',
+            'size'   : SMALL_SIZE}
+    # plt.rc('font', **font)
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rc('axes', titlesize=BIGGER_SIZE, labelsize=MEDIUM_SIZE, facecolor="xkcd:white")
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=CHONK_SIZE, facecolor="xkcd:white", edgecolor="xkcd:black") #  powder blue
+        
     possible_themes = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
     assert vis_theme in possible_themes, f"Invalid value passed for vis_theme: {vis_theme}\nSee documentation"
-    sns.set_style(vis_theme)
+    # sns.set_style(vis_theme)
     plt.ticklabel_format(style = 'plain')
     
     if "regressor_accuracy_barchart" in figures:
         for metric, _ in metric_lst:
             fig, ax = plt.subplots()
             scores_data = [results_dict[regressor][metric] for regressor in successful_regs]
-            sns.barplot(x=successful_regs, y=scores_data, ax=ax)
+            sns.barplot(x=successful_regs, y=scores_data, color="black", width=0.5, ax=ax)
             fig.suptitle(f"{metric} performance by model")
             ax.set_xlabel("Regressor Name")
             ax.set_ylabel(f"{metric}")
@@ -289,7 +305,7 @@ def main(data_path, params):
 
 if __name__ == "__main__":
 
-    for rot in [0, 5, 15, 30, 90]:
+    for rot in [0]:
         main(
             data_path = Path(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{rot}.csv"),
             params = {
