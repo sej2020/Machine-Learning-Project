@@ -264,8 +264,56 @@ def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np
 
         return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
 
+def comparison_wrapper(setting: int, conf: dict) -> dict:
+    """
+    This function is a wrapper for the comparison function. Based on the setting of the wrapper, the comparison function will either be run with
+    default parameters or with specified parameters.
 
-def comparison(datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1) -> list:
+    Args:
+        setting (int): 1 to indicate a request from the basic user interface and 2 to indicate a request from the advanced user interface
+        conf (dict): A dictionary of hyperparameters to be sent to the run function. If the dictionary contains only an id and datapath, the other 
+                    hyperparameters will be imputed with default values.
+    """
+
+    default_conf = {'id': conf['id'],
+            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
+                                 'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
+                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
+                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+                                 'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
+                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+                                 }, 
+            'metric_list': ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
+                            'Mean Squared Log Error', 'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
+                            'Mean Absolute Percentage Error', 'D-Squared Absolute Error Score',
+                            'D-Squared Pinball Score', 'D-Squared Tweedie Score'], 
+            'n_vizualized_bp': 20,
+            'n_vizualized_tb': 0,
+            'styledict': {'boxprops': {'linestyle': '-', 'linewidth': 1, 'color': 'black'},
+                          'flierprops': {'marker': 'D', 'markerfacecolor': 'white', 'markersize': 4, 'linestyle': 'none'},
+                          'medianprops': {'linestyle': '-.', 'linewidth': 1, 'color': 'black'},
+                          'whiskerprops': {'linestyle': '--', 'linewidth': 1, 'color': 'black'},
+                          'capprops': {'linewidth': 1, 'color': 'black'}, 'boxfill': 'lightgray', 'grid': True, 'dpi': 300.0 
+                            }, 
+            'test_set_size': 0.2,
+            'n_cv_folds': 10, 
+            'score_method': 'Root Mean Squared Error',
+            'datapath': conf['datapath'], 
+            'n_workers': 1,
+            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set'],
+                }
+    if setting == 1:
+        return comparison(**default_conf)
+    elif setting == 2:
+        return comparison(**conf)
+    else:
+        raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
+
+def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1, figure_lst=['Accuracy_over_Various_Proportions_of_Training_Set']) -> list:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
     The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
@@ -336,6 +384,13 @@ def comparison(datapath: str, which_regressors: dict, metric_list: list, styledi
     fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
     
+    ## generating csv of results to generate figures specified in the figure_lst parameter
+    # figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': various_training_size_fig}
+    # for k,v in figure_lookup.items():
+    #     if k in figure_lst:
+    #         fig_res = v()
+    #         ### will need to make write_results extensible
+    #         write_results(f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{k}.csv", fig_res)
     
     print(f"The following regressors failed: {'---'.join(reg for reg in failed_regs)}")
     

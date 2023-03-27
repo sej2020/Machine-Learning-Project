@@ -1,6 +1,7 @@
 from utils import *
 
-paramdict = {'datapath': 'AutoML/ConcreteData/Concrete_Data.csv',
+paramdict = {'id': 30,
+            'datapath': 'AutoML/ConcreteData/Concrete_Data.csv',
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 1, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 1, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
                                  'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 1, 'GradientBoostingRegressor': 1, 
@@ -31,7 +32,8 @@ paramdict = {'datapath': 'AutoML/ConcreteData/Concrete_Data.csv',
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    print(comparison(**paramdict))
+    print(comparison_wrapper(1,{'id': 30, 'datapath':'AutoML/ConcreteData/Concrete_Data.csv'}))
+    # print(comparison(**paramdict))
     stop = perf_counter()
 
     print(f"Total time to execute: {stop - start:.2f}s")
