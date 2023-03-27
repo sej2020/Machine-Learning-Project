@@ -38,12 +38,13 @@ def send_create_request_message(automl_create_request: AutoMLRequest):
         'which_regressors': regressor_map,
         'metric_list': convert_str_to_list(automl_create_request.metrics),
         'styledict': {},
-        'n_visualized_bp': 0,
-        'n_visualized_tb': 0,
+        'n_vizualized_bp': 0,
+        'n_vizualized_tb': 0,
         'test_set_size': automl_create_request.test_set_size,
         'n_cv_folds': automl_create_request.num_cv_folds,
         'score_method': automl_create_request.metric_score_method,
         'datapath': automl_create_request.datafile,
+        'n_workers': 1
         }
     rmq_producer = Publisher()
     rmq_producer.publish(settings.RMQ_AUTOML_REQ_IN, data)

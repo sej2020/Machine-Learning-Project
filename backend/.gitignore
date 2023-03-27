@@ -6,6 +6,8 @@
 /.idea
 downloads
 /uploads
+/echarts
+/main
 __pycache__/
 *.py[cod]
 backend/downloads

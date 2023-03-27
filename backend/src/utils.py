@@ -1,3 +1,5 @@
+import logging
+
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
@@ -12,8 +14,14 @@ import multiprocessing as multiprocessing
 
 import warnings
 
+from config import settings
+
 warnings.filterwarnings('ignore')
 from inspect import signature, _empty
+
+logging.root.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 def validation(datapath: str) -> None:
     """
@@ -247,7 +255,7 @@ def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np
     return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
 
 def comparison(id: int, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp: int, n_vizualized_tb: int, test_set_size: float,
-               n_cv_folds: int, score_method: str, datapath: str, n_workers: int) -> list:
+               n_cv_folds: int, score_method: str, datapath: str, n_workers: int) -> dict:
     """
     This function will perform cross-validation training across several regressor types for one dataset.
 
@@ -329,7 +337,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, styledict: di
     fin_org_results = {k: v for k, v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
 
-    output_path = f"/src/tmp/output/perf_stats_{id}.csv"
+    output_path = f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{id}.csv"
     write_results(output_path, fin_org_results, metric_list)
 
     # #generating figures and saving to the user's CWD ******* IF WE ARE PROVIDING VISUALIZATIONS ON BACKEND
@@ -339,7 +347,10 @@ def comparison(id: int, which_regressors: dict, metric_list: list, styledict: di
     # for k in range(len(figs)):
     #     figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
 
-    return list(failed_regs)
+    return {
+        'output_path': output_path,
+        'failed_regs': list(failed_regs)
+        }
 
 def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_attribs: np.ndarray, train_labels: np.ndarray,
         test_attribs: np.ndarray, test_labels: np.ndarray) -> dict:

@@ -12,11 +12,9 @@ from services.s3Service import S3Service
 from src.utils import comparison
 
 # logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s  %(name)s  %(levelname)s {%(pathname)s:%(lineno)d}: %(message)s')
-logging.basicConfig()
+logging.root.setLevel(logging.INFO)
+logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
-
-# log.setLevel(logging.INFO)
-
 
 class Consumer:
     def __init__(self, queue) -> None:
@@ -45,10 +43,12 @@ class Consumer:
             request_id = payload['id']
             s3_service = S3Service(settings.S3_DATA_BUCKET)
             s3_service.download_file(payload['datapath'], f"{settings.TEMP_DOWNLOAD_DIR}/{payload['datapath']}")
-            print(f'successfully downloaded file from s3 for {request_id}')
+            log.info(f'successfully downloaded file from s3 for {request_id}')
             payload['datapath'] = f"{settings.TEMP_DOWNLOAD_DIR}/{payload['datapath']}"
-            result_file = comparison(**payload)
-            print(f'completed running automl pipeline for {request_id}')
+            comparison_result = comparison(**payload)
+            log.info(f'{len(comparison_result)} regressors failed: {comparison_result.keys()}')
+            log.info(f'completed running automl pipeline for {request_id}')
+            result_file = comparison_result['output_path']
             s3_service = S3Service(settings.S3_RESULTS_BUCKET)
             result_s3_key = f"{payload['id']}_result.csv"
             s3_service.upload_file(result_file, f"{payload['id']}_result.csv")
@@ -56,7 +56,7 @@ class Consumer:
         except Exception as e:
             if request_id is not None:
                 AutoMLRequestRepository.update_request(request_id, status=-1)
-            log.info('error while processing message: ', e)
+            log.error(f'error while processing message: {e}')
 
     def consume(self):
         log.info('starting consumer')

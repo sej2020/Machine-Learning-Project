@@ -2,8 +2,6 @@ from typing import List, Union
 
 from pydantic import BaseModel
 
-from db.models.auto_ml_request import AutoMLRequest
-
 class AutoMLCreateRequest(BaseModel):
     # id: str
     email: str
@@ -18,6 +16,9 @@ class AutoMLCreateResponseContents(BaseModel):
     request_status: str
     estimated_time_completion: int
     result_link: Union[str, None]
+    visualization_data: Union[dict, None]
+    metrics_list: Union[List[str], None]
+
 class AutoMLCreateResponse(BaseModel):
     error: Union[str, None]
     data: AutoMLCreateResponseContents

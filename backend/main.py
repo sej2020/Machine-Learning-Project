@@ -14,6 +14,7 @@ from db.models.auto_ml_request import AutoMLRequestRepository
 from db.session import engine
 from fastapi import File, UploadFile
 
+from services import visualization_service
 from services.rmq_services import Publisher, send_create_request_message
 from services.s3Service import S3Service
 from fastapi.middleware.cors import CORSMiddleware
@@ -80,7 +81,11 @@ async def get_automl_request(request_id):
         automl_request = AutoMLRequestRepository.get_request_by_id(request_id)
         data = AutoMLCreateResponseContents(request_id=request_id, request_status=automl_request.status, estimated_time_completion=0)
         if automl_request.status == 1:
-            data.result_link = f'http://192.168.1.216:8081/results?key={automl_request.resultfile}'
+            data.result_link = f'{settings.HOST}/results?key={automl_request.resultfile}'
+            boxplot_vis_data, metrics_list = visualization_service.get_boxplot_data(automl_request.resultfile)
+            cv_lineplot_vis_data = visualization_service.get_lineplot_data_cv(automl_request.resultfile)
+            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data}
+            data.metrics_list = metrics_list
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
