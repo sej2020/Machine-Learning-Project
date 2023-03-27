@@ -29,7 +29,7 @@ Web Service:
 
     3. Prediction Interval Visualization Mockup (see notes)
         - have mockup by Friday
-
+    --------------------------------------------------------------------------
     4. Set limit on k folds on backend - error if k > n, where n is rows
 
     5. Data Exploration (see notes)
@@ -100,7 +100,7 @@ Current Implementations of Least Squares
         - conduct experiment
         - writeup results
         - add report and figures to LaTex doc
-
+    ---------------------------------------------------------------------------------
     5. New Experiments
         - ask for other interesting datasets at next meeting
         - if not supplied, select from beta dataset list
