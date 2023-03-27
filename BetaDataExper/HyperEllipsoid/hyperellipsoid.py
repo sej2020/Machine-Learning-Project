@@ -16,15 +16,6 @@ def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
 
     return points_org
 
-
-def rotate(pairs, degrees):
-    rot_mat = np.identity(pairs.shape[1])
-    theta = np.deg2rad(degrees)
-    rot_mat[0][0], rot_mat[0][1], rot_mat[1][0], rot_mat[1][1] = math.cos(theta), -math.sin(theta), math.sin(theta), math.cos(theta)
-    new_pairs = np.array(rot_mat) @ np.array(pairs).T
-    return new_pairs.T
-
-
 def rotate3d(pairs, yaw, pitch, roll):
     from math import cos, sin
     rot_mat = np.identity(pairs.shape[1])
@@ -37,6 +28,13 @@ def rotate3d(pairs, yaw, pitch, roll):
         ])
     rot_mat[:3,:3] = rotation
     print(rot_mat)
+    new_pairs = np.array(rot_mat) @ np.array(pairs).T
+    return new_pairs.T
+
+def rotate(pairs, degrees):
+    rot_mat = np.identity(pairs.shape[1])
+    theta = np.deg2rad(degrees)
+    rot_mat[0][0], rot_mat[0][1], rot_mat[1][0], rot_mat[1][1] = math.cos(theta), -math.sin(theta), math.sin(theta), math.cos(theta)
     new_pairs = np.array(rot_mat) @ np.array(pairs).T
     return new_pairs.T
 
@@ -70,11 +68,12 @@ upper = 1000
 dimensions = 10
 resolution = 0.001
 axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
-# axes = [8000, 3000, 5000]
+axes = [8000, 3000, 5000]
 
 data = gen_hyp_ellip(axes,resolution)
 data[:,[2,-1]] = data[:,[-1,2]]
 df = pd.DataFrame(data)
+make_line(data)
 df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_0.csv", index=False, header=False)
 
 data[:,[2,-1]] = data[:,[-1,2]]
@@ -82,7 +81,7 @@ for deg in [5,15,30,90]:
     data_rot = rotate3d(data, deg, deg, deg)
     data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
     df = pd.DataFrame(data_rot)
-    # make_line(data_rot)
+    make_line(data_rot)
     df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{deg}.csv", index=False, header=False)
 
 # axes = [8000, 5000, 3000]
