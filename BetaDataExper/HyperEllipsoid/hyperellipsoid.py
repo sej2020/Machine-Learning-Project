@@ -63,36 +63,32 @@ def make_line(data):
 # print(make_line(gen_hyp_ellip([3,2,1],.001)))
 # print(make_line(rotate(gen_hyp_ellip([3,2,1],.001),30)))
 
+
+def make_data(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
+
+    axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+
+    data = gen_hyp_ellip(axes,resolution)
+    data[:,[2,-1]] = data[:,[-1,2]]
+    df = pd.DataFrame(data)
+    # make_line(data)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
+
+    if rot:
+        data[:,[2,-1]] = data[:,[-1,2]]
+        for deg in [5,15,30,90]:
+            data_rot = rotate3d(data, deg, deg, deg)
+            data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
+            df = pd.DataFrame(data_rot)
+            # make_line(data_rot)
+            df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
+    pass
+
+
 lower = 100
 upper = 1000
-dimensions = 10
 resolution = 0.001
-axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
-axes = [8000, 3000, 5000]
+dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
 
-data = gen_hyp_ellip(axes,resolution)
-data[:,[2,-1]] = data[:,[-1,2]]
-df = pd.DataFrame(data)
-make_line(data)
-df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_0.csv", index=False, header=False)
-
-data[:,[2,-1]] = data[:,[-1,2]]
-for deg in [5,15,30,90]:
-    data_rot = rotate3d(data, deg, deg, deg)
-    data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
-    df = pd.DataFrame(data_rot)
-    make_line(data_rot)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{deg}.csv", index=False, header=False)
-
-# axes = [8000, 5000, 3000]
-
-# data = gen_hyp_ellip(axes, resolution)
-# make_line(data)
-# data_rot = rotate(data, 45)
-# make_line(data_rot)
-
-# print(data_rot)
-# print('*'*100)
-# data_rot[:,[1,-1]] = data_rot[:,[-1,1]]
-# make_line(data_rot)
-# print(data_rot)
+for dim in dimensions:
+    make_data(lower, upper, dim, resolution, rot=True)

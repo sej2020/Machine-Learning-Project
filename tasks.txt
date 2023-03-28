@@ -24,10 +24,10 @@ Web Service:
 
     1. % Train Data Used & Prediction Accuracy Visualization (see notes at bottom)
 
-    2. Make comparison wrapper function to handle different user-interface requests (see notes at bottom)
-        - expand functionality to handle these new tasks
+    X - 2. Make comparison wrapper function to handle different user-interface requests (see notes at bottom)
+        X - expand functionality to handle these new tasks
 
-    3. Prediction Interval Visualization Mockup (see notes)
+    X - 3. Prediction Interval Visualization Mockup (see notes)
         - have mockup by Friday
     --------------------------------------------------------------------------
     4. Set limit on k folds on backend - error if k > n, where n is rows
@@ -82,8 +82,8 @@ Current Implementations of Least Squares
     1. Complete styling for experiment figures
 
     2. Redo Ellipsoid Experiment
-        - generate data (# of dimensions: 2,5,10,50,100,250,500...10000)
-        - generate data (rotations for data of various size [~5 datasets])
+        X - generate data (# of dimensions: 2,5,10,50,100,250,500...10000)
+        X - generate data (rotations for data of various size [~5 datasets])
         - conduct experiment
         - writeup results
         - add report and figures to LaTex doc
@@ -103,7 +103,7 @@ Current Implementations of Least Squares
     ---------------------------------------------------------------------------------
     5. New Experiments
         - ask for other interesting datasets at next meeting
-        - if not supplied, select from beta dataset list
+        - if not supplied, rerun 'unintersting data' and select from beta dataset list
         - repeat experiment pipeline
 
     6. Lst Sqrs literature review 
