@@ -12,7 +12,7 @@ import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
 
-def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="darkgrid", output_folder=os.getcwd()):
+def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd()):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
@@ -218,7 +218,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
             'size'   : SMALL_SIZE}
     # plt.rc('font', **font)
     plt.rcParams["font.family"] = "Times New Roman"
-    plt.rc('axes', titlesize=BIGGER_SIZE, labelsize=MEDIUM_SIZE, facecolor="xkcd:white")
+    plt.rc('axes', titlesize=BIGGER_SIZE, labelsize=MEDIUM_SIZE, facecolor="xkcd:black")
     plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
     plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
     plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
@@ -226,14 +226,14 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         
     possible_themes = ["darkgrid", "whitegrid", "dark", "white", "ticks"]
     assert vis_theme in possible_themes, f"Invalid value passed for vis_theme: {vis_theme}\nSee documentation"
-    # sns.set_style(vis_theme)
+    sns.set_style(vis_theme, {'font.family':['serif'], 'axes.edgecolor':'black','ytick.left': True})
     plt.ticklabel_format(style = 'plain')
     
     if "regressor_accuracy_barchart" in figures:
         for metric, _ in metric_lst:
             fig, ax = plt.subplots()
             scores_data = [results_dict[regressor][metric] for regressor in successful_regs]
-            sns.barplot(x=successful_regs, y=scores_data, color="black", width=0.5, ax=ax)
+            sns.barplot(x=successful_regs, y=scores_data, color="darkgray", width=0.5, ax=ax, edgecolor='black')
             fig.suptitle(f"{metric} performance by model")
             ax.set_xlabel("Regressor Name")
             ax.set_ylabel(f"{metric}")
@@ -307,8 +307,8 @@ if __name__ == "__main__":
 
     for rot in [0]:
         main(
-            data_path = Path(f"BetaDataExper/HyperEllipsoid/data/hyper_ellipsoid_3drot_{rot}.csv"),
+            data_path = Path(f"BetaDataExper/Ellipse/data/ellipse_size_2_res_low.csv"),
             params = {
-                "random_seed": 100,
+                "random_seed": 100
             }
         )
