@@ -2,68 +2,68 @@
 Task List
 ----------
 
-Experiment Framework
-    4. Confidence interval around 2D datavis
+Experiment Framework:
 
-    5. Grouped barchart for runtimes by platform
+    1. Confidence interval around 2D datavis
 
-    6. Containerize environment for this w/ Docker
+    2. Grouped barchart for runtimes by platform
 
-    7. 3D vis of some data?
+    X - 3. Containerize environment for this w/ Docker
 
-    9. Meta-script to analyze time complexity of variably sized data
+    4. 3D vis of some data?
 
-    10. Memory profiling :(
+    5. Meta-script to analyze time complexity of variably sized data
 
-    11. Reset counter, little cleanup utility
+    6. Memory profiling :(
+
+    X - 7. Reset counter, little cleanup utility
 
 
 
 Web Service:
-    1. Write a short paragraph about our team and work
-        - should include links to webpages and github
-        - roadmap for future of website
-        - link and describe our related work
-    
-    2. Look into options for data centric error band visualization (Sam & Josh)
 
-    3. Pickle best model to embed on webpage
-        - should be able to return to use model based on request id
+    1. % Train Data Used & Prediction Accuracy Visualization (see notes at bottom)
 
+    X - 2. Make comparison wrapper function to handle different user-interface requests (see notes at bottom)
+        X - expand functionality to handle these new tasks
+
+    X - 3. Prediction Interval Visualization Mockup (see notes)
+        - have mockup by Friday
+    --------------------------------------------------------------------------
     4. Set limit on k folds on backend - error if k > n, where n is rows
 
-    5. Put together a list of all exciting new visualization ideas
+    5. Data Exploration (see notes)
 
-    6. Make dispatch function to handle different output types (AI params, data size vs model accuracy plotting, future work, etc)
+    6. Create human-readable report to output along with visualizations
 
-    7. Make modified comparison function that runs k-fold cv for many values k to determine if more data = better results
+    7. Pickle best model to embed on webpage
+        - should be able to return to use model based on request id
+        - will have to reintroduce TestBest pipeline
+        - create ensemble model option
 
+    8. Stepwise regressor visualization
+
+
+    In Future:
+    Notifying users via email of processed request
+    Allow requests to run concurrently? Sam doesn't understand if this is a priority or not
+    Use heuristic/new model to give user information on which models/regressors to deploy for which data
+    Make visualization package
     
 
     
+#################################
+Research Papers:
+##################################
 
 
-Research Paper:
+Survey of Popular Libraries
 
-    1. visminmaxplot added to LaTeX doc
+    1. Comparison Experiments
+        - runtime for different devices across libraries for (lst sqs?)(ANN?)
+        - memory useage for different devices across libraries for (lst sqs?)(ANN?)
 
-    2. Lst Sqrs literature review (Sam & Josh)
-
-    X - 4. Ellipsoid Experiment (Sam & Josh) 
-        - generate data
-        - conduct experiment
-            - think about adherence to big-O bounds
-        - visualize appropriately
-        - record Experiment and insert into LaTex doc
-
-    6. Beta Data Experiments (Sam & Josh) 
-        - choose which dataset concepts to test
-        - generate data
-        - conduct experiment
-        - visualize appropriately
-        - record Experiment and insert into LaTex doc
-
-    7. Add tables to describe libraries (Sam)
+    2. Add tables to describe scope of libraries (Sam)
         - Regressors
         X - activation functions
         - evaluation metrics
@@ -71,12 +71,85 @@ Research Paper:
         - optimizers (need Josh to locate optimizers in OpenCV before I can mark complete)
         - loss functions
 
+    3. Synthesize information to fit 6 pages
 
-In Future:
-    Allow requests to run concurrently
-    ReIntroduce TestBest pipeline
-    Use heuristic/new model to give user information on which models/regressors to deploy for which data
-    Ensemble Model
-    Report to go along with results
-    Embed a model in the webpage
-    Make visualization package
+    4. Fix citations
+
+
+
+Current Implementations of Least Squares
+
+    1. Complete styling for experiment figures
+
+    2. Redo Ellipsoid Experiment
+        X - generate data (# of dimensions: 2,5,10,50,100,250,500...10000)
+        X - generate data (rotations for data of various size [~5 datasets])
+        - conduct experiment
+        - writeup results
+        - add report and figures to LaTex doc
+
+    3. Big-O Experiment
+        - research time complexities mentioned in documentation (if it exists)
+        - find suitably large dataset
+        - perform big-O analysis for each library w figures
+        - writeup results
+        - add report and figures to LaTex doc
+    
+    4. MinMax Data
+        X - generate data
+        - conduct experiment
+        - writeup results
+        - add report and figures to LaTex doc
+    ---------------------------------------------------------------------------------
+    5. New Experiments
+        - ask for other interesting datasets at next meeting
+        - if not supplied, rerun 'unintersting data' and select from beta dataset list
+        - repeat experiment pipeline
+
+    6. Lst Sqrs literature review 
+
+    7. Write Paper
+
+
+Data-Centric MLaaS
+
+    1. Write Paper
+
+
+
+Notes from Meeting with Madhavan - 3/27
+
+Vizualisations to work on: (How to deliver output?)
+
+1. CV Folds % of training data used - add a test data error as well. divide data into 10/90 10 as valid. 
+    run cv on remaining 90%. randomly chosen 10 percent. this will show test error. Dont give user CV Fold option. 
+    run cv only on 80% of 90% split. Limit on certain set of regressors on one request (optimize after implementation)?
+    Dont worry about time as constraint for writing paper. worry about effectiveness of experiment.
+
+2. Prediction interval - on test set make prediction of all regressors. would give us range of predictions. data. - 
+    PCA? colors represents confidence of prediction. PCA would need to be run over test set each time to find prediction confidence. 
+    alternatively, use boxplot to show clusters, with description of clusters. prioritize boxplot 
+
+3. Data exploration - pairplot distribution of two variables. side-by-side graph will show 2 dimension. 
+    hexbin to visualize dimensions. see what values of the values have higher prediction confidence. Sam is a bit confused on this
+
+4. stepwise regression
+
+
+docker - ready to ship package. environment + your code. has to have everything code needs to run on it. 
+    have container built up and mount a drive. can change code on laptop and restart container, will have updated code on it.
+    doable but not what docker is used for 
+
+if we have any issues pulling, reclone repository
+
+simple form will only have data as input, will run everything at once and give report at end. have setting
+with def comparsion_wrapper(setting, config):
+	if setting is 1, 2, or 3, pass separate params for comparison function. 1 is basic- default for everything, 2 is advanced 
+    - will come across from event listener. create a config on what settings to run. what type of data we are creating such be set as. 
+    currently generating 1 csv. going forward, to poulate other viz, should generate more data. additional params to decide if visualizations 
+    are wanted are not.     
+
+1 parameter for user values
+1 param for config number
+
+default all regressors, all metrics, all visualizations
