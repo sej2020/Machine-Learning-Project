@@ -264,6 +264,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         plt.savefig(output_folder / f"regression.png")
         
     plt.clf()
+    plt.close(fig="all")
 
 def get_and_increment_run_counter():
     program_container = list(Path.cwd().rglob("AutoLinRegTools.py"))[0].parent
@@ -297,17 +298,21 @@ def main(data_path, params):
         "pytorch-lst_sq",
         "mxnet_lst_sq",
     ]
-    stuff = [results[reg]["model"] for reg in reg_names]
-    for name, model in zip(reg_names, stuff):
-        print(f"{name} has model: \n{model}\n{'='*30}")
+    
+    ## this section should be commented out if you can't run all regressors ##
+    stuff = [results[reg]["model"] for reg in reg_names]                     #
+    for name, model in zip(reg_names, stuff):                                #  
+        print(f"{name} has model: \n{model}\n{'='*30}")                      #
+    ##########################################################################
         
     print("Run complete")
 
 if __name__ == "__main__":
-
-    for rot in [0]:
+    container_path = Path("BetaDataExper/HyperEllipsoid/data/")
+    
+    for hyper_path in container_path.glob("hyperell*"):
         main(
-            data_path = Path(f"BetaDataExper/Ellipse/data/ellipse_size_2_res_low.csv"),
+            data_path = hyper_path,
             params = {
                 "random_seed": 100
             }
