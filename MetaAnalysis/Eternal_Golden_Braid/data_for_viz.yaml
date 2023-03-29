@@ -1,0 +1,300 @@
+hyperell_10-dim_3drot_0.csv:
+  mxnet_lst_sq: 149.72530301418786
+  pytorch-lst_sq: 149.72530301418786
+  sklearn-lst_sq: 149.72530301418786
+  tf-lst_sq_fast: 149.72530301418786
+  tf-lst_sq_slow: 149.72530301418783
+hyperell_10-dim_3drot_15.csv:
+  mxnet_lst_sq: 155.4932023941652
+  pytorch-lst_sq: 155.4932023941655
+  sklearn-lst_sq: 155.4932023941652
+  tf-lst_sq_fast: 155.49320239416517
+  tf-lst_sq_slow: 155.4932023941652
+hyperell_10-dim_3drot_30.csv:
+  mxnet_lst_sq: 171.2924139465969
+  pytorch-lst_sq: 171.29241394659704
+  sklearn-lst_sq: 171.2924139465969
+  tf-lst_sq_fast: 171.2924139465969
+  tf-lst_sq_slow: 171.29241394659692
+hyperell_10-dim_3drot_5.csv:
+  mxnet_lst_sq: 150.38577266990637
+  pytorch-lst_sq: 150.3857726699065
+  sklearn-lst_sq: 150.38577266990637
+  tf-lst_sq_fast: 150.38577266990637
+  tf-lst_sq_slow: 150.38577266990637
+hyperell_10-dim_3drot_90.csv:
+  mxnet_lst_sq: 189.81962674457014
+  pytorch-lst_sq: 189.8196267445702
+  sklearn-lst_sq: 189.81962674457014
+  tf-lst_sq_fast: 189.81962674457014
+  tf-lst_sq_slow: 189.81962674457014
+hyperell_100-dim_3drot_0.csv:
+  mxnet_lst_sq: 63.756476903460694
+  pytorch-lst_sq: 63.75647690346142
+  sklearn-lst_sq: 63.756476903460694
+  tf-lst_sq_fast: 63.756476903460694
+  tf-lst_sq_slow: 63.756476903460694
+hyperell_100-dim_3drot_15.csv:
+  mxnet_lst_sq: 48.713284832769354
+  pytorch-lst_sq: 48.713284832770334
+  sklearn-lst_sq: 48.713284832769354
+  tf-lst_sq_fast: 48.71328483276935
+  tf-lst_sq_slow: 48.713284832769354
+hyperell_100-dim_3drot_30.csv:
+  mxnet_lst_sq: 34.03312105482824
+  pytorch-lst_sq: 34.03312105483132
+  sklearn-lst_sq: 34.03312105482824
+  tf-lst_sq_fast: 34.03312105482824
+  tf-lst_sq_slow: 34.03312105482824
+hyperell_100-dim_3drot_5.csv:
+  mxnet_lst_sq: 61.048030942167344
+  pytorch-lst_sq: 61.04803094216844
+  sklearn-lst_sq: 61.048030942167344
+  tf-lst_sq_fast: 61.048030942167344
+  tf-lst_sq_slow: 61.048030942167344
+hyperell_100-dim_3drot_90.csv:
+  mxnet_lst_sq: 20.598124706913694
+  pytorch-lst_sq: 20.59812470691397
+  sklearn-lst_sq: 20.598124706913694
+  tf-lst_sq_fast: 20.598124706913694
+  tf-lst_sq_slow: 20.598124706913694
+hyperell_1000-dim_3drot_0.csv:
+  mxnet_lst_sq: 0.23318617860044497
+  pytorch-lst_sq: 0.23318623907590216
+  sklearn-lst_sq: 0.23318617860044497
+  tf-lst_sq_fast: 0.23318617860044477
+  tf-lst_sq_slow: 0.2331861786004467
+hyperell_1000-dim_3drot_15.csv:
+  mxnet_lst_sq: 0.3785838083322644
+  pytorch-lst_sq: 0.37858385081655815
+  sklearn-lst_sq: 0.3785838083322644
+  tf-lst_sq_fast: 0.3785838083322713
+  tf-lst_sq_slow: 0.3785838083322604
+hyperell_1000-dim_3drot_30.csv:
+  mxnet_lst_sq: 0.5775573706490593
+  pytorch-lst_sq: 0.5775573951117227
+  sklearn-lst_sq: 0.5775573706490593
+  tf-lst_sq_fast: 0.5775573706490498
+  tf-lst_sq_slow: 0.5775573706490531
+hyperell_1000-dim_3drot_5.csv:
+  mxnet_lst_sq: 0.26805676485153435
+  pytorch-lst_sq: 0.2680568233083657
+  sklearn-lst_sq: 0.26805676485153435
+  tf-lst_sq_fast: 0.2680567648515441
+  tf-lst_sq_slow: 0.2680567648515445
+hyperell_1000-dim_3drot_90.csv:
+  mxnet_lst_sq: 0.37460544606545915
+  pytorch-lst_sq: 0.3746055923479013
+  sklearn-lst_sq: 0.37460544606545915
+  tf-lst_sq_fast: 0.37460544606547425
+  tf-lst_sq_slow: 0.374605446065454
+hyperell_10000-dim_3drot_0.csv:
+  mxnet_lst_sq: 1.1557803769364813e-14
+  pytorch-lst_sq: 1.5021211188167339e-06
+  sklearn-lst_sq: 1.1557803769364813e-14
+  tf-lst_sq_fast: 4.439512164688092e-15
+  tf-lst_sq_slow: 6.908846392088334e-15
+hyperell_10000-dim_3drot_15.csv:
+  mxnet_lst_sq: 1.2061658758033765e-14
+  pytorch-lst_sq: 1.521800952536511e-06
+  sklearn-lst_sq: 1.2061658758033765e-14
+  tf-lst_sq_fast: 4.4152990449101124e-15
+  tf-lst_sq_slow: 7.339333759488585e-15
+hyperell_10000-dim_3drot_30.csv:
+  mxnet_lst_sq: 1.33896365946208e-14
+  pytorch-lst_sq: 1.581238144657209e-06
+  sklearn-lst_sq: 1.33896365946208e-14
+  tf-lst_sq_fast: 4.786970464808285e-15
+  tf-lst_sq_slow: 7.799825008351218e-15
+hyperell_10000-dim_3drot_5.csv:
+  mxnet_lst_sq: 1.1979457295397667e-14
+  pytorch-lst_sq: 1.5943370536765826e-06
+  sklearn-lst_sq: 1.1979457295397667e-14
+  tf-lst_sq_fast: 4.351479317768271e-15
+  tf-lst_sq_slow: 7.183352389067492e-15
+hyperell_10000-dim_3drot_90.csv:
+  mxnet_lst_sq: 1.8646391773768492e-14
+  pytorch-lst_sq: 2.393522100712882e-06
+  sklearn-lst_sq: 1.8646391773768492e-14
+  tf-lst_sq_fast: 6.5395501911003816e-15
+  tf-lst_sq_slow: 1.1222800488442934e-14
+hyperell_250-dim_3drot_0.csv:
+  mxnet_lst_sq: 47.39421797611318
+  pytorch-lst_sq: 47.39421797611547
+  sklearn-lst_sq: 47.39421797611318
+  tf-lst_sq_fast: 47.39421797611318
+  tf-lst_sq_slow: 47.39421797611318
+hyperell_250-dim_3drot_15.csv:
+  mxnet_lst_sq: 46.122390580957806
+  pytorch-lst_sq: 46.1223905809598
+  sklearn-lst_sq: 46.122390580957806
+  tf-lst_sq_fast: 46.122390580957806
+  tf-lst_sq_slow: 46.122390580957806
+hyperell_250-dim_3drot_30.csv:
+  mxnet_lst_sq: 44.60682507407205
+  pytorch-lst_sq: 44.60682507407472
+  sklearn-lst_sq: 44.60682507407205
+  tf-lst_sq_fast: 44.60682507407205
+  tf-lst_sq_slow: 44.606825074072056
+hyperell_250-dim_3drot_5.csv:
+  mxnet_lst_sq: 47.13167523251994
+  pytorch-lst_sq: 47.13167523252201
+  sklearn-lst_sq: 47.13167523251994
+  tf-lst_sq_fast: 47.13167523251994
+  tf-lst_sq_slow: 47.13167523251994
+hyperell_250-dim_3drot_90.csv:
+  mxnet_lst_sq: 55.153517277968795
+  pytorch-lst_sq: 55.15351727797087
+  sklearn-lst_sq: 55.153517277968795
+  tf-lst_sq_fast: 55.153517277968795
+  tf-lst_sq_slow: 55.153517277968795
+hyperell_3-dim_3drot_0.csv:
+  mxnet_lst_sq: 332.01183546750326
+  pytorch-lst_sq: 332.01183546750326
+  sklearn-lst_sq: 332.01183546750326
+  tf-lst_sq_fast: 332.01183546750326
+  tf-lst_sq_slow: 332.01183546750326
+hyperell_3-dim_3drot_15.csv:
+  mxnet_lst_sq: 343.74274268532844
+  pytorch-lst_sq: 343.74274268532844
+  sklearn-lst_sq: 343.74274268532844
+  tf-lst_sq_fast: 343.74274268532844
+  tf-lst_sq_slow: 343.74274268532844
+hyperell_3-dim_3drot_30.csv:
+  mxnet_lst_sq: 380.0384076386315
+  pytorch-lst_sq: 380.03840763863286
+  sklearn-lst_sq: 380.0384076386315
+  tf-lst_sq_fast: 380.0384076386315
+  tf-lst_sq_slow: 380.0384076386315
+hyperell_3-dim_3drot_5.csv:
+  mxnet_lst_sq: 333.1619653787401
+  pytorch-lst_sq: 333.1619653787401
+  sklearn-lst_sq: 333.1619653787401
+  tf-lst_sq_fast: 333.1619653787401
+  tf-lst_sq_slow: 333.1619653787401
+hyperell_3-dim_3drot_90.csv:
+  mxnet_lst_sq: 526.7817744489325
+  pytorch-lst_sq: 526.7817744489325
+  sklearn-lst_sq: 526.7817744489325
+  tf-lst_sq_fast: 526.7817744489325
+  tf-lst_sq_slow: 526.7817744489325
+hyperell_5-dim_3drot_0.csv:
+  mxnet_lst_sq: 305.7693997466001
+  pytorch-lst_sq: 305.76939974660013
+  sklearn-lst_sq: 305.7693997466001
+  tf-lst_sq_fast: 305.7693997466001
+  tf-lst_sq_slow: 305.7693997466001
+hyperell_5-dim_3drot_15.csv:
+  mxnet_lst_sq: 316.0130333046641
+  pytorch-lst_sq: 316.01303330466436
+  sklearn-lst_sq: 316.0130333046641
+  tf-lst_sq_fast: 316.013033304664
+  tf-lst_sq_slow: 316.0130333046641
+hyperell_5-dim_3drot_30.csv:
+  mxnet_lst_sq: 346.1888691702324
+  pytorch-lst_sq: 346.188869170233
+  sklearn-lst_sq: 346.1888691702324
+  tf-lst_sq_fast: 346.1888691702324
+  tf-lst_sq_slow: 346.1888691702324
+hyperell_5-dim_3drot_5.csv:
+  mxnet_lst_sq: 306.84265806247174
+  pytorch-lst_sq: 306.84265806247174
+  sklearn-lst_sq: 306.84265806247174
+  tf-lst_sq_fast: 306.84265806247174
+  tf-lst_sq_slow: 306.84265806247174
+hyperell_5-dim_3drot_90.csv:
+  mxnet_lst_sq: 441.50896568026036
+  pytorch-lst_sq: 441.50896568026036
+  sklearn-lst_sq: 441.50896568026036
+  tf-lst_sq_fast: 441.50896568026036
+  tf-lst_sq_slow: 441.50896568026036
+hyperell_50-dim_3drot_0.csv:
+  mxnet_lst_sq: 130.94743834223766
+  pytorch-lst_sq: 130.9474383422382
+  sklearn-lst_sq: 130.94743834223766
+  tf-lst_sq_fast: 130.94743834223766
+  tf-lst_sq_slow: 130.94743834223766
+hyperell_50-dim_3drot_15.csv:
+  mxnet_lst_sq: 128.97794692118848
+  pytorch-lst_sq: 128.9779469211889
+  sklearn-lst_sq: 128.97794692118848
+  tf-lst_sq_fast: 128.97794692118848
+  tf-lst_sq_slow: 128.97794692118848
+hyperell_50-dim_3drot_30.csv:
+  mxnet_lst_sq: 125.14734866666936
+  pytorch-lst_sq: 125.14734866666994
+  sklearn-lst_sq: 125.14734866666936
+  tf-lst_sq_fast: 125.14734866666936
+  tf-lst_sq_slow: 125.14734866666936
+hyperell_50-dim_3drot_5.csv:
+  mxnet_lst_sq: 130.64769903124983
+  pytorch-lst_sq: 130.6476990312504
+  sklearn-lst_sq: 130.64769903124983
+  tf-lst_sq_fast: 130.64769903124983
+  tf-lst_sq_slow: 130.64769903124983
+hyperell_50-dim_3drot_90.csv:
+  mxnet_lst_sq: 121.63643800601788
+  pytorch-lst_sq: 121.6364380060185
+  sklearn-lst_sq: 121.63643800601788
+  tf-lst_sq_fast: 121.63643800601788
+  tf-lst_sq_slow: 121.63643800601788
+hyperell_500-dim_3drot_0.csv:
+  mxnet_lst_sq: 30.525587803002836
+  pytorch-lst_sq: 30.525587803008605
+  sklearn-lst_sq: 30.525587803002836
+  tf-lst_sq_fast: 30.525587803002836
+  tf-lst_sq_slow: 30.525587803002836
+hyperell_500-dim_3drot_15.csv:
+  mxnet_lst_sq: 24.254266774293136
+  pytorch-lst_sq: 24.254266774298458
+  sklearn-lst_sq: 24.254266774293136
+  tf-lst_sq_fast: 24.254266774293136
+  tf-lst_sq_slow: 24.254266774293136
+hyperell_500-dim_3drot_30.csv:
+  mxnet_lst_sq: 17.42843777223256
+  pytorch-lst_sq: 17.42843777223948
+  sklearn-lst_sq: 17.42843777223256
+  tf-lst_sq_fast: 17.428437772232563
+  tf-lst_sq_slow: 17.428437772232563
+hyperell_500-dim_3drot_5.csv:
+  mxnet_lst_sq: 29.450504691700043
+  pytorch-lst_sq: 29.45050469170594
+  sklearn-lst_sq: 29.450504691700043
+  tf-lst_sq_fast: 29.450504691700043
+  tf-lst_sq_slow: 29.450504691700043
+hyperell_500-dim_3drot_90.csv:
+  mxnet_lst_sq: 10.604023519931523
+  pytorch-lst_sq: 10.604023519933135
+  sklearn-lst_sq: 10.604023519931523
+  tf-lst_sq_fast: 10.604023519931523
+  tf-lst_sq_slow: 10.604023519931523
+hyperell_5000-dim_3drot_0.csv:
+  mxnet_lst_sq: 3.265734406626552e-14
+  pytorch-lst_sq: 0.4773702062003711
+  sklearn-lst_sq: 3.265734406626552e-14
+  tf-lst_sq_fast: 1.0711881146566816e-14
+  tf-lst_sq_slow: 1.6899699192204177e-14
+hyperell_5000-dim_3drot_15.csv:
+  mxnet_lst_sq: 3.3759395287212354e-14
+  pytorch-lst_sq: 4.8319406788573666e-06
+  sklearn-lst_sq: 3.3759395287212354e-14
+  tf-lst_sq_fast: 1.1306907627956089e-14
+  tf-lst_sq_slow: 1.9001596151961603e-14
+hyperell_5000-dim_3drot_30.csv:
+  mxnet_lst_sq: 4.0110972662528574e-14
+  pytorch-lst_sq: 0.05069915778122491
+  sklearn-lst_sq: 4.0110972662528574e-14
+  tf-lst_sq_fast: 1.3528655682578842e-14
+  tf-lst_sq_slow: 2.111931118222231e-14
+hyperell_5000-dim_3drot_5.csv:
+  mxnet_lst_sq: 3.145379344018095e-14
+  pytorch-lst_sq: 0.3131108984423559
+  sklearn-lst_sq: 3.145379344018095e-14
+  tf-lst_sq_fast: 1.1291407662738351e-14
+  tf-lst_sq_slow: 1.7558149380494627e-14
+hyperell_5000-dim_3drot_90.csv:
+  mxnet_lst_sq: 5.573715413556892e-14
+  pytorch-lst_sq: 1.0555714236982656
+  sklearn-lst_sq: 5.573715413556892e-14
+  tf-lst_sq_fast: 1.9535398409220326e-14
+  tf-lst_sq_slow: 3.1894542695508216e-14
