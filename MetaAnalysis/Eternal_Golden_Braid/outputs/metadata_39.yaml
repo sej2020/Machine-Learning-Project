@@ -1,0 +1,11 @@
+completed_regs:
+- sklearn-lst_sq
+- tf-lst_sq_fast
+- tf-lst_sq_slow
+- pytorch-lst_sq
+- mxnet_lst_sq
+dataset_shape: 1000 x 50
+input_data: hyperell_50-dim_3drot_90.csv
+random_seed: 100
+split_percent: No train/test split
+timer_method: total
