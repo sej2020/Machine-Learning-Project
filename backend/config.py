@@ -32,6 +32,7 @@ class Settings:
                       'PassiveAggressiveRegressor', 'PoissonRegressor', 'QuantileRegressor', 'RANSACRegressor', 'RadiusNeighborsRegressor',
                       'RandomForestRegressor', 'Ridge', 'SGDRegressor', 'SVR', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
     METRICS_LIST = ['Mean Squared Error', 'Root Mean Squared Error', 'Mean Absolute Error', 'R-Squared']
+    VISUALIZATION_LIST = ['Accuracy_over_Various_Proportions_of_Training_Set']
 
     HOST = 'http://localhost:8081'
 
