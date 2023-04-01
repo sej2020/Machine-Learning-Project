@@ -18,6 +18,9 @@ from services import visualization_service
 from services.rmq_services import Publisher, send_create_request_message
 from services.s3Service import S3Service
 from fastapi.middleware.cors import CORSMiddleware
+
+from src.utils import validation
+
 # from db.base import create_tables
 
 app = FastAPI()
@@ -100,6 +103,15 @@ async def download_results(key):
     s3_service.download_file(key, temp_download_path)
     return FileResponse(path=temp_download_path, filename=key)
 
+@app.post('/validateData')
+async def validate_data(file_data: UploadFile = File(...)):
+    temp_path = f'{settings.TEMP_UPLOAD_DIR}/{file_data.filename}'
+    save_file(file_data.file.read(), temp_path)
+    data_issues = validation(temp_path)
+    delete_file(temp_path)
+    return JSONResponse(content={
+        'issues': data_issues
+        }, status_code=200)
 
 if __name__ == "__main__":
     create_tables()

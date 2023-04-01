@@ -28,6 +28,11 @@ export class MainComponentComponent {
       itemLink: "/home"
     },
     {
+      iconName: "assignment_turned_in",
+      itemName: "Data Validation",
+      itemLink: "/dataValidation"
+    },
+    {
       iconName: "draw",
       itemName: "Create New Request",
       itemLink: "/newRequest"

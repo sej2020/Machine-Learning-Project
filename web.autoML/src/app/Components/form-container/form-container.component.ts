@@ -23,6 +23,7 @@ export class FormContainerComponent {
     public dialog: MatDialog
   ){}
   request_id!: string ;
+  formType: string = "simple";
   mlGeneratorForm!: FormGroup;  
   regressorList : regressors[]=[ {
                                     groupName: 'Linear Models',
@@ -94,6 +95,10 @@ onFileChange(event: any){
       fileUpload: file
     });
   }
+}
+
+onFormTypeChange(event: any) {
+  this.formType = event.value;
 }
 
 public openDisclaimer() {

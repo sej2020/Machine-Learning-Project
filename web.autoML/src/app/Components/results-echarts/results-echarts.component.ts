@@ -73,6 +73,38 @@ export class ResultsEchartsComponent implements OnInit {
     }
   }
 
+  getDataPercentChartOptions(currentMetric: string, dataPercentages: number[], trainMetric: any, testMetric: any) {
+    let dataPercentChartOptions = {
+      xAxis: {
+        type: 'category',
+        data: dataPercentages
+      },
+      yAxis: {
+        type: 'value'
+      },
+      series: [
+        {
+          data: trainMetric,
+          type: 'line',
+          smooth: true,
+          label: {
+            show: true,
+            position: "top"
+          }
+        },
+        {
+          data: testMetric,
+          type: 'line',
+          smooth: true,
+          label: {
+            show: true,
+            position: "top"
+          }
+        }
+      ]
+    }
+  }
+
   getCvLinePlotChartOptions(currentMetric: string, num_cv_folds: number, lineData: any) {
     let regressorNames = Object.keys(lineData);
     let lineYAxisData: object[] = [];

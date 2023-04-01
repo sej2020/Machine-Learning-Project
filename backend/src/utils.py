@@ -23,7 +23,7 @@ logging.root.setLevel(logging.INFO)
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
-def validation(datapath: str) -> None:
+def validation(datapath: str) -> list:
     """
     This functon validates if a dataset is of all numeric type and does not exceed the dimensions of 10,000 x 100.
     An error will be raised describing any of breech of these requirements by the dataset.
@@ -36,10 +36,11 @@ def validation(datapath: str) -> None:
     """
     dataset, _, _ = load_data(datapath)
     issues_w_data = [*size(dataset, 10000, 100), *dtype_check(dataset)]
-    for issue in issues_w_data:
-        if issue:
-            raise Exception(issue)
-    pass
+    return issues_w_data
+    # for issue in issues_w_data:
+    #     if issue:
+    #         raise Exception(issue)
+    # pass
 
 def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
     """

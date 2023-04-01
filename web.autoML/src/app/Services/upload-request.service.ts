@@ -44,6 +44,11 @@ export class UploadRequestService {
     .pipe(retry(1), catchError(this.processError));
   } 
 
+  validateDataRequest(dataFile: any) {
+    const formData = new FormData();
+    formData.append("file_data", dataFile);
+    return this.httpClient.post(`${this.api_route}/validateData`, formData).pipe(retry(1), catchError(this.processError));
+  }
   
   processError(err: any) {
     let message = '';

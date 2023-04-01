@@ -27,6 +27,7 @@ import { DisclaimerDialogComponent } from './Components/disclaimer-dialog/discla
 import { NgxEchartsModule } from 'ngx-echarts';
 import { ResultsEchartsComponent } from './Components/results-echarts/results-echarts.component';
 import * as echarts from 'echarts';
+import { DataValidationComponent } from './Components/data-validation/data-validation.component';
 
 @NgModule({
   
@@ -37,7 +38,8 @@ import * as echarts from 'echarts';
     ResultPageComponent,
     HomepageComponent,
     DisclaimerDialogComponent,
-    ResultsEchartsComponent
+    ResultsEchartsComponent,
+    DataValidationComponent
   ],
   imports: [
     BrowserModule,
