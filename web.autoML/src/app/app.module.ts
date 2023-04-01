@@ -65,7 +65,7 @@ import { MatCarouselModule} from 'ng-mat-carousel';
     NgxEchartsModule.forRoot({
       echarts
     }),
-    MatCarouselModule.forRoot()
+    MatCarouselModule.forRoot(),
   ],
   exports: [
     BrowserModule,

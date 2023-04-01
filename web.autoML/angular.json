@@ -39,8 +39,7 @@
               "src/assets/css/typography.module.css",
               "src/styles.scss"
             ],
-            "scripts": ["src/assets/Scripts/ecSimpleTransform.min.js"
-             ]
+            "scripts": []
           },
           "configurations": {
             "production": {

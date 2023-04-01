@@ -1,84 +1,226 @@
-import { Component } from '@angular/core';
-import { EChartsOption, registerTransform} from 'echarts';
+import { Component, OnInit, Renderer2 } from '@angular/core';
+import { EChartsOption, registerTransform } from 'echarts';
+import { ScriptService } from 'src/app/Services/script.service';
+import { TransformComponent } from 'echarts/components';
+import * as echarts from 'echarts';
+import { aggregate } from '@manufac/echarts-simple-transform';
+import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
+import { UploadRequestService } from 'src/app/Services/upload-request.service';
+import { IResults } from '../result-page/result-page.component';
+import { Router } from '@angular/router';
+
+
 @Component({
   selector: 'app-results-echarts',
   templateUrl: './results-echarts.component.html',
   styleUrls: ['./results-echarts.component.scss']
 })
-export class ResultsEchartsComponent {
+export class ResultsEchartsComponent implements OnInit {
 
+  boxplotData!: [string[]]
+  cvLineplotData!: any
+  resultsData!: IResults;
 
-  chartOptions: EChartsOption ={}
-  yAxisData: string[] = [];
-  ngOnInit(){
-  
-    this.yAxisData = ['ARDRegression', 'AdaBoostRegressor', 'BaggingRegressor'];
-    // echarts.registerTransform();
-    this.chartOptions = {
-      title:{
-        text: 'Regressors - Mean Squared Error'
+  constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
+
+  requestId: string = "";
+  currentMetric: string = "";
+  chartType: string = "boxplot";
+
+  chartOptions!: EChartsOption;
+  yAxisData!: string[];
+
+  ngOnInit() {
+    this.requestId = history.state.id ? history.state.id : "";
+    if (this.requestId.length > 0) {
+      this.fetchRawData();
+    }
+    echarts.registerTransform(aggregate as ExternalDataTransform);
+  }
+
+  fetchRawData = () => {
+    this.uploadRequestService.getRequestStatus(this.requestId)
+      .subscribe((data: any) => {
+        this.resultsData = data;
+        this.boxplotData = this.resultsData.data['visualization_data']['boxplot']
+        this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
+        this.yAxisData = this.resultsData.data['metrics_list']
+        this.currentMetric = this.yAxisData[0]
+        this.chartOptions = this.getChartOptions(this.chartType);
+        console.log(this.chartOptions);
+      })
+  }
+
+  changeInRequestId(event: any) {
+    this.requestId = event.target.value;
+  }
+
+  changeInCurrentMetric(value: any) {
+    this.currentMetric = value;
+    this.chartOptions = this.getChartOptions(this.chartType);
+  }
+
+  changeInChartType(value: any) {
+    this.chartType = value;
+    this.chartOptions = this.getChartOptions(this.chartType);
+  }
+
+  getChartOptions(chartType: string) {
+    if (chartType === 'boxplot') {
+      return this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
+    } else {
+      return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
+    }
+  }
+
+  getCvLinePlotChartOptions(currentMetric: string, num_cv_folds: number, lineData: any) {
+    let regressorNames = Object.keys(lineData);
+    let lineYAxisData: object[] = [];
+    for (var i = 0; i < regressorNames.length; i++) {
+      lineYAxisData.push({
+        name: regressorNames[i],
+        type: 'line',
+        data: lineData[regressorNames[i]]
+      })
+    }
+
+    let cvLineplotOptions: EChartsOption = {
+      title: {
+        text: 'Regressors - ' + currentMetric
       },
-      tooltip:{
+      tooltip: {
+        trigger: 'axis'
+      },
+      legend: {
+        data: regressorNames,
+        top: 30
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '3%',
+        containLabel: true
+      },
+      toolbox: {
+        feature: {
+          saveAsImage: {}
+        }
+      },
+      xAxis: {
+        type: 'category',
+        boundaryGap: false,
+        data: [...Array(num_cv_folds).keys()],
+        name: "CV Fold"
+      },
+      yAxis: {
+        type: 'value',
+        name: currentMetric
+      },
+      series: lineYAxisData
+    };
+
+    return cvLineplotOptions;
+  }
+
+  getBoxPlotCharOptions(currentMetric: string, dataSource: [string[]]) {
+    let boxplotOptions: EChartsOption = {
+      title: {
+        text: 'Regressors - ' + currentMetric
+      },
+      tooltip: {
         trigger: 'axis',
         confine: true
       },
-      dataset: [
-     {
-        transform: {
-            type: 'boxplot',
-            config: { 
-                itemNameFormatter: 'Option {value}' }
+      toolbox: {
+        show: true,
+        feature: {
+          dataView: {
+            readOnly: false
+          },
+          saveAsImage: {}
         }
-    }, {
-        fromDatasetIndex: 1,
-        fromTransformResult: 1
-    }],
-      xAxis:{
-        name : 'CV Folds',
+      },
+      dataset: [
+        {
+          id: 'raw',
+          source: dataSource
+        }, {
+          id: 'raw_select_metric',
+          fromDatasetId: 'raw',
+          transform: [
+            {
+              type: 'filter',
+              config: {
+                dimension: 'metricName',
+                value: currentMetric
+              }
+            }
+          ]
+        }, {
+          id: 'raw_aggregate',
+          fromDatasetId: 'raw_select_metric',
+          transform: [
+            {
+              type: 'ecSimpleTransform:aggregate',
+              config: {
+                resultDimensions: [
+                  { name: 'min', from: 'metricValue', method: 'min' },
+                  { name: 'Q1', from: 'metricValue', method: 'Q1' },
+                  { name: 'median', from: 'metricValue', method: 'median' },
+                  { name: 'Q3', from: 'metricValue', method: 'Q3' },
+                  { name: 'max', from: 'metricValue', method: 'max' },
+                  { name: 'regressorName', from: 'regressorName' }
+                ],
+                groupBy: 'regressorName'
+              }
+            }, {
+              type: 'sort',
+              config: {
+                dimension: 'Q3',
+                order: 'asc'
+              }
+            }
+          ]
+        }
+      ],
+      xAxis: {
+        name: this.currentMetric,
         nameLocation: 'middle',
         nameGap: 30,
-        scale: true,
-
+        scale: true
       },
-      yAxis:{
+      yAxis: {
         type: 'category',
-        data : this.yAxisData,
-        splitArea:{
-          show : true
+        splitArea: {
+          show: true
         }
-
-      },
-      legend: {
-
-        selected: { detail: false }
       },
       grid: {
         bottom: 100
       },
       series: [
-        { 
+        {
           type: 'boxplot',
           name: 'boxplot',
           itemStyle: {
-            color: '#a32',
+            color: '#b8c5f2',
             borderColor: '#429',
             borderWidth: 3
-        },
-        datasetIndex: 1,
-        data : [[134.744,101.139,107.769,83.486,103.296,103.997,96.735,91.425,139.113,118.779],[61.9045328587085,52.5798970391187,60.320216595453,61.8208707545006,59.9380889894142,45.8944453371561,55.2555857413487,81.7090951014166,74.4910264391988,61.1379666741692],[19.7060123749999,
-          34.8677096054421,
-          22.1665278051947,
-          29.5878210025915,
-          28.0377016623376,
-          16.1137678474025,
-          48.667168025974,
-          32.0334957922077,
-          48.022053707013,
-          22.552428327922
-          ]],
-        
-}],
+          },
+          datasetId: "raw_aggregate",
+          encode: {
+            x: ['min', 'Q1', 'median', 'Q3', 'max'],
+            y: 'regressorName',
+            itemName: ['regressorName'],
+            tooltip: ['min', 'Q1', 'median', 'Q3', 'max']
+          }
+        }],
     };
+
+    return boxplotOptions;
   }
+
 }
-  
+
+
+
