@@ -27,7 +27,8 @@ import { DisclaimerDialogComponent } from './Components/disclaimer-dialog/discla
 import { NgxEchartsModule } from 'ngx-echarts';
 import { ResultsEchartsComponent } from './Components/results-echarts/results-echarts.component';
 import * as echarts from 'echarts';
-
+import { UserProfileCardsComponent } from './Components/user-profile-cards/user-profile-cards.component';
+import { MatCarouselModule} from 'ng-mat-carousel';
 @NgModule({
   
   declarations: [
@@ -37,7 +38,8 @@ import * as echarts from 'echarts';
     ResultPageComponent,
     HomepageComponent,
     DisclaimerDialogComponent,
-    ResultsEchartsComponent
+    ResultsEchartsComponent,
+    UserProfileCardsComponent,
   ],
   imports: [
     BrowserModule,
@@ -62,7 +64,8 @@ import * as echarts from 'echarts';
     MatDialogModule,
     NgxEchartsModule.forRoot({
       echarts
-    })
+    }),
+    MatCarouselModule.forRoot()
   ],
   exports: [
     BrowserModule,
