@@ -1,0 +1,38 @@
+.users-profile-container{
+    display: flex;
+    flex-direction: row;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: 2px;     
+}
+.user-card{
+//   max-width: 400px;
+  position: relative;
+  width: 400px;
+  margin-top: 2%;
+  margin-left: 1%;
+  margin-right: 2%;
+  height: calc(100vh - 70vh);
+  margin-bottom: 5px;
+  display: inline-flex;
+  
+}
+
+.user-card-group-title{
+    padding: 10px;
+
+   
+}
+.user-card-details{
+    padding-bottom: 8px;
+}
+
+.user-card-footer{
+    margin: 2px;
+    background-color: grey;
+}
+.mat-card-action-links{
+    position: relative;
+    padding: 10px;
+}
