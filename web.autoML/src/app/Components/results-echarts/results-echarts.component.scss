@@ -1,0 +1,22 @@
+.echarts-container {
+    height: 1000px;
+    width: 1000px;
+    margin-left: 10vw;
+    margin-top: 5vh;
+}
+
+.chart-container {
+    height: 900px;
+    width: 1200px;
+    margin-top: 2vh;
+}
+
+.chart-input-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.requestInput {
+    flex-grow: 1;
+}

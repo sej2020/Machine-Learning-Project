@@ -30,6 +30,13 @@
               "src/assets"
             ],
             "styles": [
+              "@angular/material/prebuilt-themes/indigo-pink.css",
+              "src/assets/css/colors.module.css",
+              "src/assets/css/theme.css",
+              "src/assets/css/tokens.css",
+              "src/assets/css/theme.dark.css",
+              "src/assets/css/theme.light.css",
+              "src/assets/css/typography.module.css",
               "src/styles.scss"
             ],
             "scripts": []
@@ -95,7 +102,7 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["src/assets/Scripts/ecSimpleTransform.min.js"]
           }
         }
       }

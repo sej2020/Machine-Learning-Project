@@ -1,0 +1,45 @@
+<div class="results-container">
+    <div>
+        <div class="requestid-input-container">
+            <mat-form-field class="requestInput">
+                <mat-label>Request ID</mat-label>
+                <input matInput type="text" [value]="req_id" class="requestInput" placeholder="requestId" aria-required="true"
+                    (keyup)="changeInRequestId($event)" />
+            </mat-form-field>
+        </div>
+        <button mat-raised-button color="primary" (click)="getResults()">Fetch Results!</button>
+    </div>
+    <div class="result-page-container" *ngIf="resultsFetched">
+
+        <mat-card class="result-page-card-container">
+
+            <mat-card-title class="results-page-card-container-title">Results</mat-card-title>
+
+            <mat-card-content class="results-page-card-container-content">
+                <mat-list class="results-page-list">
+                    <mat-list-item class="primary"> Request id : {{resultsData.data['request_id']}} </mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '0'"> Request status : Request in
+                        execution </mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '1'"> Request status : Request completed
+                    </mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '-1'"> Request status : Error
+                    </mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '-1'"> Error message : Internal Server
+                        Error. Please contact site administrator for more details. {{resultsData.error_message}}
+                    </mat-list-item>
+                    <mat-list-item> Expected Time of Completion : {{resultsData.data['estimated_time_completion']}}
+                        seconds</mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '1'"> Download results here: <a
+                            mat-raised-button target="#" style="color:black; background-color: beige;"
+                            href="{{resultsData.data['result_link']}}"><mat-icon>cloud_download</mat-icon> Download
+                            Results </a> </mat-list-item>
+                    <mat-list-item *ngIf="resultsData.data['request_status'] == '1'"> Visualize results: <a
+                        mat-raised-button target="#" style="color:black; background-color: beige;"
+                        (click)="redirectToVisualization()"><mat-icon>cloud_download</mat-icon> Visualize Results </a> </mat-list-item>    
+                </mat-list>
+            </mat-card-content>
+            <mat-card-footer> <a mat-raised-button class="back-button" style="color:black; background-color: beige;"
+                    href="http://localhost:4200">Home</a></mat-card-footer>
+        </mat-card>
+    </div>
+</div>

@@ -7,6 +7,11 @@ libraries_data
 # testing pytorch
 pytorch_test
 
+<<<<<<< HEAD
 # don't upload massive output files from beta data experiments
 results.yaml
 BetaDataExper/HyperEllipsoid/data/
+=======
+
+.gitignore
+>>>>>>> feature/echarts

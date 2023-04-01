@@ -1,0 +1,16 @@
+<h2 mat-dialog-title>Disclaimer</h2>
+<mat-dialog-content class="mat-typography" style="background-color: beige;">
+    <mat-list >
+        <mat-list-item>1. The upper limit for file size accepted by this system is approximately 10_000 x 100 columns (no more than 8MB).</mat-list-item>
+        <mat-list-item>2. This system performs regression tasks only - if you are trying to predict the class of a set of data points, this is not for you.</mat-list-item>
+        <mat-list-item>3. No categorical data is accepted - if you would like to include a categorical variable, you must encode it numerically.</mat-list-item>
+        <mat-list-item>4. Ensure that you are not uploading sensitive data - it will be temporarily saved to our servers.</mat-list-item>
+        <mat-list-item>5. You can only have one target variable in the file you upload, and it must be in the furthest column to the right.</mat-list-item>
+        <mat-list-item>6. You can include or exclude headers for your data - the system will ignore them if they are included.</mat-list-item>
+        <mat-list-item>7. Your data must not have any nans or missing values, as they will cause the system to fail.</mat-list-item>
+    </mat-list>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="true" cdkFocusInitial>OK</button>
+</mat-dialog-actions>

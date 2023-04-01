@@ -1,1 +1,56 @@
-<p>main-component works!</p>
+<!-- <div class="main-container">
+<div>
+<mat-toolbar  class="header-toolbar headline-large">
+    <button class = "menu-button" (click)="drawer.toggle()" > 
+        <mat-icon >menu</mat-icon>
+    </button>
+    <header class="header-title" >Auto ML</header>
+</mat-toolbar>
+<mat-drawer-container class="sidenav-container" autosize>
+    <mat-drawer #drawer class="mat-sidenav" mode="side">
+        <mat-drawer-content>
+        <h2> Welcome!</h2>
+        <ul>
+            <li> Menu 1</li>
+            <li> menu 2</li>
+        </ul>
+    </mat-drawer-content>
+    </mat-drawer>
+</mat-drawer-container>
+<div class="form-container">
+    <app-form-container></app-form-container>
+</div>
+</div>
+</div> -->
+
+<div class="main-container">
+    <script src="src/assets/Scripts/ecSimpleTransform.min.js"></script>
+    <mat-toolbar class="header-toolbar">  
+        AutoML 
+    </mat-toolbar>
+    <mat-sidenav-container class="side-nav-container">
+    <mat-sidenav class="mat-elevation-z8" mode="side" opened>
+        <mat-nav-list class="main-navigation-list">
+            <header style="font-size:x-large; padding: 10px;"> AutoML</header>
+            <mat-divider style="background-color:white;box-shadow:2px white"></mat-divider>
+            <div class="nav-list" *ngFor="let li of listItems">
+            <button mat-button class="menu-button mat-elevation-z10">
+                <mat-icon class="icon-avatar" style="color:antiquewhite; height:24px; width:24px;">{{li.iconName}}</mat-icon>
+                <a id="{{li.itemName}}" routerLink={{li.itemLink}}><span>{{li.itemName}}</span></a>
+                
+            </button>
+            
+        </div>
+          </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content >
+        <!-- <div class="content form-container mat-elevation-z8">
+          <app-form-container></app-form-container>
+        </div> -->
+        <!-- <main> -->
+            <!-- <router-outlet></router-outlet> -->
+        <!-- </main> -->
+        <router-outlet></router-outlet>
+    </mat-sidenav-content>
+    </mat-sidenav-container>
+</div>
