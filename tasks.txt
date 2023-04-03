@@ -75,8 +75,8 @@ Current Implementations of Least Squares
 
     2. Redo Ellipsoid Experiment
         - generate data (2 or 3 dimensions with varying position, rotations, and axes ratio)
-        - conduct experiment
-        - record runtimes
+        X - conduct experiment
+        X - record runtimes
         - create closed form equation
         - ???
         - writeup results
