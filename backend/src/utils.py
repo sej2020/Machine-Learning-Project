@@ -395,6 +395,19 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
     #         ### will need to make write_results extensible
     #         write_results(f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{k}.csv", fig_res)
 
+
+    path_gen = lambda file: f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{file}_{id}.csv" # helper for making various output data files
+    
+    
+    # the figure lookup dict has to include the parameters that will be passed to any functions it calls
+    figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': (gen_and_write_training_test_data, (
+                        regs, reg_names, train_attribs, train_labels, path_gen('Accuracy_over_Various_Proportions_of_Training_Set'), metric_list, metric_help
+                        ))}
+    
+    for fig, (gen_and_write_data_func, params) in figure_lookup.items():
+        if fig in figure_lst:
+            gen_and_write_data_func(*params) # these functions will both create AND write out the data - they do not return anything
+            
     output_path = f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{id}.csv"
     write_results(output_path, fin_org_results, metric_list)
 
@@ -595,3 +608,81 @@ def write_results(path: str, data: dict, metrics: list) -> None:
 
     df = pd.DataFrame(acc)
     df.to_csv(path)
+
+def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_list: list, metric_help: dict):
+    """
+    There are many iterations occurring here. Each of the following items is looped over:
+        1. fold_sets - each of these is a different group of 10/11 folds that will potentially be used to train [((trainfold1, ... trainfoldn), testfold), ..., ((trainfold1, ... trainfoldn), testfold)]
+        2. pcnt_folds - from 1-10, how many folds should be used to train the model before testing on the 11th fold. Corresponds to 10-100% of training data used
+        3. regs and reg_names - iterable of all regressors and their names to be tested
+    
+    Returns: 
+        None, but writes a similar output to the main output for this program - differences are that this
+        output is indexed by percentage of training data, not cv fold - metrics computed over the cv folds are averaged here.
+        Also, this includes both train and test data, so there should be twice as many columns compared to the normal output of just test accuracy.
+    """
+    FOLDS = 11
+    cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
+    pcnts = range(10, 110, 10)
+    
+    ## generate fold_sets
+    train_outputs = []
+    test_outputs = []
+    for X_train, y_train, X_test, y_test in zip(cv_X_train, cv_y_train, cv_X_test, cv_y_test): #[(cv_X_train[0], cv_y_train[0], cv_X_test[0], cv_y_test[0]), (cv_X_train[1], cv_y_train[1], cv_X_test[1], cv_y_test[1])]: #
+        for n_folds in range(1, FOLDS):
+            for reg, reg_name in zip(regs, reg_names):
+                train_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_train[:n_folds], y_train[:n_folds])
+                test_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_test, y_test)
+                
+                train_outputs.append(train_output)
+                test_outputs.append(test_output)
+                
+                
+    # processing round 1 - extract useful data from output of all runs
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        failed_regs = set()
+        org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
+        for success_status, single_reg_output in tt_out:
+            if success_status:
+                reg_name = list(single_reg_output.keys())[0]
+                if reg_name in org_results:
+                    org_results[reg_name] += [single_reg_output]
+                else:
+                    org_results[reg_name] = [single_reg_output]
+                    
+            else:
+                failed_regs.add(single_reg_output)
+                
+        fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
+                
+                
+    json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
+    # acc = {f"{regr}-{metric}-{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
+
+    # processing round 2 - use previous representation of data to get data into a clean JSON format
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        for regressor, runs in fin_org_results.items():
+            for fold, iteration in enumerate(runs):
+                for metric_idx, value in enumerate(list(iteration.values())[0]):
+                    if metric_idx < len(metric_list):
+                        # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
+                        json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
+
+    # reshape data to work in a csv format (pd.dataframe)
+    output_dict = {f"{regr}-{metric}-{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        for reg_name in reg_names:
+            if reg_name not in failed_regs:
+                for metric in metric_list:
+                    for pcnt in pcnts:
+                        values = json[tt_name][reg_name][metric][pcnt]
+                        output_dict[f"{reg_name}-{metric}-{tt_name}"].append(sum(values) / len(values))
+                        
+
+
+    df = pd.DataFrame(output_dict)
+    df["percent_training_data"] = pcnts
+    df.set_index("percent_training_data", inplace = True)
+    df.to_csv(path, header=True, index=True)
+        
+    return 
