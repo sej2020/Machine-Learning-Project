@@ -44,16 +44,22 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
 
             start_lstsq = timer()
             match reg_name:
-                case "sklearn-lst_sq":
+                case "sklearn-svddc":
                     model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
-                case "tf-lst_sq_fast":
+                case "tf-necd":
                     model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()             
-                case "tf-lst_sq_slow":
+                case "tf-cod":
                     model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
-                case "pytorch-lst_sq":
-                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis])).solution)
-                case "mxnet_lst_sq":
-                    model = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]   
+                case "pytorch-qrcp":
+                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+                case "pytorch-qr":
+                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                case "pytorch-svd":
+                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+                case "pytorch-svddc":
+                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
+                case "mxnet-svddc":
+                    model = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
             stop_lstsq = timer()
 
             time_list += [(stop_lstsq - start_lstsq)/10**-9] 
@@ -78,23 +84,32 @@ def comp_complexity_dict(reg: str):
     """
     Retrieves a lambda function for the theoretical number of flops for the least squares solver employed by each library
     lambda x takes an x of form (m, n, r)
-    |---------------------------------------------------------------------------------------------------------|
-    |   Regressor    |               Solver                     | Computational Complexity                    |
-    |---------------------------------------------------------------------------------------------------------|
-    | sklearn-lst_sq |  Householder Bidiagonalization and SVD   |  O(4mn^2 + 8n^3)                            |
-    | tf-lst_sq_fast |  Cholesky Decomposition                  |  O(mn^2 + n^3)                              |
-    | tf-lst_sq_slow |  Complete Orthogonal Decomposition       |  O(2mnr- r^2*(m + n) + 2r^3/3 + r(n - r))   |
-    | pytorch-lst_sq |  QR Factorization with Pivoting          |  O(4mnr-2r^2*(m+n) +4r^3/3)                 |
-    | mxnet_lst_sq   |  Householder Bidiagonalization and SVD   |  O(4mn^2 + 8n^3)                            |
-    |---------------------------------------------------------------------------------------------------------|
+    |-----------------------------------------------------------------------------------------------------|
+    |   Regressor    |               Solver                 | Computational Complexity                    |
+    |-----------------------------------------------------------------------------------------------------|
+    |    tf-necd     |       Cholesky Decomposition         |  O(mn^2 + n^3)                              |
+    |     tf-cod     |   Complete Orthogonal Decomposition  |  O(2mnr - r^2*(m + n) + 2r^3/3 + r(n - r))   |
+    |  pytorch-qrcp  |    QR Factorization with Pivoting    |  O(4mnr - 2r^2*(m + n) + 4r^3/3)                |
+    |   pytorch-qr   |          QR Factorization            |  O(2mn^2 - 2n^3/3)                          |
+    |  pytorch-svd   |            Complete SVD              |  O(4mn^2 + 8n^3)                            |
+    | pytorch-svddc  |       SVD Divide-and-Conquer         |  O(mn^2)                                    |
+    | sklearn-svddc  |       SVD Divide-and-Conquer         |  O(mn^2)                                    |
+    |  mxnet-svddc   |       SVD Divide-and-Conquer         |  O(mn^2)                                    |
+    |-----------------------------------------------------------------------------------------------------|
+    
 
     """
-    dict = {"sklearn-lst_sq": lambda x: math.floor(4*x[0]*x[1]**2 + 8*x[1]**3),
-            "tf-lst_sq_fast": lambda x: math.floor(x[0]*x[1]**2 + x[1]**3),
-            "tf-lst_sq_slow": lambda x: math.floor(2*x[0]*x[1]*x[2] - x[2]**2*(x[0] + x[1]) + 2*x[2]**3/3 + x[2]*(x[1] - x[2])),
-            "pytorch-lst_sq": lambda x: math.floor(4*x[0]*x[1]*x[2] - 2*x[2]**2*(x[0] + x[1]) + 4*x[2]**3/3),
-            "mxnet_lst_sq": lambda x: math.floor(4*x[0]*x[1]**2 + 8*x[1]**3)
-            }
+    dict = {
+        "tf-necd": lambda x: math.floor(x[0]*x[1]**2 + x[1]**3),
+        "tf-cod": lambda x: math.floor(2*x[0]*x[1]*x[2] - x[2]**2*(x[0] + x[1]) + 2*x[2]**3/3 + x[2]*(x[1] - x[2])),
+        "pytorch-qrcp": lambda x: math.floor(4*x[0]*x[1]*x[2] - 2*x[2]**2*(x[0] + x[1]) + 4*x[2]**3/3),
+        "pytorch-qr": lambda x: math.floor(2*x[0]*x[1]**2 - 2*x[1]**3/3),
+        "pytorch-svd": lambda x: math.floor(4*x[0]*x[1]**2 + 8*x[1]**3),
+        "pytorch-svddc": lambda x: math.floor(x[0]*x[1]**2),
+        "sklearn-svddc": lambda x: math.floor(x[0]*x[1]**2),
+        "mxnet-svddc": lambda x: math.floor(x[0]*x[1]**2)
+        }
+    
     return dict[reg]
 
 
@@ -120,8 +135,6 @@ def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_exp
         print(f"starting theoretical experiment with {reg_name}")
         func = comp_complexity_dict(reg_name)
         flops = list(map(func, exper_vals))
-
-        print(flops)
 
         # time_list = []
         # for flop_count in flops:
@@ -152,12 +165,16 @@ def make_viz(actual_time_dict: dict, theory_time_dict: dict, timer: object, rows
         Saves figures to user's CWD
     """
 
-    label_dict ={"sklearn-lst_sq": "scikit-learn",
-                "tf-lst_sq_fast": "TensorFlow (fast)",
-                "tf-lst_sq_slow": "TensorFlow (slow)",
-                "pytorch-lst_sq": "PyTorch",
-                "mxnet_lst_sq": "MXNet"
-                }
+    label_dict ={
+        "tf-necd": "TensorFlow (NE-CD)",
+        "tf-cod": "TensorFlow (COD)",
+        "pytorch-qrcp": "PyTorch (QRCP)",
+        "pytorch-qr": "PyTorch (QR)",
+        "pytorch-svd": "PyTorch (SVD)",
+        "pytorch-svddc": "PyTorch (SVDDC)",
+        "sklearn-svddc": "scikit-learn (SVDDC)",
+        "mxnet-svddc": "MXNet (SVDDC)"
+    }
     
     SMALL_SIZE = 10
     MEDIUM_SIZE = 14
@@ -212,8 +229,8 @@ def main(datapath: str, time_type: str, reg_names: list):
     r = np.linalg.matrix_rank(array)
     max_row_bound = len(str(m))
     # rows_in_expr = [10**row_bound for row_bound in range(1, max_row_bound)] # to produce orders of magnitude experiment
-    rows_in_expr = [i for i in range(math.floor(m/20),m,math.floor(m/20))] # to produce n evenly spaced amount of rows experiment
-    print(rows_in_expr)
+    rows_in_expr = [i for i in range(math.floor(m/3),m,math.floor(m/3))] # to produce n evenly spaced amount of rows experiment
+    print(f'Rows in Experiment: {rows_in_expr}')
 
     X, Y = array[:,:-1], array[:,-1] 
     print('All setup')
@@ -223,29 +240,19 @@ def main(datapath: str, time_type: str, reg_names: list):
     print('now running theoretical experiments...')
     theory_time_dict = theoretical_expr(n, r, timer, reg_names, rows_in_expr)
     print('All done with theoretical experiments, now just making viz')
-
+    print(f'Actual Time: {actual_time_dict}\n-----\nTheoretical Time: {theory_time_dict}')
     make_viz(actual_time_dict, theory_time_dict, timer, rows_in_expr)
     print('All done.')
 
 
 if __name__ =='__main__':
-    path = 'BetaDataExper/BigOTest/test_data/conductivity_exp.csv' #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv
+    path = 'BetaDataExper/BigOTest/test_data/conductivity.csv' #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv #will need to change on quartz
     time_type = "process" #process or total
-    reg_names = [
-        "sklearn-lst_sq",
-        "tf-lst_sq_fast",
-        "tf-lst_sq_slow"
-    ] # "sklearn-lst_sq", "tf-lst_sq_fast", "tf-lst_sq_slow", "pytorch-lst_sq", "mxnet_lst_sq"
 
-    possible_regressors = [
+    reg_names = [
         "tf-necd",
         "tf-cod",
-        "pytorch-qrcp",
-        "pytorch-qr",
-        "pytorch-svd",
-        "pytorch-svddc",
         "sklearn-svddc",
-        "mxnet-svddc",
-    ]
+    ] #        "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",
 
     main(path, time_type, reg_names)
