@@ -2,10 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import math
-import random
+import scipy as sp
 
 def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
     rng = np.random.default_rng(seed)
+    print(axes)
     norm_points = np.array([rng.normal(loc=0.0, scale=ax, size=int(1/resolution)) for ax in axes])
     numer = np.square(norm_points)
     denom = np.expand_dims(np.square(np.array(axes)), axis=1)
@@ -15,6 +16,24 @@ def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
     points_org = points.T
 
     return points_org
+
+def make_data_ellipse(axes, resolution):
+    a,b = axes
+    num = 1/resolution
+    angles = 2 * np.pi * np.arange(num) / num
+    e2 = (1.0 - a ** 2.0 / b ** 2.0)
+    tot_size = sp.special.ellipeinc(2.0 * np.pi, e2)
+    arc_size = tot_size / num
+    arcs = np.arange(num) * arc_size
+    res = sp.optimize.root(lambda x: (sp.special.ellipeinc(x, e2) - arcs), angles)
+    angles = res.x 
+    pairs = []
+    for angle in angles:
+        x = a * np.cos(angle)
+        y = b * np.sin(angle)
+        pairs.append([x,y])
+    return np.array(pairs)
+
 
 def rotate3d(pairs, yaw, pitch, roll):
     from math import cos, sin
@@ -31,7 +50,7 @@ def rotate3d(pairs, yaw, pitch, roll):
     new_pairs = np.array(rot_mat) @ np.array(pairs).T
     return new_pairs.T
 
-def rotate(pairs, degrees):
+def rotate2d(pairs, degrees):
     rot_mat = np.identity(pairs.shape[1])
     theta = np.deg2rad(degrees)
     rot_mat[0][0], rot_mat[0][1], rot_mat[1][0], rot_mat[1][1] = math.cos(theta), -math.sin(theta), math.sin(theta), math.cos(theta)
@@ -39,56 +58,107 @@ def rotate(pairs, degrees):
     return new_pairs.T
 
 
-def make_line(data):
-    # print(np.size(data))
+def make_line(data, dim):
+    fig = plt.figure()
     X = data[:,0]
     Y = data[:,1]
-    Z = data[:,2]
-    # k,d = np.polyfit(X,Y,1)
-    # y_hat = k*X + d
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    # plt.title(f"{d:e} {k:e}")
-    ax.plot(X,Y,Z,'.')
+    if dim ==2:
+        ax = fig.add_subplot()
+        ax.plot(X,Y,'.')
+
+    elif dim ==3:
+        ax = fig.add_subplot(projection=f'3d')
+        Z = data[:,2]
+        ax.plot(X,Y,Z,'.')
+        ax.set_zlabel('z')
+
+    else:
+        print("too many dims on the dancefloor")
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    # plt.plot(X,y_hat)
     ax.grid()
     ax.set_aspect('equal')
+    if dim == 2:
+        plt.xlim(-20, 20)
+        plt.ylim(-20, 20)
+    elif dim == 3:
+        ax.axes.set_xlim3d(left=-20, right=20) 
+        ax.axes.set_ylim3d(bottom=-20, top=20) 
+        ax.axes.set_zlim3d(bottom=-20, top=20) 
     plt.show()
-    # return k,d
-
-# print(np.random.normal(loc=0.0, scale=2, size = 20))
-# print(make_line(gen_hyp_ellip([3,2,1],.001)))
-# print(make_line(rotate(gen_hyp_ellip([3,2,1],.001),30)))
 
 
-def make_data(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
 
-    axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+# def make_data_gen(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
+
+#     axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+
+#     data = gen_hyp_ellip(axes,resolution)
+#     data[:,[2,-1]] = data[:,[-1,2]]
+#     df = pd.DataFrame(data)
+#     # make_line(data)
+#     df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
+
+#     if rot:
+#         data[:,[2,-1]] = data[:,[-1,2]]
+#         for deg in [5,15,30,90]:
+#             data_rot = rotate3d(data, deg, deg, deg)
+#             data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
+#             df = pd.DataFrame(data_rot)
+#             # make_line(data_rot)
+#             df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
+#     pass
+
+
+# lower = 100
+# upper = 1000
+# resolution = 0.001
+# dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
+
+# for dim in dimensions:
+#     make_data_gen(lower, upper, dim, resolution, rot=True)
+
+def make_exp_data_2d(location, axes, rotation, resolution):
+
+    data = make_data_ellipse(axes,resolution)
+    data_rot = rotate2d(data, rotation)
+    data_rot[:,0] += location[0]
+    data_rot[:,1] += location[1]
+
+    df = pd.DataFrame(data_rot)
+    make_line(data_rot, dim=2)
+    # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
+
+
+def make_exp_data_3d(location, axes, rotation, resolution):
 
     data = gen_hyp_ellip(axes,resolution)
-    data[:,[2,-1]] = data[:,[-1,2]]
-    df = pd.DataFrame(data)
-    # make_line(data)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
+    data_rot = rotate3d(data, rotation, rotation, rotation)
+    data_rot[:,0] += location[0]
+    data_rot[:,1] += location[1]
+    data_rot[:,2] += location[2]
 
-    if rot:
-        data[:,[2,-1]] = data[:,[-1,2]]
-        for deg in [5,15,30,90]:
-            data_rot = rotate3d(data, deg, deg, deg)
-            data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
-            df = pd.DataFrame(data_rot)
-            # make_line(data_rot)
-            df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
-    pass
+    df = pd.DataFrame(data_rot)
+    make_line(data_rot, dim=3)
+    # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
 
+#############################################################################################
+# location2d = [(x,y) for x in [-10,0,10] for y in [-10,0,10]]
+# axis_ratio2d = [[10,b] for b in [2,6,10]]
+# rotations = [0, 45, 90]
+# resolution = 0.01
 
-lower = 100
-upper = 1000
-resolution = 0.001
-dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
+# for loc in location2d:
+#     for ax in axis_ratio2d:
+#         for rot in rotations:
+#             make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+##############################################################################################
+location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
+axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]
+rotations = [0, 45, 90]
+resolution = 0.01
 
-for dim in dimensions:
-    make_data(lower, upper, dim, resolution, rot=True)
+for loc in location3d:
+    for ax in axis_ratio3d:
+        for rot in rotations:
+            make_exp_data_3d(location=loc, axes=ax, rotation=rot, resolution=resolution)
