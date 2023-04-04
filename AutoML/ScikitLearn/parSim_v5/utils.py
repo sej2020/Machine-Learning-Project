@@ -635,10 +635,11 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                 train_outputs.append(train_output)
                 test_outputs.append(test_output)
                 
-                
+    
     # processing round 1 - extract useful data from output of all runs
+    fin_org_results_d = {}
+    failed_regs = set()
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
-        failed_regs = set()
         org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
         for success_status, single_reg_output in tt_out:
             if success_status:
@@ -651,7 +652,7 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
             else:
                 failed_regs.add(single_reg_output)
                 
-        fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
+        fin_org_results_d[tt_name] = {k: v for k,v in org_results.items() if k not in failed_regs}
                 
                 
     json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
@@ -659,12 +660,13 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
 
     # processing round 2 - use previous representation of data to get data into a clean JSON format
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
-        for regressor, runs in fin_org_results.items():
-            for fold, iteration in enumerate(runs):
-                for metric_idx, value in enumerate(list(iteration.values())[0]):
-                    if metric_idx < len(metric_list):
-                        # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
-                        json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
+        for regressor, runs in fin_org_results_d[tt_name].items():
+            if regressor not in failed_regs:
+                for fold, iteration in enumerate(runs):
+                    for metric_idx, value in enumerate(list(iteration.values())[0]):
+                        if metric_idx < len(metric_list):
+                            # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
+                            json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
 
     # reshape data to work in a csv format (pd.dataframe)
     output_dict = {f"{regr}-{metric}-{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}

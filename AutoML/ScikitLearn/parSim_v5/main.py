@@ -1,7 +1,7 @@
 from utils import *
 
 paramdict = {'id': 30,
-            'datapath': 'AutoML/ConcreteData/Concrete_Data.csv',
+            'datapath': 'AutoML/ConductivityData/train.csv',
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 1, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 1, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
                                  'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 1, 'GradientBoostingRegressor': 1, 
