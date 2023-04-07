@@ -145,7 +145,7 @@ def make_exp_data_3d(location, axes, rotation, resolution):
 #############################################################################################
 location2d = [(x,y) for x in [0,10] for y in [0,10]]
 axis_ratio2d = [[10,b] for b in range(1,11)]
-rotations = [0, 15, 30, 45, 60, 75, 90]
+rotations = [0, 15, 30, 45, 60, 75, 90, 180]
 resolution = 0.0001
 
 for loc in location2d:
