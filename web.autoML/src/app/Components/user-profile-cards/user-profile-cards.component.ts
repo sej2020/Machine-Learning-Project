@@ -33,14 +33,14 @@ export class UserProfileCardsComponent {
     {
       "UserName": "Madhavan Kalkunte Ramachandra",
       "UserTitle": "Graduate student at IUB",
-      "UserDetails": "Madhavan has sklslkdgh kahfahf hsfjashlfl lshkslafa",
-      "UserProfileLinks" : ['https://github.com/Joshua-Elms']
+      "UserDetails": "Madhavan is a graduate in Computer Science from Luddy School of Informatics, Computing, and Engineering, Indiana University Bloomington.",
+      "UserProfileLinks" : ['https://github.com/MadhavanKR']
     },
     {
       "UserName": "Keerthana Sugasi",
       "UserTitle": "Graduate student at IUB",
-      "UserDetails": "Josh Elms is a Data Science student at Indiana University with an interest in ML and meteorology",
-      "UserProfileLinks" : ['https://github.com/Joshua-Elms']
+      "UserDetails": "Keerthana graduated in Masters in Computer Science from Luddy School of Informatics, Computing, and Engineering, Indiana University Bloomington.",
+      "UserProfileLinks" : ['https://github.com/keerthana-mk']
     }
   ];
 }

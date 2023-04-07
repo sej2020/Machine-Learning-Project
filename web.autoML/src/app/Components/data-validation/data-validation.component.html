@@ -1,5 +1,6 @@
 <div class="dv-container">
     <div class="dv-input-container">
+        <label>Upload File: </label>
         <input class="file-input" type="file" placeholder="Upload datafile"
                 (change)="onFileChange($event);">
         <button mat-raised-button type="button" color="primary" class="submit-button" (click)="validateData()">Validate Data</button>
@@ -8,12 +9,12 @@
     <div *ngIf="error.length > 0">
         <h2> Data Validation Errors <span *ngIf="validationDone && uploadFile" style="font-style: italic; color: blue;">for {{uploadFile.name}}</span> </h2>
         <mat-list>
-            <mat-list-item *ngFor="let err of error"><mat-icon [ngStyle]="{'color':'red'}">highlight_off</mat-icon> {{err}}</mat-list-item>
+            <mat-list-item *ngFor="let err of error"><mat-icon style="color: red;">highlight_off</mat-icon> {{err}}</mat-list-item>
         </mat-list>
     </div>
 
     <div *ngIf="validationDone && error.length == 0">
-        <h2> <mat-icon [ngStyle]="{'color':'green'}">check_circle</mat-icon> Data successfully validated! </h2>
+        <h2> <mat-icon style="color: green;">check_circle</mat-icon> Data successfully validated! </h2>
     </div>
 
 </div>

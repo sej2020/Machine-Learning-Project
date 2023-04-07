@@ -41,4 +41,27 @@ h1{
 .divider{
     background-color: white;
     box-shadow: #9fa8da;
+    // margin-bottom: 10vh;
+}
+
+.description-container{
+    height: 300px;
+    margin-top: 2%;
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+.automl-description {
+    font-size: 32px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: white;
+    font-weight: bolder;
+    line-height: 1.8;
+}
+
+.start-here-button {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 40%;
+    font-size: 20px
 }
