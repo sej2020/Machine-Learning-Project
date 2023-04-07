@@ -127,7 +127,7 @@ def make_exp_data_2d(location, axes, rotation, resolution):
 
     df = pd.DataFrame(data_rot)
     make_line(data_rot, dim=2)
-    # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-{axes}_rot-{rot}_.csv", index=False, header=False)
 
 
 def make_exp_data_3d(location, axes, rotation, resolution):
@@ -143,22 +143,22 @@ def make_exp_data_3d(location, axes, rotation, resolution):
     # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
 
 #############################################################################################
-# location2d = [(x,y) for x in [-10,0,10] for y in [-10,0,10]]
-# axis_ratio2d = [[10,b] for b in [2,6,10]]
+location2d = [(x,y) for x in [0,10] for y in [0,10]]
+axis_ratio2d = [[10,b] for b in range(1,11)]
+rotations = [0, 15, 30, 45, 60, 75, 90]
+resolution = 0.0001
+
+for loc in location2d:
+    for rot in rotations:
+        for ax in axis_ratio2d:
+            make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+##############################################################################################
+# location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
+# axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]
 # rotations = [0, 45, 90]
 # resolution = 0.01
 
-# for loc in location2d:
-#     for ax in axis_ratio2d:
+# for loc in location3d:
+#     for ax in axis_ratio3d:
 #         for rot in rotations:
-#             make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
-##############################################################################################
-location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
-axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]
-rotations = [0, 45, 90]
-resolution = 0.01
-
-for loc in location3d:
-    for ax in axis_ratio3d:
-        for rot in rotations:
-            make_exp_data_3d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+#             make_exp_data_3d(location=loc, axes=ax, rotation=rot, resolution=resolution)
