@@ -8,6 +8,7 @@ import seaborn as sns
 import math
 import torch
 import mxnet as mx
+from pathlib import Path
 
 
 def get_data_array(datapath: str) -> np.array:
@@ -15,7 +16,7 @@ def get_data_array(datapath: str) -> np.array:
     Datapath -> np.array
     """
     df = pd.read_csv(datapath)
-    array = df.to_numpy()
+    array = df.to_numpy()[:, :-2].astype(float)
     return array
 
 
@@ -55,7 +56,11 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
                 case "pytorch-qrcp":
                     model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
                 case "pytorch-qr":
-                    model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                    try:
+                        model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                        
+                    except Exception as e:
+                        print(e)
                 case "pytorch-svd":
                     model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
                 case "pytorch-svddc":
@@ -137,6 +142,12 @@ def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_exp
         print(f"starting theoretical experiment with {reg_name}")
         func = comp_complexity_dict(reg_name)
         flops = list(map(func, exper_vals))
+        flops_ag = [[] for _ in range(len(rows_in_expr)//10)]
+        for i, flop in enumerate(flops):
+            flops_ag[i % (len(rows_in_expr)//10)] += [flop]
+        final_flops = np.array(flops_ag).mean(axis=1)
+           
+        
 
         # time_list = []
         # for flop_count in flops:
@@ -148,7 +159,7 @@ def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_exp
         #     time_list += [stop_theor - start_theor] 
 
         # results_dict[reg_name] = time_list
-        results_dict[reg_name] = flops
+        results_dict[reg_name] = final_flops
 
     return results_dict 
 
@@ -216,6 +227,7 @@ def make_viz(actual_time_dict: dict, theory_time_dict: dict, timer: object, rows
         plt.title("Ratio between Theoretical and Actual Runtimes")
         plt.legend(loc=2)
         plt.xlabel("Number of rows in dataset")
+        plt.xscale("log")
         plt.savefig(f"BetaDataExper/BigOTest/figs/bigO_ratio_{reg}")
         plt.clf()
     
@@ -223,6 +235,7 @@ def make_viz(actual_time_dict: dict, theory_time_dict: dict, timer: object, rows
         plt.plot(rows_in_expr, [theo / act for theo, act in zip(theory_time_dict[reg],actual_time_dict[reg])], label=label_dict[reg])
         plt.title("Ratio between Theoretical and Actual Runtimes")
         plt.legend(loc=2)
+        plt.xscale("log")
         plt.xlabel("Number of rows in dataset")
 
     plt.savefig(f"BetaDataExper/BigOTest/figs/bigO_ratio_aggregate")
@@ -248,7 +261,8 @@ def main(datapath: str, time_type: str, reg_names: list):
     m, n = np.shape(array)
     r = np.linalg.matrix_rank(array)
     max_row_bound = len(str(m))
-    # rows_in_expr = [10**row_bound for row_bound in range(1, max_row_bound)] # to produce orders of magnitude experiment
+    rows_in_expr = [10**row_bound for _ in range(10) for row_bound in range(1, max_row_bound)] # to produce orders of magnitude experiment
+    print(rows_in_expr)
     rows_in_expr = [i for i in range(math.floor(m/100),m,math.floor(m/100))] # to produce n evenly spaced amount of rows experiment
     print(f'Rows in Experiment: {rows_in_expr}')
 
@@ -266,8 +280,8 @@ def main(datapath: str, time_type: str, reg_names: list):
 
 
 if __name__ =='__main__':
-    path = 'BetaDataExper/BigOTest/test_data/conductivity.csv' #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv #will need to change on quartz
-    time_type = "total" #process or total
+    path = Path('BetaDataExper/BigOTest/test_data/bigly_datums/30_SNR_faults.csv') #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv #will need to change on quartz
+    time_type = "process" #process or total
 
     reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",] 
     #            "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",
