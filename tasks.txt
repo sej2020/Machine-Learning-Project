@@ -60,20 +60,12 @@ Research Papers:
 Survey of Popular Libraries
 
     1. Comparison Experiments
-        - runtime for different devices across libraries for (lst sqs?)(ANN?)
-        - memory useage for different devices across libraries for (lst sqs?)(ANN?)
+        - runtime for different devices across libraries for (lst sqs)
+        - memory useage for different devices across libraries for (lst sqs)
 
-    2. Add tables to describe scope of libraries (Sam)
-        - Regressors
-        X - activation functions
-        - evaluation metrics
-        - layer types
-        - optimizers (need Josh to locate optimizers in OpenCV before I can mark complete)
-        - loss functions
+    2. Synthesize information to fit 3 pages
 
-    3. Synthesize information to fit 6 pages
-
-    4. Fix citations
+    3. Fix citations
 
 
 
@@ -82,39 +74,30 @@ Current Implementations of Least Squares
     X - 1. Complete styling for experiment figures
 
     2. Redo Ellipsoid Experiment
-        X - generate data (# of dimensions: 2,5,10,50,100,250,500...10000)
-        X - generate data (rotations for data of various size [~5 datasets])
+        - generate data (2 or 3 dimensions with varying position, rotations, and axes ratio)
         X - conduct experiment
-        X - write code to produce grouped barchart
+        X - record runtimes
+        - create closed form equation
+        - ???
         - writeup results
         - add report and figures to LaTex doc
 
     3. Big-O Experiment
-        - research time complexities mentioned in documentation (if it exists)
-        - find suitably large dataset
-        - perform big-O analysis for each library w figures
+        X - research time complexities mentioned in documentation (if it exists)
+        - create suitably large dataset and figure out how to run experiment (Big Red?)
+        - perform big-O analysis for each library w figures (vary the m and n dimensions and form cross-product graph?)
+        - find alternate big-O for these algorithms?
         - writeup results
         - add report and figures to LaTex doc
-    
-    4. MinMax Data
-        X - generate data
-        - conduct experiment
-        - writeup results
-        - add report and figures to LaTex doc
-    ---------------------------------------------------------------------------------
-    5. New Experiments
-        - ask for other interesting datasets at next meeting
-        - if not supplied, rerun 'unintersting data' and select from beta dataset list
-        - repeat experiment pipeline
 
-    6. Lst Sqrs literature review 
+    4. Lst Sqrs literature review 
 
-    7. Write Paper
+    5. Write Paper
 
 
 Data-Centric MLaaS
 
-    1. Write Paper
+    1. Write Paper (Ask Madhavan to assist)
 
 
 

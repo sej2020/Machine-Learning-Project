@@ -20,7 +20,7 @@ def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=
         data_path - path to file that can become a pd.DataFrame or np.ndarray with target variable in final column and no categorical or missing data
         
         include_regs - "all" to use all algorithms or a list of desired algorithms to use a subset
-            options: "sklearn-lst_sq" ::: "tf-lst_sq_fast" ::: "tf-lst_sq_slow" ::: "pytorch-lst_sq" ::: "mxnet_lst_sq"
+            options: "tf-necd" ::: "tf-cod" ::: "pytorch-qrcp" ::: "pytorch-qr" ::: "pytorch-svd" ::: "pytorch-svddc" ::: "sklearn-svddc" ::: "mxnet-svddc"
             
         split_pcnt - None to train and test the algorithm over the entirety of the data or a real number from 1 - 100 to use that percentage of the data as a training set and test on the remainder
         
@@ -109,12 +109,16 @@ def set_time_type(time_type):
 
 def decide_regressors(include_regs):
     possible_regressors = [
-        "sklearn-lst_sq",
-        "tf-lst_sq_fast",
-        "tf-lst_sq_slow",
-        "pytorch-lst_sq",
-        "mxnet_lst_sq",
+        "tf-necd",
+        "tf-cod",
+        "pytorch-qrcp",
+        "pytorch-qr",
+        "pytorch-svd",
+        "pytorch-svddc",
+        "sklearn-svddc",
+        "mxnet-svddc",
     ]
+    
     if include_regs == "all":
         reg_names = possible_regressors
         
@@ -169,19 +173,28 @@ def regression_loop(X_train, y_train, X_test, timer, reg_names):
 
         start_lstsq = timer()
         match reg_name:
-            case "sklearn-lst_sq":
+            case "sklearn-svddc":
                 model = linear_model.LinearRegression(fit_intercept=False).fit(X_train,y_train).coef_
 
-            case "tf-lst_sq_fast":
+            case "tf-necd":
                 model = tf.linalg.lstsq(X_train, y_train[...,np.newaxis], fast=True).numpy()
                 
-            case "tf-lst_sq_slow":
+            case "tf-cod":
                 model = tf.linalg.lstsq(X_train, y_train[...,np.newaxis], fast=False).numpy()
 
-            case "pytorch-lst_sq":
-                model = np.array(torch.linalg.lstsq(torch.Tensor(X_train), torch.Tensor(y_train[...,np.newaxis])).solution)
+            case "pytorch-qrcp":
+                model = np.array(torch.linalg.lstsq(torch.Tensor(X_train), torch.Tensor(y_train[...,np.newaxis]), driver="gelsy").solution)
 
-            case "mxnet_lst_sq":
+            case "pytorch-qr":
+                model = np.array(torch.linalg.lstsq(torch.Tensor(X_train), torch.Tensor(y_train[...,np.newaxis]), driver="gels").solution)
+
+            case "pytorch-svd":
+                model = np.array(torch.linalg.lstsq(torch.Tensor(X_train), torch.Tensor(y_train[...,np.newaxis]), driver="gelss").solution)
+
+            case "pytorch-svddc":
+                model = np.array(torch.linalg.lstsq(torch.Tensor(X_train), torch.Tensor(y_train[...,np.newaxis]), driver="gelsd").solution)
+
+            case "mxnet-svddc":
                 model = mx.np.linalg.lstsq(X_train, y_train[...,np.newaxis], rcond=None)[0]
             
         pred = X_test @ model 
@@ -212,11 +225,6 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
     MEDIUM_SIZE = 14
     BIGGER_SIZE = 18
     CHONK_SIZE = 24
-    # font = {"fontname": "Times New Roman"}
-    font = {'family' : 'Times New Roman',
-            'weight' : 'bold',
-            'size'   : SMALL_SIZE}
-    # plt.rc('font', **font)
     plt.rcParams["font.family"] = "Times New Roman"
     plt.rc('axes', titlesize=BIGGER_SIZE, labelsize=MEDIUM_SIZE, facecolor="xkcd:black")
     plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
@@ -228,12 +236,25 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
     assert vis_theme in possible_themes, f"Invalid value passed for vis_theme: {vis_theme}\nSee documentation"
     sns.set_style(vis_theme, {'font.family':['serif'], 'axes.edgecolor':'black','ytick.left': True})
     plt.ticklabel_format(style = 'plain')
+
+    label_lookup = {
+        "tf-necd": "TensorFlow (NE-CD)",
+        "tf-cod": "TensorFlow (COD)",
+        "pytorch-qrcp": "PyTorch (QRCP)",
+        "pytorch-qr": "PyTorch (QR)",
+        "pytorch-svd": "PyTorch (SVD)",
+        "pytorch-svddc": "PyTorch (SVDDC)",
+        "sklearn-svddc": "scikit-learn (SVDDC)",
+        "mxnet-svddc": "MXNet (SVDDC)"
+    }
     
+    reg_titles = [label_lookup[reg] for reg in successful_regs]
+
     if "regressor_accuracy_barchart" in figures:
         for metric, _ in metric_lst:
             fig, ax = plt.subplots()
             scores_data = [results_dict[regressor][metric] for regressor in successful_regs]
-            sns.barplot(x=successful_regs, y=scores_data, color="darkgray", width=0.5, ax=ax, edgecolor='black')
+            sns.barplot(x=reg_titles, y=scores_data, color="darkgray", width=0.5, ax=ax, edgecolor='black')
             fig.suptitle(f"{metric} performance by model")
             ax.set_xlabel("Regressor Name")
             ax.set_ylabel(f"{metric}")
@@ -242,7 +263,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
     if "regressor_runtime_barchart" in figures:
         fig, ax = plt.subplots()
         elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[successful_regs[0]]["elapsed_time"] > 10 else (results_dict[regressor]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time shorter than 10s, report in ms            
-        sns.barplot(x=successful_regs, y=[pair[0] for pair in elapsed], ax=ax) # get times from elapsed
+        sns.barplot(x=reg_titles, y=[pair[0] for pair in elapsed], ax=ax) # get times from elapsed
         fig.suptitle(f"Runtime by model")
         ax.set_xlabel("Regressor Name")
         ax.set_ylabel(f"Runtime in {elapsed[0][1]}")
@@ -254,7 +275,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
         reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
         for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=regressor)
+            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
         ax.legend()
 
         ax.set_aspect('equal')
@@ -292,11 +313,14 @@ def main(data_path, params):
     
     results = linreg_pipeline(data_path, **params)
     reg_names = [
-        "sklearn-lst_sq",
-        "tf-lst_sq_fast",
-        "tf-lst_sq_slow",
-        "pytorch-lst_sq",
-        "mxnet_lst_sq",
+        "tf-necd",
+        "tf-cod",
+        "pytorch-qrcp",
+        "pytorch-qr",
+        "pytorch-svd",
+        "pytorch-svddc",
+        "sklearn-svddc",
+        "mxnet-svddc",
     ]
     
     ## this section should be commented out if you can't run all regressors ##
@@ -317,3 +341,4 @@ if __name__ == "__main__":
                 "random_seed": 100
             }
         )
+    

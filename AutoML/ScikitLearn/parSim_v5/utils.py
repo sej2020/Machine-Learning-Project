@@ -173,8 +173,7 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
     return (train_attribs, train_labels, test_attribs, test_labels)
 
 
-
-def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int) -> tuple:
+def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int = 11) -> tuple:
     """
     Generates a nested array of length k (where k is the number of cv folds).
     Each sub-tuple contains k folds formed into training data and the k+1 fold left out as test data.
@@ -210,13 +209,13 @@ def metric_help_func():
     """
     
     metric_table = {'Explained Variance': [True, 1, metrics.explained_variance_score], 'Max Error': [False, 1, metrics.max_error],
-                            'Mean Absolute Error': [False, -1, metrics.mean_absolute_error], 'Mean Squared Error': [False, -1, metrics.mean_squared_error],
-                            'Root Mean Squared Error': [False, -1, metrics.mean_squared_error], 'Mean Squared Log Error': [False, -1, metrics.mean_squared_log_error],
-                            'Median Absolute Error': [False, -1, metrics.median_absolute_error], 'R-Squared': [True, 1, metrics.r2_score],
-                            'Mean Poisson Deviance': [False, -1, metrics.mean_poisson_deviance], 'Mean Gamma Deviance': [False, -1, metrics.mean_gamma_deviance],
-                            'Mean Absolute Percentage Error': [False, -1, metrics.mean_absolute_percentage_error], 'D-Squared Absolute Error Score': [True, 1, metrics.d2_absolute_error_score],
-                            'D-Squared Pinball Score': [True, 1, metrics.d2_pinball_score], 'D-Squared Tweedie Score': [True, 1, metrics.d2_tweedie_score]
-                            }
+                    'Mean Absolute Error': [False, -1, metrics.mean_absolute_error], 'Mean Squared Error': [False, -1, metrics.mean_squared_error],
+                    'Root Mean Squared Error': [False, -1, metrics.mean_squared_error], 'Mean Squared Log Error': [False, -1, metrics.mean_squared_log_error],
+                    'Median Absolute Error': [False, -1, metrics.median_absolute_error], 'R-Squared': [True, 1, metrics.r2_score],
+                    'Mean Poisson Deviance': [False, -1, metrics.mean_poisson_deviance], 'Mean Gamma Deviance': [False, -1, metrics.mean_gamma_deviance],
+                    'Mean Absolute Percentage Error': [False, -1, metrics.mean_absolute_percentage_error], 'D-Squared Absolute Error Score': [True, 1, metrics.d2_absolute_error_score],
+                    'D-Squared Pinball Score': [True, 1, metrics.d2_pinball_score], 'D-Squared Tweedie Score': [True, 1, metrics.d2_tweedie_score]
+                   }
     
     try:
         return metric_table
@@ -263,6 +262,7 @@ def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np
         test_labels_prepped = imp_full_test[:, -1]
 
         return (train_attribs_prepped, train_labels_prepped, test_attribs_prepped, test_labels_prepped)
+
 
 def comparison_wrapper(setting: int, conf: dict) -> dict:
     """
@@ -312,6 +312,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
         return comparison(**conf)
     else:
         raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
+
 
 def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1, figure_lst=['Accuracy_over_Various_Proportions_of_Training_Set']) -> list:
     """
@@ -384,25 +385,30 @@ def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list
     fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
     
-    ## generating csv of results to generate figures specified in the figure_lst parameter
-    # figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': various_training_size_fig}
-    # for k,v in figure_lookup.items():
-    #     if k in figure_lst:
-    #         fig_res = v()
-    #         ### will need to make write_results extensible
-    #         write_results(f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{k}.csv", fig_res)
+    write_results("output.csv", fin_org_results, metrics=metric_list)
+    
+    # generating csv of results to generate figures specified in the figure_lst parameter
+    path_gen = lambda file: f"perf_stats_{file}.csv"
+    figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': (gen_and_write_training_test_data, (
+                        regs, reg_names, train_attribs, train_labels, path_gen('Accuracy_over_Various_Proportions_of_Training_Set'), metric_list, metric_help
+                        ))}
+    
+    for fig, (gen_and_write_data_func, params) in figure_lookup.items():
+        if fig in figure_lst:
+            gen_and_write_data_func(*params)
+
     
     print(f"The following regressors failed: {'---'.join(reg for reg in failed_regs)}")
     
     stop = perf_counter()
     print(f"Time to execute regression: {stop - start:.2f}s")
 
-    #generating figures and saving to the user's CWD
-    figs = [test_best(fin_org_results, metric_list, train_attribs.to_numpy(), train_labels.to_numpy(), test_attribs.to_numpy(), test_labels.to_numpy(), metric_help, n_vizualized_tb)]
-    for index in range(len(metric_list)):
-        figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
-    for k in range(len(figs)):
-        figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
+    # #generating figures and saving to the user's CWD
+    # figs = [test_best(fin_org_results, metric_list, train_attribs.to_numpy(), train_labels.to_numpy(), test_attribs.to_numpy(), test_labels.to_numpy(), metric_help, n_vizualized_tb)]
+    # for index in range(len(metric_list)):
+    #     figs += [boxplot(fin_org_results, styledict, metric_list, metric_help, n_vizualized_bp, index)]
+    # for k in range(len(figs)):
+    #     figs[k].savefig(f'AutoML/ScikitLearn/parSim_v5/par_1/figure_{k}.png', bbox_inches='tight', dpi=styledict['dpi'])
     
     return list(failed_regs)
 
@@ -575,3 +581,108 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     ax.table(cellText=df_sorted.values, rowLabels=df_sorted.index, colLabels=df_sorted.columns, loc='center')
     fig.tight_layout()
     return fig
+
+
+def write_results(path: str, data: dict, metrics: list) -> None:
+    """
+    An internal function to create a write a csv file from the data of a dictionary of a specific format
+
+    Args:
+        path (str) - the path of the file to be written
+        data (dict) - the dictionary to be converted to csv
+        metrics (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
+
+    Returns:
+        None
+    """
+
+    acc = {f"{regr}-{metric}": [] for regr in data for metric in metrics}
+    for regressor, runs in data.items():
+        for fold, run in enumerate(runs):
+            for metric_idx, value in enumerate(list(run.values())[0]):
+                if metric_idx < len(metrics):
+                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+
+    df = pd.DataFrame(acc)
+    df.to_csv(path)
+
+
+def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_list: list, metric_help: dict):
+    """
+    There are many iterations occurring here. Each of the following items is looped over:
+        1. fold_sets - each of these is a different group of 10/11 folds that will potentially be used to train [((trainfold1, ... trainfoldn), testfold), ..., ((trainfold1, ... trainfoldn), testfold)]
+        2. pcnt_folds - from 1-10, how many folds should be used to train the model before testing on the 11th fold. Corresponds to 10-100% of training data used
+        3. regs and reg_names - iterable of all regressors and their names to be tested
+    
+    Args:
+
+    Returns: 
+
+    """
+    FOLDS = 11
+    cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
+    pcnts = range(10, 110, 10)
+    
+    ## generate fold_sets
+    train_outputs = []
+    test_outputs = []
+    for X_train, y_train, X_test, y_test in zip(cv_X_train, cv_y_train, cv_X_test, cv_y_test): #[(cv_X_train[0], cv_y_train[0], cv_X_test[0], cv_y_test[0]), (cv_X_train[1], cv_y_train[1], cv_X_test[1], cv_y_test[1])]: #
+        for n_folds in range(1, FOLDS):
+            for reg, reg_name in zip(regs, reg_names):
+                train_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_train[:n_folds], y_train[:n_folds])
+                test_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_test, y_test)
+                
+                train_outputs.append(train_output)
+                test_outputs.append(test_output)
+                
+    
+    # processing round 1 - extract useful data from output of all runs
+    fin_org_results_d = {}
+    failed_regs = set()
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
+        for success_status, single_reg_output in tt_out:
+            if success_status:
+                reg_name = list(single_reg_output.keys())[0]
+                if reg_name in org_results:
+                    org_results[reg_name] += [single_reg_output]
+                else:
+                    org_results[reg_name] = [single_reg_output]
+                    
+            else:
+                failed_regs.add(single_reg_output)
+                
+        fin_org_results_d[tt_name] = {k: v for k,v in org_results.items() if k not in failed_regs}
+                
+                
+    json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
+    # acc = {f"{regr}-{metric}-{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
+
+    # processing round 2 - use previous representation of data to get data into a clean JSON format
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        for regressor, runs in fin_org_results_d[tt_name].items():
+            if regressor not in failed_regs:
+                for fold, iteration in enumerate(runs):
+                    for metric_idx, value in enumerate(list(iteration.values())[0]):
+                        if metric_idx < len(metric_list):
+                            # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
+                            json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
+
+    # reshape data to work in a csv format (pd.dataframe)
+    output_dict = {f"{regr}-{metric}-{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
+    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+        for reg_name in reg_names:
+            if reg_name not in failed_regs:
+                for metric in metric_list:
+                    for pcnt in pcnts:
+                        values = json[tt_name][reg_name][metric][pcnt]
+                        output_dict[f"{reg_name}-{metric}-{tt_name}"].append(sum(values) / len(values))
+                        
+
+
+    df = pd.DataFrame(output_dict)
+    df["percent_training_data"] = pcnts
+    df.set_index("percent_training_data", inplace = True)
+    df.to_csv(path, header=True, index=True)
+        
+    return 
