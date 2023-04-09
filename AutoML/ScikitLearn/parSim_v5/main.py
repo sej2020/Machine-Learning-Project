@@ -32,7 +32,7 @@ paramdict = {'id': 30,
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    print(comparison_wrapper(1,{'id': 30, 'datapath':'AutoML/ConcreteData/Concrete_Data.csv'}))
+    print(comparison_wrapper(1,{'id': 30, 'datapath':'AutoML/ConcreteData/Concrete_Data.csv'})) # 'AutoML\PowerPlantData\Folds5x2_pp.csv' 'AutoML/ConcreteData/Concrete_Data.csv'
     # print(comparison(**paramdict))
     stop = perf_counter()
 

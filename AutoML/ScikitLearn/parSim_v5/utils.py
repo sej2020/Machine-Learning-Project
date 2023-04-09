@@ -8,6 +8,7 @@ from sklearn.utils import all_estimators
 from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import KNNImputer
+from sklearn.base import clone
 from time import perf_counter
 import multiprocessing as multiprocessing
 
@@ -276,16 +277,27 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
     """
 
     default_conf = {'id': conf['id'],
-            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
-                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
-                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
-                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
-                                 'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
-                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
-                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
-                                 'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
-                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
-                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+            # 'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+            #                      'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+            #                      'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+            #                      'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
+            #                      'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
+            #                      'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
+            #                      'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+            #                      'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
+            #                      'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
+            #                      'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+            #                      }, 
+            'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 1, 'BayesianRidge': 0, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 0, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
+                                 'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
+                                 'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
+                                 'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 0, 'LassoLarsIC': 0, 'LinearRegression': 1, 
+                                 'LinearSVR': 0, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
+                                 'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 0, 
+                                 'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
+                                 'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
                                  }, 
             'metric_list': ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
                             'Mean Squared Log Error', 'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
@@ -304,7 +316,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'score_method': 'Root Mean Squared Error',
             'datapath': conf['datapath'], 
             'n_workers': 1,
-            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set'],
+            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set', 'Percent_Error_by_Datapoint'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Percent_Error_by_Datapoint'
                 }
     if setting == 1:
         return comparison(**default_conf)
@@ -384,6 +396,7 @@ def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list
     #keeping only those results that did not throw an error during any cv run
     fin_org_results = {k: v for k,v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
+
     
     write_results("output.csv", fin_org_results, metrics=metric_list)
     
@@ -391,11 +404,15 @@ def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list
     path_gen = lambda file: f"perf_stats_{file}.csv"
     figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': (gen_and_write_training_test_data, (
                         regs, reg_names, train_attribs, train_labels, path_gen('Accuracy_over_Various_Proportions_of_Training_Set'), metric_list, metric_help
-                        ))}
+                        )),
+                    'Percent_Error_by_Datapoint': (percent_error_viz, (
+                        fin_org_results, train_attribs, train_labels, path_gen('Percent_Error_by_Datapoint')
+                        ))
+                    }
     
-    for fig, (gen_and_write_data_func, params) in figure_lookup.items():
+    for fig, (func, params) in figure_lookup.items():
         if fig in figure_lst:
-            gen_and_write_data_func(*params)
+            func(*params)
 
     
     print(f"The following regressors failed: {'---'.join(reg for reg in failed_regs)}")
@@ -436,14 +453,15 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
     try:
         #preprocessing data
         train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
-
-        model_trained = reg.fit(train_attribs, train_labels)
+        clone_reg = clone(reg)
+        model_trained = clone_reg.fit(train_attribs, train_labels)
         y_pred = model_trained.predict(test_attribs)
         reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k][2](test_labels, y_pred)
             reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated**.5)
         reg_dict[reg_name].append(model_trained)
+
 
     except Exception as e:
         success = False
@@ -596,15 +614,47 @@ def write_results(path: str, data: dict, metrics: list) -> None:
         None
     """
 
-    acc = {f"{regr}-{metric}": [] for regr in data for metric in metrics}
+    acc = {f"{regr}~{metric}": [] for regr in data for metric in metrics}
     for regressor, runs in data.items():
         for fold, run in enumerate(runs):
             for metric_idx, value in enumerate(list(run.values())[0]):
                 if metric_idx < len(metrics):
-                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+                    acc[f"{regressor}~{metrics[metric_idx]}"].append(value)
 
     df = pd.DataFrame(acc)
     df.to_csv(path)
+
+
+def percent_error_viz(fin_org_results: dict, X: pd.DataFrame, y: pd.DataFrame, path: str):
+    point_data = point_performance(fin_org_results, X, y)
+    mape_score = pd.DataFrame()
+    for col_id, col_val in point_data.iteritems():
+        col_val = list(col_val)
+        y_true = [col_val[-1] for _ in range(len(col_val)-1)]
+        y_pred = col_val[:-1]
+        score = metric_help_func()['Mean Absolute Percentage Error'][2](y_true=y_true, y_pred=y_pred)
+        mape_score[col_id] = [score] 
+    mape_score.transpose().to_csv(path, header=True, index=True)
+    return
+
+
+def point_performance(fin_org_results: dict, X: pd.DataFrame, y: pd.DataFrame):
+    """
+    {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... }
+    """
+    point_data = pd.DataFrame()
+    for reg_name, res in fin_org_results.items():
+        print(f'Predicting point by point with {reg_name}')
+        for (i_x, point_x), (i_y, point_y) in zip(X.iterrows(), y.iteritems()):
+            new_column = []
+            y_true = point_y
+            for fold in res:
+                y_pred = fold[reg_name][-1].predict(point_x.to_numpy().reshape(1,-1))
+                new_column += [y_pred[0]]
+            new_column += [y_true]
+            point_data[f'{reg_name}~p{i_x}'] = new_column    
+    print(point_data)
+    return point_data
 
 
 def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_list: list, metric_help: dict):
@@ -656,7 +706,7 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                 
                 
     json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
-    # acc = {f"{regr}-{metric}-{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
+    # acc = {f"{regr}~{metric}~{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
 
     # processing round 2 - use previous representation of data to get data into a clean JSON format
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
@@ -665,20 +715,19 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                 for fold, iteration in enumerate(runs):
                     for metric_idx, value in enumerate(list(iteration.values())[0]):
                         if metric_idx < len(metric_list):
-                            # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
+                            # acc[f"{regressor}~{metric_list[metric_idx]}~{tt_name}"].append(value)
                             json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
 
     # reshape data to work in a csv format (pd.dataframe)
-    output_dict = {f"{regr}-{metric}-{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
+    output_dict = {f"{regr}~{metric}~{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
         for reg_name in reg_names:
             if reg_name not in failed_regs:
                 for metric in metric_list:
                     for pcnt in pcnts:
                         values = json[tt_name][reg_name][metric][pcnt]
-                        output_dict[f"{reg_name}-{metric}-{tt_name}"].append(sum(values) / len(values))
+                        output_dict[f"{reg_name}~{metric}~{tt_name}"].append(sum(values) / len(values))
                         
-
 
     df = pd.DataFrame(output_dict)
     df["percent_training_data"] = pcnts
