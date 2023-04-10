@@ -10,6 +10,7 @@ from sklearn.utils import all_estimators
 from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import KNNImputer
+from sklearn.base import clone
 import multiprocessing as multiprocessing
 
 import warnings
@@ -41,6 +42,7 @@ def validation(datapath: str) -> None:
             raise Exception(issue)
     pass
 
+
 def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
     """
     This function will validate that a pandas dataframe is of dimensions less than the specified row and column maximums.
@@ -59,6 +61,7 @@ def size(dataset: pd.DataFrame, row_max: int, col_max: int) -> set:
     if dataset.shape[1] > col_max:
         error.add(f'The number of columns in the dataset exceeds {col_max}. Please reduce the number of columns.')
     return error
+
 
 def dtype_check(dataset: pd.DataFrame) -> set:
     """
@@ -83,6 +86,7 @@ def dtype_check(dataset: pd.DataFrame) -> set:
             error.add(
                 'This dataset contains a categorial data column, a date/time data column, or there has been data input error. Please convert dataset to all numeric values.')
     return error
+
 
 def get_all_regs(which_regressors: dict) -> list:
     """
@@ -116,6 +120,7 @@ def get_all_regs(which_regressors: dict) -> list:
             all_reg_names.append(name)
     return all_regs, all_reg_names
 
+
 def load_data(datapath: str) -> pd.DataFrame:
     """
     This function will take the relative file path of a csv file and return a pandas DataFrame of the csv content.
@@ -134,6 +139,7 @@ def load_data(datapath: str) -> pd.DataFrame:
 
     except Exception as e:
         raise ValueError(f"Expected a valid path to data - invalid: {csv_path}")
+
 
 def data_split(datapath: str, test_set_size: float) -> tuple:
     """
@@ -162,7 +168,8 @@ def data_split(datapath: str, test_set_size: float) -> tuple:
 
     return (train_attribs, train_labels, test_attribs, test_labels)
 
-def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int) -> tuple:
+
+def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_folds: int = 11) -> tuple:
     """
     Generates a nested array of length k (where k is the number of cv folds).
     Each sub-tuple contains k folds formed into training data and the k+1 fold left out as test data.
@@ -177,15 +184,15 @@ def gen_cv_samples(X_train_df: pd.DataFrame, y_train_df: pd.DataFrame, n_cv_fold
     """
 
     X_train, y_train = X_train_df.values, y_train_df.values
-    kf = KFold(n_splits=n_cv_folds, shuffle=True)  # KFold creates a generator object, not list
-    kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)]  # making list of indices to be used for folds based on KFold object
-    nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in
-                      kf_indices]  # unpacking train/test data @ train/test indices
-    X_tr, y_tr, X_te, y_te = [], [], [], []  # variables which will each be of type list(np.ndarray, np.ndarray,..., np.ndarray), with k ndarray's representing each fold
+    kf = KFold(n_splits = n_cv_folds, shuffle = True) # KFold creates a generator object, not list
+    kf_indices = [(train, test) for train, test in kf.split(X_train, y_train)] # making list of indices to be used for folds based on KFold object
+    nested_samples = [(X_train[train_idxs], y_train[train_idxs], X_train[test_idxs], y_train[test_idxs]) for train_idxs, test_idxs in kf_indices] # unpacking train/test data @ train/test indices 
+    X_tr, y_tr, X_te, y_te = [], [], [], [] # variables which will each be of type list(np.ndarray, np.ndarray,..., np.ndarray), with k ndarray's representing each fold
     for sample in nested_samples:
         for i, var in enumerate((X_tr, y_tr, X_te, y_te)):
-            var.append(sample[i])  # method to prevent code duplication in unpacking nested_samples into four variables
+            var.append(sample[i]) # method to prevent code duplication in unpacking nested_samples into four variables
     return (X_tr, y_tr, X_te, y_te)
+
 
 def metric_help_func():
     """
@@ -219,6 +226,7 @@ def metric_help_func():
 
     except Exception as e:
         raise Exception("Update your version of sklearn to comply with requirements.txt")
+
 
 def preprocess(train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array) -> tuple:
     """
@@ -293,7 +301,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'score_method': 'Root Mean Squared Error',
             'datapath': conf['datapath'], 
             'n_workers': 1,
-            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set'],
+            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set', 'Percent_Error_by_Datapoint'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Percent_Error_by_Datapoint'
                 }
     if setting == 1:
         return comparison(**default_conf)
@@ -305,18 +313,10 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
 
 
 def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_tb: int, test_set_size: float,
-               n_cv_folds: int, score_method: str, datapath: str, n_workers: int, figure_lst: list) -> dict:
+               n_cv_folds: int, score_method: str, datapath: str, n_workers: int, figure_lst: list) -> list:
     """
-    This function will perform cross-validation training across several regressor types for one dataset.
-
-    If visualization is on frontend:
-    The cross-validation scores will be recorded as a temporary csv file, later to be uploaded to the output s3 bucket.
-
-    If visualization is on backend:
-    The cross-validation scores will be recorded as a temporary csv file and vizualized in a box plot chart,
-    displaying regressor performance across specified metrics. These charts will be saved in as a temporary png file.
-    The best performing model trained on each regressor type will be tested on the set of test instances.
-    The performance of those regs on the test instances will be recorded in a table and saved as a temporary png file.
+    This function will perform cross-validation training across several regressor types for one dataset. It will
+    also deploy other functions to generate additional visualizations.
 
     Args:
         id (int) - request id for particular comparison run
@@ -326,7 +326,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
         n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
         test_set_size (float) - a number between 0 and 1 that indicates the proportion of data to be allocated to the test set (Default: 0.2)
         n_cv_folds (int) - the number of folds for k-fold cross validation training (Default: 10)
-        score_method* (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
+        score_method (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
         datapath (str) - a file path to temporary dataset file retrieved from input s3 bucket
         n_workers (int) - this determines whether the 'run' function is performed serially or with multiple concurrent processors. The user selects the number of processes (Default: 1)
         figure_lst (list) - a list of the names of the figures to be generated on the frontend that require a separate process in the backend
@@ -340,6 +340,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
 
     regs, reg_names = get_all_regs(which_regressors)
     train_attribs, train_labels, test_attribs, test_labels = data_split(datapath, test_set_size)
+    train_attribs_idx, train_labels_idx, test_attribs_idx, test_labels_idx = list(train_attribs.index), list(train_labels.index), list(test_attribs.index), list(test_labels.index)
 
     # appending the score method to the metric list to be used in the remainder of the program
     metric_list = [score_method] + metric_list
@@ -348,7 +349,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
             del metric_list[i + 1]
 
     metric_help = metric_help_func()
-            
+
     # creating cv samples and running each regressor over these samples
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(train_attribs, train_labels, n_cv_folds)
     # fundemental idea of args_lst is to create the cross product of all k folds with all r regressors, making k*r tasks (sets of arguments) to be passed to mp pool
@@ -361,8 +362,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
         results = [run(*args) for args in args_lst]
 
     else:  # parallel
-        multiprocessing.set_start_method(
-            "spawn")  # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
+        multiprocessing.set_start_method("spawn")  # spawn method is safer and supported across both Unix and Windows systems, alternative (may not work) is fork
         with multiprocessing.Pool(processes=n_workers) as pool:  # defaulting to 8 processesors
             results = pool.starmap(run, args_lst)
 
@@ -390,12 +390,17 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
     # the figure lookup dict has to include the parameters that will be passed to any functions it calls
     figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': (gen_and_write_training_test_data, (
                         regs, reg_names, train_attribs, train_labels, path_gen('Accuracy_over_Various_Proportions_of_Training_Set'), metric_list, metric_help
-                        ))}
+                        )),
+                    'Percent_Error_by_Datapoint': (percent_error_viz, (
+                        fin_org_results, train_attribs, train_labels, test_attribs, test_labels, 
+                        train_attribs_idx, train_labels_idx, test_attribs_idx, test_labels_idx, n_cv_folds, path_gen('Percent_Error_by_Datapoint')
+                        ))
+                    }
     
-    for fig, (gen_and_write_data_func, params) in figure_lookup.items():
+    for fig, (func, params) in figure_lookup.items():
         if fig in figure_lst:
-            gen_and_write_data_func(*params) # these functions will both create AND write out the data - they do not return anything
-            
+            func(*params) # these functions will both create AND write out the data - they do not return anything
+
     output_path = f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{id}.csv"
     write_results(output_path, fin_org_results, metric_list)
 
@@ -428,8 +433,8 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
     try:
         # preprocessing data
         train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
-
-        model_trained = reg.fit(train_attribs, train_labels)
+        clone_reg = clone(reg)
+        model_trained = clone_reg.fit(train_attribs, train_labels)
         y_pred = model_trained.predict(test_attribs)
         reg_dict = {reg_name: []}
         for k in metric_list:
@@ -483,9 +488,9 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
         # if the specified score metric is a loss metric, the model with the lowest score will be "best". if the specified metric is a correlation score
         # (like R^2), then the model with the highest score will be "best"
         if metric_help[metric_list[0]][0] == True:
-            best = max(zip(scores, models), key=lambda pair: pair[0])[1]
+            best = max(zip(scores, models), key = lambda pair: pair[0])[1]
         else:
-            best = min(zip(scores, models), key=lambda pair: pair[0])[1]
+            best = min(zip(scores, models), key = lambda pair: pair[0])[1]
 
         # preprocessing data
         train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
@@ -530,15 +535,82 @@ def write_results(path: str, data: dict, metrics: list) -> None:
         None
     """
 
-    acc = {f"{regr}-{metric}": [] for regr in data for metric in metrics}
+    acc = {f"{regr}~{metric}": [] for regr in data for metric in metrics}
     for regressor, runs in data.items():
         for fold, run in enumerate(runs):
             for metric_idx, value in enumerate(list(run.values())[0]):
                 if metric_idx < len(metrics):
-                    acc[f"{regressor}-{metrics[metric_idx]}"].append(value)
+                    acc[f"{regressor}~{metrics[metric_idx]}"].append(value)
 
     df = pd.DataFrame(acc)
     df.to_csv(path)
+
+
+def percent_error_viz(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: pd.DataFrame, test_attribs: pd.DataFrame, test_labels: pd.DataFrame, 
+                      train_attribs_idx: list, train_labels_idx: list, test_attribs_idx: list, test_labels_idx: list, n_cv_folds: int, path: str):
+    """
+    This function generates a CSV file that stores the Mean Absolute Percentage Error for the prediction of each point for each regressor
+    Args:
+        fin_org_results (dict) - the final results from cross-validation
+        train_attribs (pd.DataFrame) - pd.DataFrame of dataset training attributes
+        train_labels (pd.DataFrame) - pd.DataFrame of dataset training labels
+        test_attribs (pd.DataFrame) - pd.DataFrame of dataset test attributes
+        test_labels (pd.DataFrame) - pd.DataFrame of dataset test labels
+        train_attribs_idx (list) - list of the indexes of the shuffled training set
+        train_labels_idx (list) - list of the indexes of the shuffled training set
+        test_attribs_idx (list) - list of the indexes of the shuffled test set
+        test_labels_idx (list) - list of the indexes of the shuffled test set
+        n_cv_folds (int) - the number of folds for k-fold cross validation training
+        path (str) - the path to write final CSV results to
+
+    Return:
+        writes a CSV file to specified path
+    """
+    point_data = point_performance(fin_org_results, train_attribs, train_labels, test_attribs, test_labels, 
+                      train_attribs_idx, train_labels_idx, test_attribs_idx, test_labels_idx, n_cv_folds)
+    mape_score = pd.DataFrame(index=['Mean Absolute Percentage Error'])
+    y_true = [list(np.array(point_data.tail(1)).squeeze()) for _ in range(n_cv_folds)]
+    y_pred = [point_data.loc[i, :].values.flatten().tolist() for i in range(n_cv_folds)]
+    score = np.array(metric_help_func()['Mean Absolute Percentage Error'][2](y_true=y_true, y_pred=y_pred, multioutput="raw_values"))
+    score_form = np.expand_dims(score, axis=1).T
+    mape_score = pd.DataFrame(score_form, index=['Mean Absolute Percentage Error'], columns=point_data.columns)
+    mape_score.transpose().to_csv(path, header=True, index=True)
+    return
+
+
+def point_performance(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: pd.DataFrame, test_attribs: pd.DataFrame, test_labels: pd.DataFrame, 
+                      train_attribs_idx: list, train_labels_idx: list, test_attribs_idx: list, test_labels_idx: list, n_cv_folds: int) -> pd.DataFrame:
+    """
+    This function creates a pandas dataframe that stores the y_prediction - y_true values of each point for each regressor and a final row with each y_true value
+    Args:
+        fin_org_results (dict) - the final results from cross-validation
+        train_attribs (pd.DataFrame) - pd.DataFrame of dataset training attributes
+        train_labels (pd.DataFrame) - pd.DataFrame of dataset training labels
+        test_attribs (pd.DataFrame) - pd.DataFrame of dataset test attributes
+        test_labels (pd.DataFrame) - pd.DataFrame of dataset test labels
+        train_attribs_idx (list) - list of the indexes of the shuffled training set
+        train_labels_idx (list) - list of the indexes of the shuffled training set
+        test_attribs_idx (list) - list of the indexes of the shuffled test set
+        test_labels_idx (list) - list of the indexes of the shuffled test set
+        n_cv_folds (int) - the number of folds for k-fold cross validation training
+
+    Return:
+        point_dat (pd.DataFrame) - a dataframe that stores the y_prediction - y_true values of each point for each regressor and a final row with each y_true value
+    """
+    train_attribs, train_labels, test_attribs, test_labels = preprocess(train_attribs, train_labels, test_attribs, test_labels)
+    X = pd.DataFrame(np.vstack((train_attribs, test_attribs)), index=train_attribs_idx+test_attribs_idx)
+    y = pd.DataFrame(np.vstack((np.expand_dims(train_labels, axis=1), np.expand_dims(test_labels, axis=1))), index=train_labels_idx+test_labels_idx)
+    partial_row = [[] for _ in range(n_cv_folds)]
+    true_val_row = np.array([])
+    for reg_name, res in fin_org_results.items():
+        print(f'Predicting point by point with {reg_name}')
+        for fold_idx, fold in enumerate(res):
+            y_pred = list(fold[reg_name][-1].predict(X))
+            partial_row[fold_idx] += y_pred
+        true_val_row = np.append(true_val_row, y.values.reshape((len(y),)))
+    partial_row.append(true_val_row)
+    point_data = pd.DataFrame(partial_row, columns=[f'{reg_name}~p{idx}' for reg_name in fin_org_results.keys() for idx in train_labels_idx+test_labels_idx])
+    return point_data
 
 
 def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_list: list, metric_help: dict):
@@ -592,7 +664,7 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                 
                 
     json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
-    # acc = {f"{regr}-{metric}-{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
+    # acc = {f"{regr}~{metric}~{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
 
     # processing round 2 - use previous representation of data to get data into a clean JSON format
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
@@ -601,18 +673,18 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                 for fold, iteration in enumerate(runs):
                     for metric_idx, value in enumerate(list(iteration.values())[0]):
                         if metric_idx < len(metric_list):
-                            # acc[f"{regressor}-{metric_list[metric_idx]}-{tt_name}"].append(value)
+                            # acc[f"{regressor}~{metric_list[metric_idx]}~{tt_name}"].append(value)
                             json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
 
     # reshape data to work in a csv format (pd.dataframe)
-    output_dict = {f"{regr}-{metric}-{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
+    output_dict = {f"{regr}~{metric}~{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
         for reg_name in reg_names:
             if reg_name not in failed_regs:
                 for metric in metric_list:
                     for pcnt in pcnts:
                         values = json[tt_name][reg_name][metric][pcnt]
-                        output_dict[f"{reg_name}-{metric}-{tt_name}"].append(sum(values) / len(values))
+                        output_dict[f"{reg_name}~{metric}~{tt_name}"].append(sum(values) / len(values))
                         
 
     df = pd.DataFrame(output_dict)
