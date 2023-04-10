@@ -303,9 +303,6 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
         raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
 
 
-def various_training_size_fig():
-    pass
-
 
 def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_tb: int, test_set_size: float,
                n_cv_folds: int, score_method: str, datapath: str, n_workers: int, figure_lst: list) -> dict:
@@ -387,15 +384,6 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
     fin_org_results = {k: v for k, v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
 
-    ## generating csv of results to generate figures specified in the figure_lst parameter
-    # figure_lookup = {'Accuracy_over_Various_Proportions_of_Training_Set': various_training_size_fig}
-    # for k,v in figure_lookup.items():
-    #     if k in figure_lst:
-    #         fig_res = v()
-    #         ### will need to make write_results extensible
-    #         write_results(f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{k}.csv", fig_res)
-
-
     path_gen = lambda file: f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{file}_{id}.csv" # helper for making various output data files
     
     
@@ -455,64 +443,6 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
 
     return success, reg_dict
 
-
-# def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_help: dict, n_vizualized_bp: int, index: int) -> plt.figure:
-#     """
-#     This function will return a box plot chart displaying the cross-validation scores of various regressors for a given metric.
-#     The box plot chart will be in descending order by median performance. The chart will be saved to the user's CPU as a png file.
-
-#     Args:
-#         fin_org_results (dict) - the final results from cross-validation
-#         styledict (dict) - container for user to specify style of boxplots
-#         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
-#         metric_help (dict) - a dictionary to assist with any functions involving metrics
-#         n_vizualized_bp (int) - the top scoring 'n' regressors in cross-validation to be included in boxplot visualizations. The value -1 will include all regressors (Default: -1)
-#         index (int) - this variable is created internally to determine which metric this particular run of boxplot will visualize
-
-#     Returns:
-#         A boxplot figure displaying the performance of a specified number of regressors on cross-validation training
-#     """
-
-#     boxfig = plt.figure(constrained_layout=True)
-
-#     metric = metric_list[index]
-#     df = pd.DataFrame()
-#     for k, v in fin_org_results.items():
-#         df[k] = [list(dict.values())[0][index] for dict in v]
-
-#     # Sorting the columns by median value of the CV scores. The metric_help dictionary helps to determine whether it will be an ascending
-#     # sort or a descending sort based on the metric.
-#     sorted_index = df.median().sort_values(ascending=metric_help[metric][0]).index
-#     df_sorted = df[sorted_index]
-
-#     # Creating box plot figure of best n regressors.
-#     df_final = df_sorted.iloc[:, len(df_sorted.columns) - n_vizualized_bp:]
-#     bp_data = []
-#     for column in df_final.columns:
-#         bp_data.append(df[column[:]].tolist())
-
-#     boxfig = plt.figure()
-#     ax = boxfig.add_subplot(111)
-#     bp = ax.boxplot(bp_data, patch_artist=True, vert=0, boxprops=styledict['boxprops'],
-#                     flierprops=styledict['flierprops'], medianprops=styledict['medianprops'],
-#                     whiskerprops=styledict['whiskerprops'], capprops=styledict['capprops']
-#                     )
-
-#     for patch in bp['boxes']:
-#         patch.set_facecolor(styledict['boxfill'])
-
-#     ax.set_yticklabels([column for column in df_final.columns])
-#     ax.yaxis.grid(styledict['grid'])
-#     ax.xaxis.grid(styledict['grid'])
-
-#     plt.title("Cross Validation Scores")
-
-#     ax.set_xlabel(f'{metric}')
-#     ax.set_ylabel('Models')
-#     ax.get_xaxis().tick_bottom()
-#     ax.get_yaxis().tick_left()
-
-#     return boxfig
 
 
 def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array, train_labels: np.array, test_attribs: np.array,
@@ -586,6 +516,7 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     fig.tight_layout()
     return fig
 
+
 def write_results(path: str, data: dict, metrics: list) -> None:
     """
     An internal function to create a write a csv file from the data of a dictionary of a specific format
@@ -608,6 +539,7 @@ def write_results(path: str, data: dict, metrics: list) -> None:
 
     df = pd.DataFrame(acc)
     df.to_csv(path)
+
 
 def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_list: list, metric_help: dict):
     """
@@ -682,7 +614,6 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
                         values = json[tt_name][reg_name][metric][pcnt]
                         output_dict[f"{reg_name}-{metric}-{tt_name}"].append(sum(values) / len(values))
                         
-
 
     df = pd.DataFrame(output_dict)
     df["percent_training_data"] = pcnts
