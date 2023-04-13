@@ -117,6 +117,7 @@ def get_all_regs(which_regressors: dict) -> list:
 
     # importing all sklearn regressors and establishing which regressors will be ommited from the run
     estimators = all_estimators(type_filter='regressor')
+    print(f'Number of Regressors:{len(estimators)}')
     all_regs = []
     all_reg_names = []
 
@@ -535,7 +536,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k]['Function'](test_labels, y_pred)
-            reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated ** .5)
+            reg_dict[reg_name].append(calculated)
         reg_dict[reg_name].append(model_trained)
 
     except Exception as e:
