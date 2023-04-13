@@ -671,7 +671,7 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
         single_reg_output = []
         for m in metric_list:
             calculated = metric_help[m]['Function'](test_labels, best_predict)
-            single_reg_output.append(round(calculated if m != 'Root Mean Squared Error' else calculated ** .5, 4))
+            single_reg_output.append(round(calculated, 4))
 
         output.append(single_reg_output)
 
