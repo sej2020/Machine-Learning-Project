@@ -366,11 +366,13 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
         which_regressors (dict) - dictionary of key:value pairs of form <'RegressorName'> : <Bool(0)|Bool(1)>
 
         metric_list (list) - the regressors will be evaluated on these metrics during cross-validation and visualized
+
         n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
 
         test_set_size (float) - a number between 0 and 1 that indicates the proportion of data to be allocated to the test set (Default: 0.2)
 
         n_cv_folds (int) - the number of folds for k-fold cross validation training (Default: 10)
+
         score_method (str) - the regressors will be evaluated on this metric to determine which regressors perform best (Default: 'Root Mean Squared Error')
         
         datapath (str) - a file path to temporary dataset file retrieved from input s3 bucket
@@ -497,7 +499,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k]['Function'](test_labels, y_pred)
-            reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated ** .5)
+            reg_dict[reg_name].append(calculated)
         reg_dict[reg_name].append(model_trained)
 
     except Exception as e:
@@ -568,7 +570,7 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
         single_reg_output = []
         for m in metric_list:
             calculated = metric_help[m]['Function'](test_labels, best_predict)
-            single_reg_output.append(round(calculated if m != 'Root Mean Squared Error' else calculated ** .5, 4))
+            single_reg_output.append(round(calculated, 4))
 
         output.append(single_reg_output)
 
