@@ -18,6 +18,7 @@ def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
     return points_org
 
 def make_data_ellipse(axes, resolution):
+    print('workin')
     a,b = axes
     num = 1/resolution
     angles = 2 * np.pi * np.arange(num) / num
@@ -126,7 +127,8 @@ def make_exp_data_2d(location, axes, rotation, resolution):
     data_rot[:,1] += location[1]
 
     df = pd.DataFrame(data_rot)
-    make_line(data_rot, dim=2)
+    if rotation == 15:
+        make_line(data_rot, dim=2)
     df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-{axes}_rot-{rot}_.csv", index=False, header=False)
 
 
@@ -146,7 +148,7 @@ def make_exp_data_3d(location, axes, rotation, resolution):
 location2d = [(x,y) for x in [0,10] for y in [0,10]]
 axis_ratio2d = [[10,b] for b in range(1,11)]
 rotations = [0, 15, 30, 45, 60, 75, 90, 180]
-resolution = 0.0001
+resolution = 0.001
 
 for loc in location2d:
     for rot in rotations:
