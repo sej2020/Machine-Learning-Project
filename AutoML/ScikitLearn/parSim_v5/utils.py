@@ -236,22 +236,13 @@ def metric_help_func():
 
     def root_mean_squared_error(y_true, y_pred, multioutput="uniform_average"):
         return metrics.mean_squared_error(y_true=y_true, y_pred=y_pred, multioutput=multioutput)**(1/2)
-
-
-    # metric_table = {'Explained Variance': [True, 1, metrics.explained_variance_score], 'Max Error': [False, 1, metrics.max_error],
-    #                 'Mean Absolute Error': [False, -1, metrics.mean_absolute_error], 'Mean Squared Error': [False, -1, metrics.mean_squared_error],
-    #                 'Root Mean Squared Error': [False, -1, metrics.mean_squared_error], 'Mean Squared Log Error': [False, -1, metrics.mean_squared_log_error],
-    #                 'Median Absolute Error': [False, -1, metrics.median_absolute_error], 'R-Squared': [True, 1, metrics.r2_score],
-    #                 'Mean Poisson Deviance': [False, -1, metrics.mean_poisson_deviance], 'Mean Gamma Deviance': [False, -1, metrics.mean_gamma_deviance],
-    #                 'Mean Absolute Percentage Error': [False, -1, metrics.mean_absolute_percentage_error], 'D-Squared Absolute Error Score': [True, 1, metrics.d2_absolute_error_score],
-    #                 'D-Squared Pinball Score': [True, 1, metrics.d2_pinball_score], 'D-Squared Tweedie Score': [True, 1, metrics.d2_tweedie_score]
-    #                }
+    
     metric_table = {'Explained Variance': {'Correlation Score': True, 'Function': metrics.explained_variance_score, 'Multi-Output': True},
                     'Max Error': {'Correlation Score': False, 'Function': metrics.max_error, 'Multi-Output': False},
                     'Mean Absolute Error': {'Correlation Score': False, 'Function': metrics.mean_absolute_error, 'Multi-Output': True},
                     'Mean Squared Error': {'Correlation Score': False, 'Function': metrics.mean_squared_error, 'Multi-Output': True},
                     'Root Mean Squared Error': {'Correlation Score': False, 'Function': root_mean_squared_error, 'Multi-Output': True},
-                    'Mean Squared Log Error': {'Correlation Score': False, 'Function': metrics.mean_squared_log_error, 'Multi-Output': True},
+                    # 'Mean Squared Log Error': {'Correlation Score': False, 'Function': metrics.mean_squared_log_error, 'Multi-Output': True},
                     'Median Absolute Error': {'Correlation Score': False, 'Function': metrics.median_absolute_error, 'Multi-Output': True},
                     'R-Squared': {'Correlation Score': True, 'Function': metrics.r2_score, 'Multi-Output': True},
                     'Mean Poisson Deviance': {'Correlation Score': False, 'Function': metrics.mean_poisson_deviance, 'Multi-Output': False},
@@ -331,30 +322,30 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
     """
 
     default_conf = {'id': conf['id'],
-            # 'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
-            #                      'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
-            #                      'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
-            #                      'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
-            #                      'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
-            #                      'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
-            #                      'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
-            #                      'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
-            #                      'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
-            #                      'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
-            #                      }, 
-            'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 1, 'BayesianRidge': 0, 'CCA': 0, 
-                                 'DecisionTreeRegressor': 0, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 0, 
-                                 'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
-                                 'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
-                                 'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 0, 'LassoLarsIC': 0, 'LinearRegression': 1, 
+            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
+                                 'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
                                  'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
-                                 'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 0, 
-                                 'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
-                                 'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
-                                 'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
+                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+                                 'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
+                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
                                  }, 
+            # 'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 0, 'BayesianRidge': 0, 'CCA': 0, 
+            #                      'DecisionTreeRegressor': 0, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
+            #                      'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
+            #                      'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
+            #                      'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 0, 'LassoLarsIC': 0, 'LinearRegression': 0, 
+            #                      'LinearSVR': 0, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
+            #                      'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 0, 
+            #                      'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
+            #                      'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
+            #                      'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
+            #                      }, 
             'metric_list': ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
-                            'Mean Squared Log Error', 'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
+                            'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
                             'Mean Absolute Percentage Error', 'D-Squared Absolute Error Score',
                             'D-Squared Pinball Score', 'D-Squared Tweedie Score'], 
             'n_vizualized_bp': 20,
@@ -370,7 +361,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'score_method': 'Root Mean Squared Error',
             'datapath': conf['datapath'], 
             'n_workers': 1,
-            'figure_lst': ['Error_by_Datapoint'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint'
+            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint'
                 }
     if setting == 1:
         return comparison(**default_conf)
@@ -535,7 +526,7 @@ def run(reg: object, reg_name: str, metric_list: list, metric_help: dict, train_
         reg_dict = {reg_name: []}
         for k in metric_list:
             calculated = metric_help[k]['Function'](test_labels, y_pred)
-            reg_dict[reg_name].append(calculated if k != 'Root Mean Squared Error' else calculated ** .5)
+            reg_dict[reg_name].append(calculated)
         reg_dict[reg_name].append(model_trained)
 
     except Exception as e:
@@ -766,7 +757,10 @@ def error_viz(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: 
         partial_row = [[] for _ in range(n_cv_folds)]
         print(f'Predicting point by point with {reg_name}')
         for fold_idx, fold in enumerate(res):
-            y_pred = list(fold[reg_name][-1].predict(X))
+            if reg_name == "PLSRegression":
+                y_pred = list(fold[reg_name][-1].predict(X).flatten().tolist())
+            else:
+                y_pred = list(fold[reg_name][-1].predict(X))
             partial_row[fold_idx] += y_pred
         partial_row.append(y)
 
@@ -866,8 +860,8 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
     for X_train, y_train, X_test, y_test in zip(cv_X_train, cv_y_train, cv_X_test, cv_y_test): #[(cv_X_train[0], cv_y_train[0], cv_X_test[0], cv_y_test[0]), (cv_X_train[1], cv_y_train[1], cv_X_test[1], cv_y_test[1])]: #
         for n_folds in range(1, FOLDS):
             for reg, reg_name in zip(regs, reg_names):
-                train_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_train[:n_folds], y_train[:n_folds])
-                test_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds], y_train[:n_folds], X_test, y_test)
+                train_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds+1], y_train[:n_folds+1], X_train[:n_folds+1], y_train[:n_folds+1])
+                test_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds+1], y_train[:n_folds+1], X_test, y_test)
                 
                 train_outputs.append(train_output)
                 test_outputs.append(test_output)

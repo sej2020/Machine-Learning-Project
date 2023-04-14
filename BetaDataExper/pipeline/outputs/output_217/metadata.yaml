@@ -1,0 +1,14 @@
+completed_regs:
+  - tf-necd
+  - tf-cod
+  - pytorch-qrcp
+  - pytorch-qr
+  - pytorch-svd
+  - pytorch-svddc
+  - sklearn-svddc
+  - mxnet-svddc
+dataset_shape: 1000 x 2
+input_data: 'hyperell_loc-(0, 0)_ax-[10, 4]_rot-30_.csv'
+random_seed: 100
+split_percent: No train/test split
+timer_method: total

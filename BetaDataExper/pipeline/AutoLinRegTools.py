@@ -12,7 +12,7 @@ import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
 
-def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd()):
+def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=False, want_figs=False):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
@@ -48,9 +48,9 @@ def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=
 
     X_train, X_test, y_train, y_test = split_data(data, split_pcnt, random_seed)
     
-    figures = decide_figures(data, chosen_figures)
+    figures = decide_figures(data, chosen_figures, verbose_output)
     
-    results_dict = regression_loop(X_train, y_train, X_test, timer, reg_names)
+    results_dict = regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output)
 
     successful_regs = list(results_dict.keys())
 
@@ -67,7 +67,8 @@ def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=
     
     output_folder = create_output_folder(run_number)
     
-    generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder)
+    if want_figs:
+        generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder)
     
     metadata = {
         "input_data": data_path.name,
@@ -78,9 +79,9 @@ def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=
         "dataset_shape": f"{data.shape[0]} x {data.shape[1]}",
     }
     
-    dump_to_yaml(output_folder / "metadata.yaml", metadata)
+    dump_to_yaml(output_folder / "metadata.yaml", metadata, True)
     
-    dump_to_yaml(output_folder / "results.yaml", results_dict)
+    dump_to_yaml(output_folder / "results.yaml", results_dict, verbose_output)
     
     return results_dict
     
@@ -140,7 +141,7 @@ def split_data(data, split_pcnt, seed):
         
     return X_train, X_test, y_train, y_test
 
-def decide_figures(data, chosen_figures):
+def decide_figures(data, chosen_figures, verbose_output):
     impossible_figures = []
     possible_figures = [
         "regressor_accuracy_barchart",
@@ -150,6 +151,9 @@ def decide_figures(data, chosen_figures):
     
     if data.shape[1] > 2:
         print(f"{'-'*30}\nWarning: Your data is {data.shape[1]} dimensional, so 2D scatterplot will not be created\n{'-'*30}")
+        impossible_figures.append("2d_scatterplot_w_regression_line")
+        
+    if not verbose_output: 
         impossible_figures.append("2d_scatterplot_w_regression_line")
             
     if chosen_figures == "all":
@@ -166,7 +170,7 @@ def decide_figures(data, chosen_figures):
 
     return figures
 
-def regression_loop(X_train, y_train, X_test, timer, reg_names):
+def regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output):
     results_dict = {}
         
     for reg_name in reg_names:       
@@ -202,10 +206,12 @@ def regression_loop(X_train, y_train, X_test, timer, reg_names):
         stop_lstsq = timer()
 
         results_dict[reg_name] = {
-            "model": model,
-            "y_pred": pred,
-            "elapsed_time": stop_lstsq - start_lstsq
+            "elapsed_time": stop_lstsq - start_lstsq,
+            "y_pred": pred
             }
+        
+        if verbose_output:
+            results_dict["model"] = model
         
     return results_dict
 
@@ -215,7 +221,12 @@ def process_results(results_dict, y_test, metrics):
             score = formula(y_test, reg_output["y_pred"])
             results_dict[reg_name][metric] = score
 
-def dump_to_yaml(path, object):
+def dump_to_yaml(path, object, verbose_output = True):
+    print(f"Results dict: {object.keys()}")
+    if not verbose_output:
+        for reg in object.keys():
+            del object[reg]["y_pred"]
+    
     with open(path, "w") as f_log:
         dump = pyaml.dump(object)
         f_log.write(dump)
@@ -324,9 +335,9 @@ def main(data_path, params):
     ]
     
     ## this section should be commented out if you can't run all regressors ##
-    stuff = [results[reg]["model"] for reg in reg_names]                     #
-    for name, model in zip(reg_names, stuff):                                #  
-        print(f"{name} has model: \n{model}\n{'='*30}")                      #
+    # stuff = [results[reg]["model"] for reg in reg_names]                     #
+    # for name, model in zip(reg_names, stuff):                                #  
+    #     print(f"{name} has model: \n{model}\n{'='*30}")                      #
     ##########################################################################
         
     print("Run complete")

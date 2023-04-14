@@ -8,9 +8,7 @@ libraries_data
 pytorch_test
 
 # don't upload massive output files from beta data experiments
-results.yaml
 BetaDataExper/HyperEllipsoid/data/
 err_distr_synth.ipynb
 animals.csv
 bigly_datums
-outputs
