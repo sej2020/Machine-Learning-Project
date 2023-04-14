@@ -6,8 +6,8 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import math
-import torch
-import mxnet as mx
+# import torch
+# import mxnet as mx
 from pathlib import Path
 
 
@@ -71,7 +71,11 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
 
             time_list += [(stop_lstsq - start_lstsq)] 
 
-        results_dict[reg_name] = time_list   
+        final = []
+        for i,j in zip(rows_in_expr, time_list):
+            final.append([i,j])
+
+        results_dict[reg_name] = final   
 
     return results_dict
 
@@ -142,24 +146,12 @@ def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_exp
         print(f"starting theoretical experiment with {reg_name}")
         func = comp_complexity_dict(reg_name)
         flops = list(map(func, exper_vals))
-        flops_ag = [[] for _ in range(len(rows_in_expr)//10)]
-        for i, flop in enumerate(flops):
-            flops_ag[i % (len(rows_in_expr)//10)] += [flop]
-        final_flops = np.array(flops_ag).mean(axis=1)
-           
-        
 
-        # time_list = []
-        # for flop_count in flops:
-        #     temp = 0
-        #     start_theor = timer()
-        #     for i in range(flop_count):
-        #         temp += 1
-        #     stop_theor = timer()
-        #     time_list += [stop_theor - start_theor] 
+        final = []
+        for i,j in zip(rows_in_expr, flops):
+            final.append([i,j])
 
-        # results_dict[reg_name] = time_list
-        results_dict[reg_name] = final_flops
+        results_dict[reg_name] = final
 
     return results_dict 
 
@@ -242,7 +234,7 @@ def make_viz(actual_time_dict: dict, theory_time_dict: dict, timer: object, rows
 
 
 
-def main(datapath: str, time_type: str, reg_names: list):
+def main(datapath: str, time_type: str, reg_names: list, granularity=2, repeat=10):
     """
     Makes visualizations for Theoretical Runtime vs. Actual Runtime comparison
 
@@ -250,6 +242,8 @@ def main(datapath: str, time_type: str, reg_names: list):
         datapath (str): str of csv file to use in experiment
         time_type (str): "process" to get a time without sleep or "total" to get an actual runtime
         reg_names (list): list of the regressors to be used
+        granularity (int): step size of test between orders of magnitude
+        repeat (int): how many times to repeat experiment
 
     Returns:
         Saves figures to cwd 
@@ -260,10 +254,16 @@ def main(datapath: str, time_type: str, reg_names: list):
 
     m, n = np.shape(array)
     r = np.linalg.matrix_rank(array)
-    max_row_bound = len(str(m))
-    rows_in_expr = [10**row_bound for _ in range(10) for row_bound in range(1, max_row_bound)] # to produce orders of magnitude experiment
-    print(rows_in_expr)
-    rows_in_expr = [i for i in range(math.floor(m/100),m,math.floor(m/100))] # to produce n evenly spaced amount of rows experiment
+    ## loop to find the maximum number of rows allowed in experiment
+    max_row_bound = 0
+    for i in range(1*10, (len(str(m))+1)*10, granularity):
+        if 10**(i/10) < m:
+            max_row_bound = i/10
+        else:
+            max_row_bound = i/10
+            break
+
+    rows_in_expr = [math.floor(10**(row_bound/10)) for row_bound in range(1*10, int(max_row_bound*10), granularity) for _ in range(repeat)] # to produce orders of magnitude experiment for _ in range(10)
     print(f'Rows in Experiment: {rows_in_expr}')
 
     X, Y = array[:,:-1], array[:,-1] 
@@ -274,16 +274,16 @@ def main(datapath: str, time_type: str, reg_names: list):
     print('now running theoretical experiments...')
     theory_time_dict = theoretical_expr(n, r, timer, reg_names, rows_in_expr)
     print('All done with theoretical experiments, now just making viz')
-    print(f'Actual Time: {actual_time_dict}\n-----\nTheoretical Time: {theory_time_dict}')
-    make_viz(actual_time_dict, theory_time_dict, timer, rows_in_expr)
-    print('All done.')
+    print(f'Actual Time: {actual_time_dict}\n--------------\nTheoretical Time: {theory_time_dict}')
+    # make_viz(actual_time_dict, theory_time_dict, timer, rows_in_expr)
+    # print('All done.')
 
 
 if __name__ =='__main__':
-    path = Path('BetaDataExper/BigOTest/test_data/bigly_datums/30_SNR_faults.csv') #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv #will need to change on quartz
+    path = Path('BetaDataExper/BigOTest/test_data/conductivity.csv') #AutoML\PowerPlantData\Folds5x2_pp.csv or BetaDataExper/BigOTest/test_data/conductivity.csv #will need to change on quartz
     time_type = "process" #process or total
 
-    reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",] 
+    reg_names = ["tf-necd", "tf-cod", "sklearn-svddc"] 
     #            "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",
 
-    main(path, time_type, reg_names)
+    main(path, time_type, reg_names, granularity=5, repeat=2)
