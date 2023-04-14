@@ -9,12 +9,20 @@
             <mat-select aria-required="true" [(value)]="chartType" (selectionChange)="changeInChartType($event.value)">
                 <mat-option value="boxplot">Boxplot</mat-option>
                 <mat-option value="cv_line_chart">Cross Validation Line Chart</mat-option>
+                <mat-option value="train_test_error">Train Test Error</mat-option>
+                <mat-option value="tsne_visualization">TSNE Visualization</mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+        <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0 && chartType != 'tsne_visualization'" class="form-field-styles">
             <mat-label>Metric</mat-label>
             <mat-select aria-required="true" [(value)]="currentMetric" (selectionChange)="changeInCurrentMetric($event.value)">
                 <mat-option *ngFor="let v of yAxisData" [value]="v">{{v}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field *ngIf="regressorList!=null && regressorList.length > 0 && chartType == 'train_test_error'" class="form-field-styles">
+            <mat-label>Regressor</mat-label>
+            <mat-select aria-required="true" [(value)]="currentRegressor" (selectionChange)="changeInRegressor($event.value)">
+                <mat-option *ngFor="let v of regressorList" [value]="v">{{v}}</mat-option>
             </mat-select>
         </mat-form-field>
     </div>

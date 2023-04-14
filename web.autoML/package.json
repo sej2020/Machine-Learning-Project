@@ -24,6 +24,7 @@
     "@types/scriptjs": "^0.0.2",
     "easy-drag-and-drop-file-upload": "^1.0.3",
     "echarts": "^5.4.1",
+    "echarts-stat": "^1.2.0",
     "ng-mat-carousel": "^0.11.1",
     "ngx-echarts": "^15.0.1",
     "rxjs": "~7.8.0",

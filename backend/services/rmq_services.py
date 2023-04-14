@@ -43,7 +43,8 @@ def send_create_request_message(automl_create_request: AutoMLRequest):
         'score_method': automl_create_request.metric_score_method,
         'datapath': automl_create_request.datafile,
         'n_workers': 1,
-        'figure_lst': settings.VISUALIZATION_LIST
+        'figure_lst': settings.VISUALIZATION_LIST,
+        'setting': automl_create_request.default_setting
         }
     rmq_producer = Publisher()
     rmq_producer.publish(settings.RMQ_AUTOML_REQ_IN, data)

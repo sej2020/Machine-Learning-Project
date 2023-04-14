@@ -5,10 +5,10 @@ import { TransformComponent } from 'echarts/components';
 import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
-import { UploadRequestService } from 'src/app/Services/upload-request.service';
+import { IDataVisualizationResponse, IVisualizationData, UploadRequestService } from 'src/app/Services/upload-request.service';
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
-
+import { transform } from "echarts-stat";
 
 @Component({
   selector: 'app-results-echarts',
@@ -19,16 +19,20 @@ export class ResultsEchartsComponent implements OnInit {
 
   boxplotData!: [string[]]
   cvLineplotData!: any
+  trainTestErrorData!: any
   resultsData!: IResults;
+  visualizationResponse!: IDataVisualizationResponse;
 
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
   requestId: string = "";
   currentMetric: string = "";
+  currentRegressor: string = "";
   chartType: string = "boxplot";
 
   chartOptions!: EChartsOption;
   yAxisData!: string[];
+  regressorList!: string[];
 
   ngOnInit() {
     this.requestId = history.state.id ? history.state.id : "";
@@ -36,6 +40,7 @@ export class ResultsEchartsComponent implements OnInit {
       this.fetchRawData();
     }
     echarts.registerTransform(aggregate as ExternalDataTransform);
+    echarts.registerTransform(transform.clustering);
   }
 
   fetchRawData = () => {
@@ -44,11 +49,18 @@ export class ResultsEchartsComponent implements OnInit {
         this.resultsData = data;
         this.boxplotData = this.resultsData.data['visualization_data']['boxplot']
         this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
+        this.trainTestErrorData = this.resultsData.data['visualization_data']['train_test_error'];
         this.yAxisData = this.resultsData.data['metrics_list']
-        this.currentMetric = this.yAxisData[0]
+        this.currentMetric = this.yAxisData[0];
+        this.regressorList = this.resultsData.data['regressor_list'];
+        this.currentRegressor = this.regressorList[0];
         this.chartOptions = this.getChartOptions(this.chartType);
-        console.log(this.chartOptions);
-      })
+      });
+
+    this.uploadRequestService.getVisualizationData(this.requestId)
+      .subscribe((data: any) => {
+        this.visualizationResponse = data;
+      });
   }
 
   changeInRequestId(event: any) {
@@ -60,6 +72,11 @@ export class ResultsEchartsComponent implements OnInit {
     this.chartOptions = this.getChartOptions(this.chartType);
   }
 
+  changeInRegressor(value: any) {
+    this.currentRegressor = value;
+    this.chartOptions = this.getChartOptions(this.chartType);
+  }
+
   changeInChartType(value: any) {
     this.chartType = value;
     this.chartOptions = this.getChartOptions(this.chartType);
@@ -68,13 +85,18 @@ export class ResultsEchartsComponent implements OnInit {
   getChartOptions(chartType: string) {
     if (chartType === 'boxplot') {
       return this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
-    } else {
+    } else if (chartType === 'cv_line_chart'){
       return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
+    } else if (chartType === 'tsne_visualization') {
+      return this.getTSNEScatterPlot(this.currentMetric, this.visualizationResponse.tsne.dimension1, this.visualizationResponse.tsne.dimension2);
+    } else {
+      return this.getDataPercentChartOptions();
     }
   }
 
-  getDataPercentChartOptions(currentMetric: string, dataPercentages: number[], trainMetric: any, testMetric: any) {
-    let dataPercentChartOptions = {
+  getDataPercentChartOptions() {
+    let dataPercentages = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let dataPercentChartOptions: EChartsOption = {
       xAxis: {
         type: 'category',
         data: dataPercentages
@@ -82,9 +104,14 @@ export class ResultsEchartsComponent implements OnInit {
       yAxis: {
         type: 'value'
       },
+      legend: {
+        data: ['Train ' + this.currentMetric, 'Test ' + this.currentMetric],
+        top: 30
+      },
       series: [
         {
-          data: trainMetric,
+          name: 'Train ' + this.currentMetric,
+          data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'],
           type: 'line',
           smooth: true,
           label: {
@@ -93,7 +120,8 @@ export class ResultsEchartsComponent implements OnInit {
           }
         },
         {
-          data: testMetric,
+          name: 'Test ' + this.currentMetric,
+          data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['test'],
           type: 'line',
           smooth: true,
           label: {
@@ -102,7 +130,8 @@ export class ResultsEchartsComponent implements OnInit {
           }
         }
       ]
-    }
+    };
+    return dataPercentChartOptions;
   }
 
   getCvLinePlotChartOptions(currentMetric: string, num_cv_folds: number, lineData: any) {
@@ -250,6 +279,70 @@ export class ResultsEchartsComponent implements OnInit {
     };
 
     return boxplotOptions;
+  }
+  getTSNEScatterPlot(currentMetric: string, dimension1: number[], dimension2: number[]){
+    console.log(dimension1.length);
+    let data = [];
+    for (var i=0; i<dimension1.length; i++) {
+      data.push([dimension1[i], dimension2[i]]);
+    }
+    var CLUSTER_COUNT = 2;
+    var DIENSIION_CLUSTER_INDEX = 2;
+    var COLOR_ALL = ['#37A2DA', '#e06343'];
+    var pieces = [];
+    for (var i = 0; i < CLUSTER_COUNT; i++) {
+      pieces.push({
+        value: i,
+        label: 'cluster ' + i,
+        color: COLOR_ALL[i]
+      });
+    }
+    let scatterPlotOption: EChartsOption = {
+      dataset: [
+        {
+          source: data
+        },
+        {
+          transform: {
+            type: 'ecStat:clustering',
+            // print: true,
+            config: {
+              clusterCount: CLUSTER_COUNT,
+              outputType: 'single',
+              outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX
+            }
+          }
+        }
+      ],
+      tooltip: {
+        position: 'top'
+      },
+      visualMap: {
+        type: 'piecewise',
+        top: 'middle',
+        min: 0,
+        max: CLUSTER_COUNT,
+        left: 10,
+        splitNumber: CLUSTER_COUNT,
+        dimension: DIENSIION_CLUSTER_INDEX,
+        pieces: pieces
+      },
+      grid: {
+        left: 120
+      },
+      xAxis: {},
+      yAxis: {},
+      series: {
+        type: 'scatter',
+        encode: { tooltip: [0, 1] },
+        symbolSize: 15,
+        itemStyle: {
+          borderColor: '#555'
+        },
+        datasetIndex: 1
+      }
+    };
+    return scatterPlotOption;
   }
 
 }

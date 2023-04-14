@@ -49,3 +49,28 @@ def get_lineplot_data_cv(results_filename):
             visualization_data[metricName][regressorName].append(float(v))
     visualization_data['num_cv_folds'] = num_rows
     return visualization_data
+
+def get_train_test_error_data(results_filename):
+    result_filepath = download_results_file(results_filename)
+    result_file = open(result_filepath, 'r')
+    csv_file = csv.DictReader(result_file)
+
+    visualization_data = {}
+    regressor_list = set()
+    num_rows = 0
+    for row in csv_file:
+        num_rows += 1
+        for k, v in row.items():
+            if k == 'percent_training_data':
+                continue
+            k_split = k.split("-")
+            regressorName, metricName, data_type = k_split[0], k_split[1], k_split[2]
+            regressor_list.add(regressorName)
+            if metricName not in visualization_data:
+                visualization_data[metricName] = {}
+            if regressorName not in visualization_data[metricName]:
+                visualization_data[metricName][regressorName] = {}
+                visualization_data[metricName][regressorName]['train'] = []
+                visualization_data[metricName][regressorName]['test'] = []
+            visualization_data[metricName][regressorName][data_type].append(round(float(v), 2))
+    return visualization_data, regressor_list

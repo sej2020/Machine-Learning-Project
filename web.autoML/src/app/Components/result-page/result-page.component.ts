@@ -9,7 +9,8 @@ export interface IResultsData {
   estimated_time_completion: number,
   result_link: string
   visualization_data: Record<string, [string[]]>,
-  metrics_list: string[]
+  metrics_list: string[],
+  regressor_list: string[]
 }
 
 export interface IResults {

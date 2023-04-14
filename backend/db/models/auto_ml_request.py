@@ -17,6 +17,7 @@ class AutoMLRequest(Base):
     test_set_size = Column(Float, default=0.2)
     num_cv_folds = Column(Integer, default=10)
     resultfile = Column(String)
+    default_setting = Column(Integer, default=1)
 
 class AutoMLRequestRepository:
     db_session = get_db_actual()
@@ -29,12 +30,12 @@ class AutoMLRequestRepository:
         return separator.join(trimmed_list)
 
     @staticmethod
-    def add_request(request_id, datafile, regressor_list, email, metrics, metric_score_method, test_set_size, num_cv_folds):
+    def add_request(request_id, datafile, regressor_list, email, metrics, metric_score_method, test_set_size, num_cv_folds, default_setting):
         regressor_list_str = AutoMLRequestRepository.convert_list_to_str(regressor_list)
         metrics_str = AutoMLRequestRepository.convert_list_to_str(metrics)
         automl_request = AutoMLRequest(id=request_id, datafile=datafile, regressor_list=regressor_list_str, email=email, status=0,
                                        metrics=metrics_str, metric_score_method=metric_score_method, test_set_size=test_set_size,
-                                       num_cv_folds=num_cv_folds)
+                                       num_cv_folds=num_cv_folds, default_setting=default_setting)
         try:
             AutoMLRequestRepository.db_session.add(automl_request)
             AutoMLRequestRepository.db_session.commit()

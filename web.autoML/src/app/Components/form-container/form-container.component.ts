@@ -118,8 +118,12 @@ public onSubmit(formData: any) {
   form_data.append("regressor_list", this.mlGeneratorForm.get('regressors')?.value);
   form_data.append("metrics", this.mlGeneratorForm.get('visualizationMetrics')?.value);
   form_data.append("file_data", this.mlGeneratorForm.get('fileUpload')?.value);
+  let defaultSetting: string = "2";
+  if (this.formType === "simple") {
+    defaultSetting = "1";
+  }
   this.uploadRequestService.createMLRequest(form_data, formData.regressors, formData.visualizationMetrics,formData.fileUpload, formData.email,
-     formData.rankingMetrics, "0.1", formData.cvFold).subscribe(response =>{
+     formData.rankingMetrics, "0.1", formData.cvFold, defaultSetting).subscribe(response =>{
       console.log(response);
       this.request_id = response.data['request_id'];
       console.log(this.request_id);

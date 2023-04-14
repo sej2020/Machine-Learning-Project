@@ -5,11 +5,12 @@ from pydantic import BaseModel
 class AutoMLCreateRequest(BaseModel):
     # id: str
     email: str
-    regressor_list: List[str]
-    metrics: List[str]
+    regressor_list: Union[List[str], None]
+    metrics: Union[List[str], None]
     metric_score_method: Union[str, None] = 'Root Mean Squared Error'
     test_set_size: Union[float, None] = 0.2
     num_cv_folds: Union[int, None] = 10
+    default_setting: Union[int, None] = 1
 
 class AutoMLCreateResponseContents(BaseModel):
     request_id: str
@@ -18,6 +19,7 @@ class AutoMLCreateResponseContents(BaseModel):
     result_link: Union[str, None]
     visualization_data: Union[dict, None]
     metrics_list: Union[List[str], None]
+    regressor_list: Union[List[str], None]
 
 class AutoMLCreateResponse(BaseModel):
     error: Union[str, None]

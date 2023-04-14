@@ -45,14 +45,20 @@ class Consumer:
             s3_service.download_file(payload['datapath'], f"{settings.TEMP_DOWNLOAD_DIR}/{payload['datapath']}")
             log.info(f'successfully downloaded file from s3 for {request_id}')
             payload['datapath'] = f"{settings.TEMP_DOWNLOAD_DIR}/{payload['datapath']}"
-            comparison_result = comparison_wrapper(2, payload)
-            log.info(f'{len(comparison_result)} regressors failed: {comparison_result.keys()}')
+            setting = payload['setting']
+            del payload['setting']
+            comparison_result = comparison_wrapper(setting, payload)
             log.info(f'completed running automl pipeline for {request_id}')
-            result_file = comparison_result['output_path']
+            result_file_list = [comparison_result['output_path'],
+                                f'{settings.TEMP_UPLOAD_DIR}/perf_stats_Accuracy_over_Various_Proportions_of_Training_Set_{request_id}.csv']
             s3_service = S3Service(settings.S3_RESULTS_BUCKET)
-            result_s3_key = f"{payload['id']}_result.csv"
-            s3_service.upload_file(result_file, f"{payload['id']}_result.csv")
-            AutoMLRequestRepository.update_request(request_id, status=1, result_file=result_s3_key)
+            result_s3_key_list = []
+            for i, result_file in enumerate(result_file_list):
+                print(i, result_file)
+                result_s3_key = f"{payload['id']}_result_{i}.csv"
+                result_s3_key_list.append(result_s3_key)
+                s3_service.upload_file(result_file, result_s3_key)
+            AutoMLRequestRepository.update_request(request_id, status=1, result_file=','.join(result_s3_key_list))
         except Exception as e:
             if request_id is not None:
                 AutoMLRequestRepository.update_request(request_id, status=-1)
