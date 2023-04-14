@@ -335,12 +335,12 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
                                  'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
                                  }, 
             # 'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 0, 'BayesianRidge': 0, 'CCA': 0, 
-            #                      'DecisionTreeRegressor': 0, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
+            #                      'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
             #                      'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
             #                      'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
             #                      'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 0, 'LassoLarsIC': 0, 'LinearRegression': 0, 
-            #                      'LinearSVR': 0, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
-            #                      'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 0, 
+            #                      'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
+            #                      'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 0, 
             #                      'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
             #                      'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
             #                      'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
@@ -851,40 +851,44 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
     Returns: 
 
     """
-    FOLDS = 11
+    ITERS = 10
+    FOLDS = 10
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
     pcnts = range(10, 110, 10)
-    
     ## generate fold_sets
+    gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
     train_outputs = []
     test_outputs = []
-    for X_train, y_train, X_test, y_test in zip(cv_X_train, cv_y_train, cv_X_test, cv_y_test): #[(cv_X_train[0], cv_y_train[0], cv_X_test[0], cv_y_test[0]), (cv_X_train[1], cv_y_train[1], cv_X_test[1], cv_y_test[1])]: #
-        for n_folds in range(1, FOLDS):
+    for i in range(ITERS):
+        X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train, cv_X_test, cv_y_train, cv_y_test)]
+        for n_folds in range(1, FOLDS+1):
+            X_tr = np.vstack(X_train[:n_folds])
+            X_te = np.vstack(X_test[:n_folds])
+            y_tr = np.hstack(y_train[:n_folds])
+            y_te = np.hstack(y_test[:n_folds])
             for reg, reg_name in zip(regs, reg_names):
-                train_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds+1], y_train[:n_folds+1], X_train[:n_folds+1], y_train[:n_folds+1])
-                test_output = run(reg, reg_name, metric_list, metric_help, X_train[:n_folds+1], y_train[:n_folds+1], X_test, y_test)
+                train_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_tr, y_tr.flatten())
+                test_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_te, y_te.flatten())
                 
-                train_outputs.append(train_output)
-                test_outputs.append(test_output)
+                train_outputs.append((i, n_folds-1, *train_output))
+                test_outputs.append((i, n_folds-1, *test_output))
+   
                 
     
     # processing round 1 - extract useful data from output of all runs
     fin_org_results_d = {}
     failed_regs = set()
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
-        org_results = {} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
-        for success_status, single_reg_output in tt_out:
+        org_results = {name: [[None for _ in range(FOLDS)] for _ in range(ITERS)] for name in reg_names} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
+        for iter, amt, success_status, single_reg_output in tt_out:
             if success_status:
                 reg_name = list(single_reg_output.keys())[0]
-                if reg_name in org_results:
-                    org_results[reg_name] += [single_reg_output]
-                else:
-                    org_results[reg_name] = [single_reg_output]
+                org_results[reg_name][iter][amt] = single_reg_output[reg_name]
                     
             else:
                 failed_regs.add(single_reg_output)
                 
-        fin_org_results_d[tt_name] = {k: v for k,v in org_results.items() if k not in failed_regs}
+        fin_org_results_d[tt_name] = {k: np.array(v)[..., :-1].mean(axis=0).tolist() for k,v in org_results.items() if k not in failed_regs}
                 
                 
     json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
@@ -895,10 +899,10 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
         for regressor, runs in fin_org_results_d[tt_name].items():
             if regressor not in failed_regs:
                 for fold, iteration in enumerate(runs):
-                    for metric_idx, value in enumerate(list(iteration.values())[0]):
+                    for metric_idx, value in enumerate(iteration):
                         if metric_idx < len(metric_list):
-                            # acc[f"{regressor}~{metric_list[metric_idx]}~{tt_name}"].append(value)
-                            json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS - 1)) + 1) * 10)].append(value)
+                            
+                            json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS)) + 1) * 10)].append(value)
 
     # reshape data to work in a csv format (pd.dataframe)
     output_dict = {f"{regr}~{metric}~{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
