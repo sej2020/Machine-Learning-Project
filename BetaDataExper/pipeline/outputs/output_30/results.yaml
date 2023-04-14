@@ -1,0 +1,48 @@
+mxnet-svddc:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 5.390698788687587e-05
+pytorch-qr:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 7.741298759356141e-05
+pytorch-qrcp:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 0.00022898399038240314
+pytorch-svd:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 9.54050337895751e-05
+pytorch-svddc:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 6.712699541822076e-05
+sklearn-svddc:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 0.0005714480066671968
+tf-cod:
+  MAE: 10.000000000000002
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 0.00017453398322686553
+tf-necd:
+  MAE: 10.0
+  MSE: 150.0
+  R2: -2.0
+  RMSE: 12.24744871391589
+  elapsed_time: 0.0006519809830933809
