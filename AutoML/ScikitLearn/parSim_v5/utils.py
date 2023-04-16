@@ -237,7 +237,7 @@ def metric_help_func():
 
     def root_mean_squared_error(y_true, y_pred, multioutput="uniform_average"):
         return metrics.mean_squared_error(y_true=y_true, y_pred=y_pred, multioutput=multioutput)**(1/2)
-    
+
     metric_table = {'Explained Variance': {'Correlation Score': True, 'Function': metrics.explained_variance_score, 'Multi-Output': True},
                     'Max Error': {'Correlation Score': False, 'Function': metrics.max_error, 'Multi-Output': False},
                     'Mean Absolute Error': {'Correlation Score': False, 'Function': metrics.mean_absolute_error, 'Multi-Output': True},
@@ -323,34 +323,34 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
     """
 
     default_conf = {'id': conf['id'],
-            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
-                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
-                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
-                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
-                                 'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
-                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
-                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
-                                 'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
-                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
-                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+            # 'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+            #                      'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+            #                      'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+            #                      'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 0, 'KNeighborsRegressor': 1, 
+            #                      'KernelRidge': 0, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
+            #                      'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
+            #                      'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+            #                      'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 1, 'RadiusNeighborsRegressor': 1, 
+            #                      'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 0, 'SVR': 1, 'TheilSenRegressor': 0, 
+            #                      'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+                                #  }, 
+            'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 0, 'BayesianRidge': 0, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
+                                 'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
+                                 'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
+                                 'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 1, 'LassoLarsIC': 0, 'LinearRegression': 0, 
+                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
+                                 'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 0, 
+                                 'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
+                                 'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
                                  }, 
-            # 'which_regressors': {'ARDRegression': 0, 'AdaBoostRegressor': 0, 'BaggingRegressor': 0, 'BayesianRidge': 0, 'CCA': 0, 
-            #                      'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 0, 'ExtraTreeRegressor': 0, 
-            #                      'ExtraTreesRegressor': 0, 'GammaRegressor': 0, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 0, 
-            #                      'HistGradientBoostingRegressor': 0, 'HuberRegressor': 0, 'IsotonicRegression': 0, 'KNeighborsRegressor': 0, 
-            #                      'KernelRidge': 0, 'Lars': 0, 'Lasso': 0, 'LassoLars': 0, 'LassoLarsIC': 0, 'LinearRegression': 0, 
-            #                      'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 0, 
-            #                      'OrthogonalMatchingPursuit': 0, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 0, 
-            #                      'PoissonRegressor': 0, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 0, 
-            #                      'RandomForestRegressor': 0, 'Ridge': 0, 'SGDRegressor': 0, 'SVR': 0, 'TheilSenRegressor': 0, 
-            #                      'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
-            #                      }, 
             'metric_list': ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
                             'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
                             'Mean Absolute Percentage Error', 'D-Squared Absolute Error Score',
                             'D-Squared Pinball Score', 'D-Squared Tweedie Score'], 
             'n_vizualized_bp': 20,
-            'n_vizualized_tb': 0,
+            'n_vizualized_tb': -1,
             'styledict': {'boxprops': {'linestyle': '-', 'linewidth': 1, 'color': 'black'},
                           'flierprops': {'marker': 'D', 'markerfacecolor': 'white', 'markersize': 4, 'linestyle': 'none'},
                           'medianprops': {'linestyle': '-.', 'linewidth': 1, 'color': 'black'},
@@ -362,7 +362,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'score_method': 'Root Mean Squared Error',
             'datapath': conf['datapath'], 
             'n_workers': 1,
-            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint'
+            'figure_lst': ['Test_Best_Models'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models'
                 }
     if setting == 1:
         return comparison(**default_conf)
@@ -372,7 +372,8 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
         raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
 
 
-def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1, figure_lst=['Accuracy_over_Various_Proportions_of_Training_Set']) -> list:
+def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list, styledict: dict, n_vizualized_bp=-1, n_vizualized_tb=-1, test_set_size=0.2, 
+               n_cv_folds=10, score_method='Root Mean Squared Error', n_workers=1, figure_lst=['Accuracy_over_Various_Proportions_of_Training_Set']) -> list:
     """
     This function will perform cross-validation training across several regressor types for one dataset. 
     The cross-validation scores will be recorded and vizualized in a box plot chart, displaying regressor performance across
@@ -466,8 +467,12 @@ def comparison(id: int, datapath: str, which_regressors: dict, metric_list: list
                     'Error_by_Datapoint': (error_viz, (
                         fin_org_results, train_attribs, train_labels, test_attribs, test_labels, 
                         train_attribs_idx, train_labels_idx, test_attribs_idx, test_labels_idx, n_cv_folds, metric_help, path_gen('Error_by_Datapoint')
+                        )),
+                    'Test_Best_Models': (test_best, (
+                        fin_org_results, metric_list, train_attribs, train_labels, test_attribs, test_labels, metric_help, n_vizualized_tb, 
+                        path_gen('Test_Best_Models')
                         ))
-                        }
+                    }
     
     for fig, (func, params) in figure_lookup.items():
         if fig in figure_lst:
@@ -603,11 +608,12 @@ def boxplot(fin_org_results: dict, styledict: dict, metric_list: list, metric_he
     return boxfig
 
 
-def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array, metric_help: dict, n_vizualized_tb: int) -> plt.figure:
+def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array, train_labels: np.array, test_attribs: np.array, test_labels: np.array, metric_help: dict, 
+              n_vizualized_tb: int, path: str) -> plt.figure:
     """
     This function will take the best performing model on each regressor type generated by cross-validation training and 
-    apply it to the set of test data. The performance of the regs on the test instances will be displayed on a table and
-    saved to the user's CPU as a png file. The regs will be sorted in descending order by performance on specified metrics.
+    apply it to the set of test data. The performance of the regs on the test instances will be written to a csv file.
+    The regressors will be sorted in descending order by performance on specified metrics.
 
     Args:
 
@@ -627,10 +633,12 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
 
     n_vizualized_tb (int) - the top scoring 'n' regressors over the test set to be included in final table. The value -1 will include all regressors (Default: -1)
 
+    path (str) - the path to write final CSV results to
+    
     Returns:
 
-        A table displaying the top performing model of each regressor type. The "best" models are determined by using the highest scoring model on cross-validation
-        and using it to predict the labels of the test set. The models will be listed best-to-worst by their prediction performance on the tes set.
+        A csv displaying the top performing model of each regressor type. The "best" models are determined by using the highest scoring model on cross-validation
+        and using it to predict the labels of the test set. The models will be listed best-to-worst by their prediction performance on the test set.
     """
 
     columns = metric_list
@@ -671,17 +679,10 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     df = pd.DataFrame(data=output, index=rows, columns=columns)
 
     df_sorted = df.sort_values(by=columns[0], axis=0, ascending=not (metric_help[columns[0]]['Correlation Score']))
-    print(df_sorted)
-
     df_sorted = df_sorted.iloc[:n_vizualized_tb]
+    df_sorted.to_csv(path, header=True, index=True)
 
-    fig, ax = plt.subplots()
-    fig.patch.set_visible(False)
-    ax.axis('off')
-    ax.axis('tight')
-    ax.table(cellText=df_sorted.values, rowLabels=df_sorted.index, colLabels=df_sorted.columns, loc='center')
-    fig.tight_layout()
-    return fig
+    return
 
 
 def write_results(path: str, data: dict, metrics: list) -> None:
@@ -713,7 +714,8 @@ def write_results(path: str, data: dict, metrics: list) -> None:
 
 
 def error_viz(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: pd.DataFrame, test_attribs: pd.DataFrame, test_labels: pd.DataFrame, 
-              train_attribs_idx: list, train_labels_idx: list, test_attribs_idx: list, test_labels_idx: list, n_cv_folds: int, metric_help: dict, path: str):
+              train_attribs_idx: list, train_labels_idx: list, test_attribs_idx: list, test_labels_idx: list, n_cv_folds: int, metric_help: dict, 
+              path: str, metrics_presented="Mean Absolute Percentage Error"):
     """
     This function generates a CSV file that stores various error metrics for the prediction of each point for each regressor
 
@@ -743,6 +745,8 @@ def error_viz(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: 
 
         path (str) - the path to write final CSV results to
 
+        metrics_presented (str) - the metrics to show in final csv: can be either "Mean Absolute Percentage Error" or "All" (Default: "Mean Absolute Percentage Error")
+
     Returns:
 
         writes a CSV file to specified path
@@ -769,30 +773,44 @@ def error_viz(fin_org_results: dict, train_attribs: pd.DataFrame, train_labels: 
         y_true = [list(np.array(point_data.tail(1)).squeeze()) for _ in range(n_cv_folds)]
         y_pred = [point_data.loc[i, :].values.flatten().tolist() for i in range(n_cv_folds)]
 
-        score = np.array([v['Function'](y_true=y_true, y_pred=y_pred, multioutput="raw_values") for k,v in metric_help.items() if v['Multi-Output']]) 
-        metric_scores = pd.DataFrame(score, index=[k for k,v in metric_help.items() if v['Multi-Output']==True], columns=point_data.columns)
-        metric_scores = metric_scores.transpose()
+    # All metrics configuration
+        if metrics_presented == "All":
+            
+            score = np.array([v['Function'](y_true=y_true, y_pred=y_pred, multioutput="raw_values") for k,v in metric_help.items() if v['Multi-Output']]) 
+            metric_scores = pd.DataFrame(score, index=[k for k,v in metric_help.items() if v['Multi-Output']==True], columns=point_data.columns)
+            metric_scores = metric_scores.transpose()
 
-        for column in metric_scores.columns:
-            if metric_help[column]['Correlation Score']:
-                metric_scores[column] = -1* metric_scores[column]
+            for column in metric_scores.columns:
+                if metric_help[column]['Correlation Score']:
+                    metric_scores[column] = -1* metric_scores[column]
 
-        df_standard = metric_scores.copy(deep=True)
-        # error_ensemble = error_PCA(metric_scores.copy(deep=True))
-        # df_standard['Error Ensemble'] = error_ensemble
+            df_standard = metric_scores.copy(deep=True)
 
-        for column in df_standard.columns:
-            if column == 'Mean Absolute Percentage Error':
-                df_standard['Raw Mean Absolute Percentage Error'] = df_standard[column].copy(deep=True)
-                df_standard[column] = (df_standard[column] - df_standard[column].mean()) / df_standard[column].std()
-            elif column in ['D-Squared Absolute Error Score','D-Squared Pinball Score']:
-                df_standard.drop(column, axis=1)
-            else:
-                df_standard[column] = (df_standard[column] - df_standard[column].mean()) / df_standard[column].std()
+            for column in df_standard.columns:
+                if column == 'Mean Absolute Percentage Error':
+                    df_standard['Raw Mean Absolute Percentage Error'] = df_standard[column].copy(deep=True)
+                    df_standard[column] = (df_standard[column] - df_standard[column].mean()) / df_standard[column].std()
+                elif column in ['D-Squared Absolute Error Score','D-Squared Pinball Score']:
+                    df_standard.drop(column, axis=1)
+                else:
+                    df_standard[column] = (df_standard[column] - df_standard[column].mean()) / df_standard[column].std()
 
-        error_ensemble = error_PCA(df_standard.copy(deep=True))
-        df_standard['Error Ensemble'] = error_ensemble.values
-        df_standard['Error Ensemble'] = (df_standard['Error Ensemble'] - df_standard['Error Ensemble'].mean()) / df_standard['Error Ensemble'].std()
+            error_ensemble = error_PCA(df_standard.copy(deep=True))
+            df_standard['Error Ensemble'] = error_ensemble.values
+            df_standard['Error Ensemble'] = (df_standard['Error Ensemble'] - df_standard['Error Ensemble'].mean()) / df_standard['Error Ensemble'].std()
+
+
+    # Mean Absolute Percentage Error configuration
+        elif metrics_presented == "Mean Absolute Percentage Error":
+
+            score = np.array([metric_help[metrics_presented]['Function'](y_true=y_true, y_pred=y_pred, multioutput="raw_values")]) 
+            metric_scores = pd.DataFrame(score, index=["Raw Mean Absolute Percentage Error"], columns=point_data.columns)
+            metric_scores = metric_scores.transpose()
+
+            df_standard = metric_scores.copy(deep=True)
+
+        else:
+            raise Exception("metrics_presented must be either 'All' or 'Mean Absolute Percentage Error'")
 
         all_dfs.append(df_standard)
 
