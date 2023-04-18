@@ -129,7 +129,7 @@ def make_exp_data_2d(location, axes, rotation, resolution):
     df = pd.DataFrame(data_rot)
     if rotation == 15:
         make_line(data_rot, dim=2)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-{axes}_rot-{rot}_.csv", index=False, header=False)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{location}_ax-{axes}_rot-{rotation}_.csv", index=False, header=False)
 
 
 def make_exp_data_3d(location, axes, rotation, resolution):
@@ -150,10 +150,13 @@ axis_ratio2d = [[10,b] for b in range(1,11)]
 rotations = [0, 15, 30, 45, 60, 75, 90, 180]
 resolution = 0.001
 
-for loc in location2d:
-    for rot in rotations:
-        for ax in axis_ratio2d:
-            make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+# for loc in location2d:
+#     for rot in rotations:
+#         for ax in axis_ratio2d:
+
+            # make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+
+make_exp_data_2d(location=(0,10), axes=[10,10], rotation=0, resolution=0.001)
 ##############################################################################################
 # location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
 # axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]
