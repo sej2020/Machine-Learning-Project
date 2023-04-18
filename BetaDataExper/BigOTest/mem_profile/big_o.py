@@ -13,22 +13,17 @@ import pickle
 import pyaml
 
 
-def get_data_array(rows, cols, seed=100, input_data_path=None, output_data=False) -> np.array:
+def get_data_array(rows, cols) -> np.array:
     """
     Datapath -> np.array
     """
-    if input_data_path:
-        with open(Path(input_data_path), 'rb') as f:
-            df = pickle.load(f)
+    data = np.random.normal(loc=0, scale=1, size=(rows, cols))
+    df = pd.DataFrame(data)
+    with open(Path.cwd() / 'big_o_data.pkl', 'wb') as f:
+        pickle.dump(df, f)
 
-    else:
-        rng = np.random.default_rng(seed=seed)
-        data = rng.normal(loc=0, scale=1, size=(rows, cols))
-        df = pd.DataFrame(data)
-
-        if output_data:
-            with open(Path.cwd() / 'big_o_data.pkl', 'wb') as f:
-                pickle.dump(df, f)
+    with open(Path.cwd() / 'big_o_data.pkl', 'rb') as f:
+        df = pickle.load(f)
 
     print(df.head(3))
     array = df.to_numpy()
