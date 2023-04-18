@@ -176,26 +176,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
     }
     
     reg_titles = [label_lookup[reg] for reg in successful_regs]
-
-    if "regressor_accuracy_barchart" in figures:
-        for metric, _ in metric_lst:
-            fig, ax = plt.subplots()
-            scores_data = [results_dict[regressor][metric] for regressor in successful_regs]
-            sns.barplot(x=reg_titles, y=scores_data, color="darkgray", width=0.5, ax=ax, edgecolor='black')
-            fig.suptitle(f"{metric} performance by model")
-            ax.set_xlabel("Regressor Name")
-            ax.set_ylabel(f"{metric}")
-            plt.savefig(output_folder / f"{metric}_barchart.png")
-            
-    if "regressor_runtime_barchart" in figures:
-        fig, ax = plt.subplots()
-        elapsed = [(results_dict[regressor]["elapsed_time"], "s") if results_dict[successful_regs[0]]["elapsed_time"] > 10 else (results_dict[regressor]["elapsed_time"] / 1000, "ms") for regressor in successful_regs] # if elapsed time shorter than 10s, report in ms            
-        sns.barplot(x=reg_titles, y=[pair[0] for pair in elapsed], ax=ax) # get times from elapsed
-        fig.suptitle(f"Runtime by model")
-        ax.set_xlabel("Regressor Name")
-        ax.set_ylabel(f"Runtime in {elapsed[0][1]}")
-        plt.savefig(output_folder / f"runtime_barchart.png")
-            
+    
     if "2d_scatterplot_w_regression_line" in figures:
         fig, ax = plt.subplots()
         sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax)
