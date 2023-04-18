@@ -9,30 +9,18 @@ import math
 import torch
 import mxnet as mx
 from pathlib import Path
-import pickle
 import pyaml
 
 
-def get_data_array(rows, cols, seed=100, input_data_path=None, output_data=False) -> np.array:
+def get_data_array(rows, cols, seed=100) -> np.array:
     """
     Datapath -> np.array
     """
-    if input_data_path:
-        with open(Path(input_data_path), 'rb') as f:
-            df = pickle.load(f)
 
-    else:
-        rng = np.random.default_rng(seed=seed)
-        data = rng.normal(loc=0, scale=1, size=(rows, cols))
-        df = pd.DataFrame(data)
+    rng = np.random.default_rng(seed=seed)
+    data = rng.normal(loc=0, scale=1, size=(rows, cols))
 
-        if output_data:
-            with open(Path.cwd() / 'big_o_data.pkl', 'wb') as f:
-                pickle.dump(df, f)
-
-    print(df.head(3))
-    array = df.to_numpy()
-    return array
+    return data
 
 
 def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: list, rows_in_expr: list) -> dict:
@@ -356,7 +344,7 @@ def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granul
 if __name__ =='__main__':
 
     time_type = "process" #process or total
-    reg_names = ["tf-necd", "tf-cod", "sklearn-svddc"] 
+    reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"] 
     #            "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",
     data_rows = 1000
             #      '  
