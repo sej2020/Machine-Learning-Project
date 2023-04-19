@@ -1,3 +1,8 @@
+"""
+Make sure to run this experiment from the same directory it is in - this is because the output files will be saved in the same directory as the script
+Also, there must be a directory called memory_output in the same directory as the script
+"""
+
 import numpy as np
 import pandas as pd
 from time import perf_counter_ns, process_time_ns
@@ -11,6 +16,7 @@ import mxnet as mx
 from pathlib import Path
 import pickle
 import pyaml
+import memray
 
 
 def get_data_array(rows, cols) -> np.array:
@@ -30,7 +36,7 @@ def get_data_array(rows, cols) -> np.array:
     return array
 
 
-def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: list, rows_in_expr: list) -> dict:
+def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: list, rows_in_expr: list, n_iters_per_row: int) -> dict:
     """
     This function will record the runtimes to create a model of each specified regressor using a dataset of varying size. The size of the dataset will vary according to a schedule
     specified by rows_in_expr parameter. The output will be a dictionary recording these results
@@ -40,6 +46,7 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
         timer (timer object) - timer either perf_counter or process time
         reg_names (list) - list of regressors that will be in experiment
         rows_in_expr (list) - a list of rows that will be used in experiment e.g. [10, 100, 1000, 10000] 
+        n_iters_per_row (int) - number of iterations to run for each row count
 
     Returns:
         results_dict (dict) - dictionary of format {regressor: [list of runtimes for each # of rows specified in rows_in_expr]}
@@ -50,65 +57,84 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
     exceptions_lst = []
 
     for reg_name in reg_names:
+        final = []
         print(f"starting actual experiment with {reg_name}")
          
-        time_list = []
         for row_count in rows_in_expr:
             partial_X_train = X_train[:row_count, :]
             partial_y_train = y_train[:row_count] 
+            
+            for iter in range(n_iters_per_row):
+                output_path = Path("memory_output") / f"mem_{reg_name}_{row_count}_{iter}.bin"
 
-            try:
-                match reg_name:
+                try:
+                    match reg_name:
 
-                    case "sklearn-svddc":
-                        start_lstsq = timer()
-                        model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
-                        stop_lstsq = timer()
+                        
+                        case "sklearn-svddc":
+                            start_lstsq = timer()
+                            model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
 
-                    case "tf-necd":
-                        start_lstsq = timer()
-                        model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
-                        stop_lstsq = timer()
+                        case "tf-necd":
+                            start_lstsq = timer()
+                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
+                                
+                        case "tf-cod":
+                            start_lstsq = timer()
+                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
 
-                    case "tf-cod":
-                        start_lstsq = timer()
-                        model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
-                        stop_lstsq = timer()
+                        case "pytorch-qrcp":
+                            start_lstsq = timer()
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
 
-                    case "pytorch-qrcp":
-                        start_lstsq = timer()
-                        model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
-                        stop_lstsq = timer()
+                        case "pytorch-qr":
+                            start_lstsq = timer()
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                                
+                        case "pytorch-svd":
+                            start_lstsq = timer()
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
 
-                    case "pytorch-qr":
-                        start_lstsq = timer()
-                        model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
-                        stop_lstsq = timer()
-                            
-                    case "pytorch-svd":
-                        start_lstsq = timer()
-                        model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
-                        stop_lstsq = timer()
+                        case "pytorch-svddc":
+                            start_lstsq = timer()
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
 
-                    case "pytorch-svddc":
-                        start_lstsq = timer()
-                        model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
-                        stop_lstsq = timer()
+                        case "mxnet-svddc":
+                            start_lstsq = timer()
+                            model = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
+                            stop_lstsq = timer()
+                            with memray.Tracker(output_path, native_traces=True):
+                                model2 = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
+                                
 
-                    case "mxnet-svddc":
-                        start_lstsq = timer()
-                        model = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
-                        stop_lstsq = timer()
-
-            except Exception as e:
-                failed_regs.append(reg_name)
-                exceptions_lst.append(e)
-
-            time_list += [(stop_lstsq - start_lstsq)] 
-
-        final = []
-        for i,j in zip(rows_in_expr, time_list):
-            final.append([i,j])
+                except Exception as e:
+                    failed_regs.append(reg_name)
+                    exceptions_lst.append(e)
+                    final += [(row_count, None)]
+                    continue
+                
+                final += [(row_count, stop_lstsq - start_lstsq)] 
 
         results_dict[reg_name] = final   
 
@@ -159,7 +185,7 @@ def comp_complexity_dict(reg: str):
     return dict[reg]
 
 
-def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_expr: list) -> dict:
+def theoretical_expr(n: int, r: int, reg_names: list, rows_in_expr: list) -> dict:
     """
     This function will record the runtimes to perform the theoretical number of flops for the least squares solver employed by each library for a specified
     number of rows. The rows_in_expr list contains the varying number of rows in this experiment. This will be performed for
@@ -167,7 +193,6 @@ def theoretical_expr(n: int, r: int, timer: object, reg_names: list, rows_in_exp
     Args:
         n (int) - the number of columns of the dataset
         r (int) - the rank of the dataset
-        timer (timer object) - timer either perf_counter or process_time
         reg_names (list) - list of regressors that will be in experiment
         rows_in_expr (list) - a list of the orders of magnitude of rows that will be used in experiment e.g. [10, 100, 1000, 10000] 
 
@@ -274,9 +299,13 @@ def dump_to_yaml(path: str, object: dict):
     """
     print(f"Dumping to yaml: {object.keys()}")
 
-    with open(path, "w") as f_log:
-        dump = pyaml.dump(object)
-        f_log.write(dump)
+    try:
+        with open(path, "w") as f_log:
+            dump = pyaml.dump(object)
+            f_log.write(dump)
+            
+    except Exception as e:
+        print(f"Error dumping to yaml: {[val for val in object.items()]}")
 
 
 def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granularity=2, repeat=10):
@@ -312,7 +341,7 @@ def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granul
             max_row_bound = i/10
             break
 
-    rows_in_expr = [math.floor(10**(row_bound/10)) for row_bound in range(1*10, int(max_row_bound*10), granularity) for _ in range(repeat)] # to produce orders of magnitude experiment for _ in range(repeat)
+    rows_in_expr = [math.floor(10**(row_bound/10)) for row_bound in range(1*10, int(max_row_bound*10), granularity)] # to produce orders of magnitude experiment for _ in range(repeat)
     print(f'Rows in Experiment: {rows_in_expr}')
 
     X, Y = array[:,:-1], array[:,-1] 
@@ -320,13 +349,13 @@ def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granul
     print('All setup')
     print('running actual experiments...')
 
-    actual_time_dict, failed_regs, exceptions_lst = actual_expr(X, Y, timer, reg_names, rows_in_expr)
+    actual_time_dict, failed_regs, exceptions_lst = actual_expr(X, Y, timer, reg_names, rows_in_expr, repeat)
 
     print('All done with actual experiments')
 
     print('now running theoretical experiments...')
 
-    theory_time_dict = theoretical_expr(n, r, timer, reg_names, rows_in_expr)
+    theory_time_dict = theoretical_expr(n, r, reg_names, rows_in_expr)
 
     print(f'Actual Time: {actual_time_dict}\n--------------\nTheoretical Time: {theory_time_dict}')
 
@@ -335,6 +364,7 @@ def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granul
         "failed_regs": failed_regs,
         "failed_regs_exceptions": exceptions_lst,
         "rows_in_experiment": rows_in_expr,
+        "repeat": repeat,
         "timer_method": f"{time_type} in nanoseconds"
     }
 
@@ -352,9 +382,9 @@ if __name__ =='__main__':
 
     time_type = "process" #process or total
     reg_names = ["tf-necd", "tf-cod", "sklearn-svddc"] 
-    #            "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc",
-    data_rows = 1000
-            #      '  
+    reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
+        # "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
+    data_rows = 100_000_000
     data_cols = 10
 
-    main(time_type, reg_names, data_rows=data_rows, data_cols=data_cols, granularity=2, repeat=3)
+    main(time_type, reg_names, data_rows=data_rows, data_cols=data_cols, granularity=2, repeat=1)
