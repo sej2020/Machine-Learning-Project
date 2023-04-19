@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
+import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
 # import torch
@@ -13,7 +14,7 @@ from pathlib import Path
 
 
 
-def linreg_pipeline(array, include_regs="all", vis_theme="whitegrid", output_folder=Path("BetaDataExper/HyperEllipsoid/finding_tangent/figs/")):
+def linreg_pipeline(X, y, location, step_n, include_regs="all", vis_theme="whitegrid", output_folder=Path("BetaDataExper/HyperEllipsoid/finding_tangent/figs/")):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
@@ -33,22 +34,21 @@ def linreg_pipeline(array, include_regs="all", vis_theme="whitegrid", output_fol
 
     """
     
-    X, y = array[:, :-1], array[:, -1]
     reg_names = decide_regressors(include_regs)
     
     results_dict = regression_loop(X, y, reg_names)
 
     successful_regs = list(results_dict.keys())
      
-    generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder)
+    generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n)
     
     metadata = {
         "completed_regs": successful_regs,
     }
     
-    dump_to_yaml(output_folder / "metadata.yaml", metadata, True)
+    dump_to_yaml(output_folder / f"metadata_loc{location}_step{step_n}.yaml", metadata, True)
     
-    dump_to_yaml(output_folder / "results.yaml", results_dict)
+    dump_to_yaml(output_folder / f"results_loc{location}_step{step_n}.yaml", results_dict)
     
     return results_dict
     
@@ -124,7 +124,7 @@ def dump_to_yaml(path, object, verbose_output = True):
         f_log.write(dump)
 
 
-def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder):
+def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n):
 
     SMALL_SIZE = 10
     MEDIUM_SIZE = 14
@@ -154,37 +154,56 @@ def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_fold
     }
     
     fig, ax = plt.subplots()
-    sns.scatterplot(x=X.flatten(), y=y.flatten(), ax=ax)
-    X_range = np.linspace(np.min(X), np.max(X), 2)[:, np.newaxis]
-    reg_lines = [X_range @ results_dict[regressor] for regressor in successful_regs]
+    sns.scatterplot(x=X.flatten(), y=y.flatten(), ax=ax, s=3, marker=".", color="black", edgecolor="black")
+    rangex = np.linspace(-50, 50, 2)[:, np.newaxis]
+    reg_lines = [rangex @ results_dict[regressor] for regressor in successful_regs]
     for line, regressor in zip(reg_lines, successful_regs):
-        ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
-    ax.legend()
+        ax.plot(rangex.flatten(), line.flatten(), label=label_lookup[regressor])
+    # ax.legend()
+
+    # plotting a thin line to accentuate x and y axes
+    ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="gray", alpha=0.4)
+    ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="gray", alpha=0.4)
 
     ax.set_aspect('equal')
-    fig.suptitle(f"Regression Over Data")
+    ax.set_xlim(-20, 20)
+    ax.set_ylim(-10, 30)
+    fig.suptitle(f"Circluar Data and its Regression Line")
     # ax.set_xlabel(f"")
     # ax.set_ylabel(f"")
-    plt.savefig(output_folder / f"regression_line.png")
-        
-    plt.clf()
-    plt.close(fig="all")
-
-    
-def main(data_path, include_regs):
-    results = linreg_pipeline(data_path, include_regs=include_regs)
-    print("Run complete")
+    plt.savefig(output_folder / f"regression_line_loc{location}_step{step_n}.png")
+    # plt.show()  
 
 
-def main_test(path, include_regs):
+
+def main_test(path, include_regs, lr=1e-2, threshold=1e-2):
     df = pd.read_csv(path)
+    location = path.split("loc-")[-1].split("_")[0]
+    loc_x, loc_y = int(location.split(",")[0].strip("() ")), int(location.split(",")[1].strip("() "))
     array = df.to_numpy()
-    main(array, include_regs=include_regs)
+    X, y = array[:, :-1], array[:, -1]
+
+    dist_from_regline = sys.float_info.max
+    step_n = 1
+    sign = 1
+    while abs(dist_from_regline) > threshold:
+        results = linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs)
+        X = X + sign*lr*abs(loc_y)
+        regline = X @ results[include_regs[0]]
+        min_distance = np.min(np.subtract(y, regline))
+        if min_distance < 0:
+            sign = -1
+            lr = lr/2
+        else:
+            sign = 1
+        dist_from_regline = min_distance
+        step_n += 1
+    print("Run Complete")
 
 
 if __name__ == '__main__':
-    path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 10)_ax-[10, 10]_rot-0_.csv"
-    include_regs = ["tf-necd", "tf-cod", "sklearn-svddc"]
+    path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 10)_ax-[5, 5]_rot-0_.csv"
+    include_regs = ["sklearn-svddc"]
     #               "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
 
     main_test(path, include_regs)

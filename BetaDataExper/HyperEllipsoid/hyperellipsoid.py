@@ -156,7 +156,9 @@ resolution = 0.001
 
             # make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
 
-make_exp_data_2d(location=(0,10), axes=[10,10], rotation=0, resolution=0.001)
+make_exp_data_2d(location=(0,10), axes=[5,5], rotation=0, resolution=0.001)
+make_exp_data_2d(location=(0,15), axes=[5,5], rotation=0, resolution=0.001)
+make_exp_data_2d(location=(0,20), axes=[5,5], rotation=0, resolution=0.001)
 ##############################################################################################
 # location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
 # axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]
