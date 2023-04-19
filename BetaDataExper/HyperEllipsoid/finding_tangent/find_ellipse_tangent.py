@@ -10,88 +10,78 @@ import tensorflow as tf
 # import mxnet as mx
 import pyaml
 from pathlib import Path
-from time import perf_counter, process_time
 
-def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=False, want_figs=False):
+
+
+def linreg_pipeline(array, include_regs="all", vis_theme="whitegrid", output_folder=Path("BetaDataExper/HyperEllipsoid/finding_tangent/figs/")):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
     Args: 
-        data_path - path to file that can become a pd.DataFrame or np.ndarray with target variable in final column and no categorical or missing data
-        
+
+        array - array of data for circle
+
         include_regs - "all" to use all algorithms or a list of desired algorithms to use a subset
             options: "tf-necd" ::: "tf-cod" ::: "pytorch-qrcp" ::: "pytorch-qr" ::: "pytorch-svd" ::: "pytorch-svddc" ::: "sklearn-svddc" ::: "mxnet-svddc"
-            
-        split_pcnt - None to train and test the algorithm over the entirety of the data or a real number from 1 - 100 to use that percentage of the data as a training set and test on the remainder
-        
-        random_seed - only used by sklearn.model_selection.train_test_split if split_pcnt != None
-        
-        time_type - "total" to use perf_counter and measure time in sleep, or "process" to measure only cpu time with process_time
-        
-        chosen_figures - "all" to build all figure types below, False to skip generating any figures, or a list of desired figures to use a subset
-            options: "regressor_accuracy_barchart" ::: "regressor_runtime_barchart" ::: "2d_scatterplot_w_regression_line"
-            
+                    
         vis_theme - "darkgrid" by default, or specify any one of the below options
             options: "darkgrid" ::: "whitegrid" ::: "dark" ::: "white" ::: "ticks"
         
     Returns result_dict:
-        includes various useful things
-        
-    """
-    data = pd.read_csv(data_path, header=None).values
-    
-    data, fields = data_ingestion(data)
-    
-    timer = set_time_type(time_type)
-    
-    reg_names = decide_regressors(include_regs)
 
-    X_train, X_test, y_train, y_test = split_data(data, split_pcnt, random_seed)
+        includes various useful things 
+
+    """
     
-    figures = decide_figures(data, chosen_figures, verbose_output)
+    X, y = array[:, :-1], array[:, -1]
+    reg_names = decide_regressors(include_regs)
     
-    results_dict = regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output)
+    results_dict = regression_loop(X, y, reg_names)
 
     successful_regs = list(results_dict.keys())
-
-    metric_lst = [
-        ("MAE", metrics.mean_absolute_error),
-        ("MSE", metrics.mean_squared_error),
-        ("RMSE", lambda y_true, y_pred: metrics.mean_squared_error(y_true, y_pred)**(1/2)),
-        ("R2", metrics.r2_score),
-    ]
-
-    process_results(results_dict, y_test, metric_lst)
-    
-    run_number = get_and_increment_run_counter()
-    
-    output_folder = create_output_folder(run_number)
-    
-    if want_figs:
-        generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder)
+     
+    generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder)
     
     metadata = {
-        "input_data": data_path.name,
         "completed_regs": successful_regs,
-        "split_percent": split_pcnt if split_pcnt else "No train/test split",
-        "random_seed": random_seed,
-        "timer_method": time_type,
-        "dataset_shape": f"{data.shape[0]} x {data.shape[1]}",
     }
     
     dump_to_yaml(output_folder / "metadata.yaml", metadata, True)
     
-    dump_to_yaml(output_folder / "results.yaml", results_dict, verbose_output)
+    dump_to_yaml(output_folder / "results.yaml", results_dict)
     
     return results_dict
     
 
-def regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output):
+def decide_regressors(include_regs):
+    possible_regressors = [
+        "tf-necd",
+        "tf-cod",
+        "pytorch-qrcp",
+        "pytorch-qr",
+        "pytorch-svd",
+        "pytorch-svddc",
+        "sklearn-svddc",
+        "mxnet-svddc",
+    ]
+    
+    if include_regs == "all":
+        reg_names = possible_regressors
+        
+    elif isinstance(include_regs, (tuple, list, set)):
+        reg_names = list({reg_name for reg_name in include_regs if reg_name in possible_regressors})
+        
+    else: 
+        raise ValueError(f'Invalid value passed for include_regs: {include_regs}\nSee documentation')
+    
+    return reg_names
+
+
+def regression_loop(X_train, y_train, reg_names):
     results_dict = {}
         
     for reg_name in reg_names:       
 
-        start_lstsq = timer()
         match reg_name:
             case "sklearn-svddc":
                 model = linear_model.LinearRegression(fit_intercept=False).fit(X_train,y_train).coef_
@@ -117,25 +107,11 @@ def regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output):
             case "mxnet-svddc":
                 model = mx.np.linalg.lstsq(X_train, y_train[...,np.newaxis], rcond=None)[0]
             
-        pred = X_test @ model 
-        
-        stop_lstsq = timer()
 
-        results_dict[reg_name] = {
-            "elapsed_time": stop_lstsq - start_lstsq,
-            "y_pred": pred
-            }
-        
-        if verbose_output:
-            results_dict["model"] = model
+        results_dict[reg_name] = model
         
     return results_dict
 
-def process_results(results_dict, y_test, metrics):
-    for reg_name, reg_output in results_dict.items():
-        for metric, formula in metrics:
-            score = formula(y_test, reg_output["y_pred"])
-            results_dict[reg_name][metric] = score
 
 def dump_to_yaml(path, object, verbose_output = True):
     print(f"Results dict: {object.keys()}")
@@ -147,7 +123,9 @@ def dump_to_yaml(path, object, verbose_output = True):
         dump = pyaml.dump(object)
         f_log.write(dump)
 
-def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst, figures, successful_regs, output_folder):
+
+def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder):
+
     SMALL_SIZE = 10
     MEDIUM_SIZE = 14
     BIGGER_SIZE = 18
@@ -175,56 +153,38 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         "mxnet-svddc": "MXNet (SVDDC)"
     }
     
-    reg_titles = [label_lookup[reg] for reg in successful_regs]
-    
-    if "2d_scatterplot_w_regression_line" in figures:
-        fig, ax = plt.subplots()
-        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax)
-        X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
-        reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
-        for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
-        ax.legend()
+    fig, ax = plt.subplots()
+    sns.scatterplot(x=X.flatten(), y=y.flatten(), ax=ax)
+    X_range = np.linspace(np.min(X), np.max(X), 2)[:, np.newaxis]
+    reg_lines = [X_range @ results_dict[regressor] for regressor in successful_regs]
+    for line, regressor in zip(reg_lines, successful_regs):
+        ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
+    ax.legend()
 
-        ax.set_aspect('equal')
-        fig.suptitle(f"Regression Over Data")
-        ax.set_xlabel(f"{fields[0] if fields else 'X'}")
-        ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
-        plt.savefig(output_folder / f"regression.png")
+    ax.set_aspect('equal')
+    fig.suptitle(f"Regression Over Data")
+    # ax.set_xlabel(f"")
+    # ax.set_ylabel(f"")
+    plt.savefig(output_folder / f"regression_line.png")
         
     plt.clf()
     plt.close(fig="all")
 
-
     
-def main(data_path, params):
-    
-    results = linreg_pipeline(data_path, **params)
-    reg_names = [
-        "tf-necd",
-        "tf-cod",
-        "pytorch-qrcp",
-        "pytorch-qr",
-        "pytorch-svd",
-        "pytorch-svddc",
-        "sklearn-svddc",
-        "mxnet-svddc",
-    ]
-    
-    ## this section should be commented out if you can't run all regressors ##
-    # stuff = [results[reg]["model"] for reg in reg_names]                     #
-    # for name, model in zip(reg_names, stuff):                                #  
-    #     print(f"{name} has model: \n{model}\n{'='*30}")                      #
-    ##########################################################################
-        
+def main(data_path, include_regs):
+    results = linreg_pipeline(data_path, include_regs=include_regs)
     print("Run complete")
 
-def main_test(path):
+
+def main_test(path, include_regs):
     df = pd.read_csv(path)
     array = df.to_numpy()
-    main(array)
+    main(array, include_regs=include_regs)
 
 
 if __name__ == '__main__':
     path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 10)_ax-[10, 10]_rot-0_.csv"
-    main_test(path)
+    include_regs = ["tf-necd", "tf-cod", "sklearn-svddc"]
+    #               "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
+
+    main_test(path, include_regs)
