@@ -17,7 +17,7 @@ def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
 
     return points_org
 
-def make_data_ellipse(axes, resolution):
+def make_data_ellipse(axes, resolution, data_remove=0.0, ran_seed=100):
     print('workin')
     a,b = axes
     num = 1/resolution
@@ -33,7 +33,11 @@ def make_data_ellipse(axes, resolution):
         x = a * np.cos(angle)
         y = b * np.sin(angle)
         pairs.append([x,y])
+    rng = np.random.default_rng(ran_seed)
+    rows_to_be_removed = rng.choice(range(len(pairs)), int(data_remove*len(pairs)), replace=False)
+    pairs = np.delete(pairs, rows_to_be_removed, axis=0)
     return np.array(pairs)
+
 
 
 def rotate3d(pairs, yaw, pitch, roll):
@@ -119,17 +123,16 @@ def make_line(data, dim):
 # for dim in dimensions:
 #     make_data_gen(lower, upper, dim, resolution, rot=True)
 
-def make_exp_data_2d(location, axes, rotation, resolution):
+def make_exp_data_2d(location, axes, rotation, resolution, data_remove):
 
-    data = make_data_ellipse(axes,resolution)
+    data = make_data_ellipse(axes, resolution, data_remove)
     data_rot = rotate2d(data, rotation)
     data_rot[:,0] += location[0]
     data_rot[:,1] += location[1]
 
     df = pd.DataFrame(data_rot)
-    if rotation == 15:
-        make_line(data_rot, dim=2)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{location}_ax-{axes}_rot-{rotation}_.csv", index=False, header=False)
+    pass
+    # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{location}_ax-{axes}_rot-{rotation}_.csv", index=False, header=False)
 
 
 def make_exp_data_3d(location, axes, rotation, resolution):
@@ -142,23 +145,28 @@ def make_exp_data_3d(location, axes, rotation, resolution):
 
     df = pd.DataFrame(data_rot)
     make_line(data_rot, dim=3)
-    # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
 
 #############################################################################################
 location2d = [(x,y) for x in [0,10] for y in [0,10]]
-axis_ratio2d = [[10,b] for b in range(1,11)]
-rotations = [0, 15, 30, 45, 60, 75, 90, 180]
+axis_ratio2d = [[10,b] for b in range(2,12,2)]
+rotations = [0, 15, 45, 60, 90]
+data_remove = [0.1, 0.25, 0.5]
 resolution = 0.001
 
-# for loc in location2d:
-#     for rot in rotations:
-#         for ax in axis_ratio2d:
 
-            # make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+for loc in location2d:
+    for rot in rotations:
+        for ax in axis_ratio2d:
+            for dr in data_remove:
 
-make_exp_data_2d(location=(0,10), axes=[5,5], rotation=0, resolution=0.001)
-make_exp_data_2d(location=(0,15), axes=[5,5], rotation=0, resolution=0.001)
-make_exp_data_2d(location=(0,20), axes=[5,5], rotation=0, resolution=0.001)
+                make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution, data_remove=dr)
+
+
+
+# make_exp_data_2d(location=(0,5.25), axes=[5,5], rotation=0, resolution=0.001)
+# make_exp_data_2d(location=(0,5.025), axes=[5,5], rotation=0, resolution=0.001)
+# make_exp_data_2d(location=(0,7.5), axes=[5,5], rotation=0, resolution=0.001)
 ##############################################################################################
 # location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
 # axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]

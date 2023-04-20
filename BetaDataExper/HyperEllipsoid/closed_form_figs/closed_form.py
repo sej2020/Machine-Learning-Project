@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.preprocessing import PolynomialFeatures
 import matplotlib.pyplot as plt
 import time
 
 # ["location_x", "location_y", "rotation", "major_axis_length", "minor_axis_length", "MAE"]
 
-def make_viz(array, deg, trained_model, dummys):
+def make_viz(array, deg, trained_model, dummys, metric):
 
     for (loc_x, loc_y), dummy in zip([(0,0), (0,10), (10,0), (10,10)], dummys):
         x_rot = []
@@ -26,17 +26,17 @@ def make_viz(array, deg, trained_model, dummys):
         ax.scatter(x_rot, y_min_ax, z_err, label="Actual")
         ax.scatter(dummy[:,3], dummy[:,5], trained_model.predict(dummy), label="Prediction", marker="_")
         ax.legend()
-        ax.set_title(f"Ellipses at location: ({loc_x}, {loc_y})")
+        ax.set_title(f"Ellipses at location: ({loc_x}, {loc_y})\nPolynomial of degreee {deg}")
         ax.grid()
         ax.set_xlabel("Rotation")
         ax.set_ylabel("Minor Axis size")
-        ax.set_zlim(0,12)
-        ax.set_zlabel("MAE")
-        plt.show()
-        fig.savefig(f"BetaDataExper/HyperEllipsoid/closed_form_figs/polydeg{deg}/({loc_x},{loc_y})")
+        ax.set_zlim(min(array[:,-1])*1.1,max(array[:,-1])*1.1)
+        ax.set_zlabel(metric)
+        # plt.show()
+        fig.savefig(f"BetaDataExper/HyperEllipsoid/closed_form_figs/{metric}/polydeg{deg}/({loc_x},{loc_y})")
 
 
-def main(datapath):
+def main(datapath, metric):
     df = pd.read_csv(datapath)
     array = df.to_numpy()
     X, y = array[:, :-1], array[:, -1]
@@ -60,10 +60,10 @@ def main(datapath):
         lin_poly.fit(X_poly, y)
 
         y_pred = lin_poly.predict(X_poly)
-        print(f'MAE of polynomial degree {deg}: {mean_absolute_error(y, y_pred)}')
+        print(f'MAPE of polynomial degree {deg} for {metric} prediction: {mean_absolute_percentage_error(y, y_pred)}')
 
         new_array = np.append(X_poly, np.expand_dims(y, axis=1), axis=1)
-        make_viz(new_array, deg, lin_poly, dummy_Xs)
+        make_viz(new_array, deg, lin_poly, dummy_Xs, metric)
 
 # 4 3-D plots
 
@@ -93,5 +93,8 @@ def interp_data(deg):
 
 
 if __name__ == "__main__":
-    datapath = "BetaDataExper/HyperEllipsoid/closed_form_figs/pred_error.csv"
-    main(datapath)
+    
+    for metric in ["MAE", "MSE", "RMSE", "R2", "elapsed_time"]:
+        datapath = f"BetaDataExper/HyperEllipsoid/closed_form_figs/pred_error_{metric}.csv"
+        main(datapath, metric)
+        ## thread metric thru in place of MAE
