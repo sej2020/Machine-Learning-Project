@@ -7,8 +7,8 @@ import os
 import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-# import torch
-# import mxnet as mx
+import torch
+import mxnet as mx
 import pyaml
 from pathlib import Path
 
@@ -40,7 +40,7 @@ def linreg_pipeline(X, y, location, step_n, include_regs="all", vis_theme="white
 
     successful_regs = list(results_dict.keys())
      
-    generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n)
+    gen_every_fig(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n)
     
     metadata = {
         "completed_regs": successful_regs,
@@ -114,7 +114,7 @@ def regression_loop(X_train, y_train, reg_names):
 
 
 def dump_to_yaml(path, object, verbose_output = True):
-    print(f"Results dict: {object.keys()}")
+    # print(f"Results dict: {object.keys()}")
     if not verbose_output:
         for reg in object.keys():
             del object[reg]["y_pred"]
@@ -124,7 +124,7 @@ def dump_to_yaml(path, object, verbose_output = True):
         f_log.write(dump)
 
 
-def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n):
+def gen_every_fig(results_dict, X, y, vis_theme, successful_regs, output_folder, location, step_n):
 
     SMALL_SIZE = 10
     MEDIUM_SIZE = 14
@@ -152,14 +152,14 @@ def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_fold
         "sklearn-svddc": "scikit-learn (SVDDC)",
         "mxnet-svddc": "MXNet (SVDDC)"
     }
-    
     fig, ax = plt.subplots()
     sns.scatterplot(x=X.flatten(), y=y.flatten(), ax=ax, s=3, marker=".", color="black", edgecolor="black")
     rangex = np.linspace(-50, 50, 2)[:, np.newaxis]
+    print([results_dict[regressor] for regressor in successful_regs])
     reg_lines = [rangex @ results_dict[regressor] for regressor in successful_regs]
     for line, regressor in zip(reg_lines, successful_regs):
         ax.plot(rangex.flatten(), line.flatten(), label=label_lookup[regressor])
-    # ax.legend()
+    ax.legend()
 
     # plotting a thin line to accentuate x and y axes
     ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="gray", alpha=0.4)
@@ -169,41 +169,51 @@ def generate_figures(results_dict, X, y, vis_theme, successful_regs, output_fold
     ax.set_xlim(-20, 20)
     ax.set_ylim(-10, 30)
     fig.suptitle(f"Circluar Data and its Regression Line")
-    # ax.set_xlabel(f"")
-    # ax.set_ylabel(f"")
-    plt.savefig(output_folder / f"regression_line_loc{location}_step{step_n}.png")
+    ax.set_xlabel(f"x")
+    ax.set_ylabel(f"y")
+    plt.savefig(output_folder / f"regression_line_loc{location}_step{step_n}.png", dpi=300)
     # plt.show()  
 
 
-
-def main_test(path, include_regs, lr=1e-2, threshold=1e-2):
+def main_test(path, include_regs, lr=1e-2, threshold=1e-3):
     df = pd.read_csv(path)
-    location = path.split("loc-")[-1].split("_")[0]
-    loc_x, loc_y = int(location.split(",")[0].strip("() ")), int(location.split(",")[1].strip("() "))
+    location = path.split("loc-")[-1].split("_")[0].replace(" ","")
+    loc_x, loc_y = float(location.split(",")[0].strip("() ")), float(location.split(",")[1].strip("() "))
     array = df.to_numpy()
     X, y = array[:, :-1], array[:, -1]
+    output_folder = Path(f"BetaDataExper/HyperEllipsoid/finding_tangent/figs{location}/")
 
     dist_from_regline = sys.float_info.max
     step_n = 1
     sign = 1
     while abs(dist_from_regline) > threshold:
-        results = linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs)
-        X = X + sign*lr*abs(loc_y)
-        regline = X @ results[include_regs[0]]
-        min_distance = np.min(np.subtract(y, regline))
+        results = linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs, output_folder=output_folder)
+        min_distance = sys.float_info.max 
+        for reg in include_regs:
+        # print(results[include_regs[0]])
+            regline = X @ results[reg]
+            min_distance = min(np.min(np.subtract(y.flatten(), regline.flatten())), min_distance)
+        # print(y[0::2])
+        # print(regline[0::2])
+        # print(np.subtract(y,regline)[0::2])
+        # print(f"****{min_distance}")
         if min_distance < 0:
             sign = -1
             lr = lr/2
         else:
             sign = 1
+        X = X + sign*lr*abs(loc_y)
+        print(f"{min_distance}")
         dist_from_regline = min_distance
         step_n += 1
+
     print("Run Complete")
 
 
 if __name__ == '__main__':
-    path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 10)_ax-[5, 5]_rot-0_.csv"
-    include_regs = ["sklearn-svddc"]
+    # path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 20)_ax-[5, 5]_rot-0_.csv"
+    include_regs = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
     #               "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
-
-    main_test(path, include_regs)
+    for loc in ["(0, 5.025)", "(0, 5.25)", "(0, 7.5)", "(0, 10)", "(0, 15)", "(0, 20)"]:
+        path = f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-[5, 5]_rot-0_.csv"
+        main_test(path, include_regs)
