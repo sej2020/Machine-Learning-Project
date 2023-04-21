@@ -1,12 +1,15 @@
 <div class="echarts-container">
     <div class="chart-input-container">
-        <div>
+        <div class="RequestIDClass">
             <mat-form-field class="requestInput">
                 <mat-label>Request ID</mat-label>
                 <input matInput type="text" class="requestInput" [value]="requestId" placeholder="requestId"
                     aria-required="true" (keyup)="changeInRequestId($event)" />
             </mat-form-field>
-            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+        </div>
+        <mat-divider ></mat-divider>
+        <div class="visualization-types">
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Visualization Type</mat-label>
                 <mat-select aria-required="true" [(value)]="visualizationType"
                     (selectionChange)="changeInVisualizationType($event.value)">
@@ -14,9 +17,9 @@
                     <mat-option value="data_centric_visualization">Data Centric Visualizations</mat-option>
                 </mat-select>
             </mat-form-field>
-        </div>
+        
         <div *ngIf="visualizationType=='default_visualization'">
-            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Chart Type</mat-label>
                 <mat-select aria-required="true" [(value)]="chartType"
                     (selectionChange)="changeInChartType($event.value)">
@@ -25,7 +28,7 @@
                     <mat-option value="train_test_error">Train Test Error</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Metric</mat-label>
                 <mat-select aria-required="true" [(value)]="currentMetric"
                     (selectionChange)="changeInCurrentMetric($event.value)">
@@ -42,7 +45,7 @@
             </mat-form-field>
         </div>
         <div *ngIf="visualizationType=='data_centric_visualization'">
-            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Chart Type</mat-label>
                 <mat-select aria-required="true" [(value)]="chartType"
                     (selectionChange)="changeInChartType($event.value)">
@@ -50,14 +53,14 @@
                     <mat-option value="pca_visualization_2d">PCA Visualization</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="form-field-styles">
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Metric</mat-label>
                 <mat-select aria-required="true" [(value)]="currentMetric"
                     (selectionChange)="changeInCurrentMetric($event.value)">
                     <mat-option *ngFor="let v of yAxisData" [value]="v">{{v}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field *ngIf="regressorList!=null && regressorList.length > 0" class="form-field-styles">
+            <mat-form-field *ngIf="regressorList!=null && regressorList.length > 0" class="requestInput">
                 <mat-label>Regressor</mat-label>
                 <mat-select aria-required="true" [(value)]="currentRegressor"
                     (selectionChange)="changeInRegressor($event.value)">
@@ -65,8 +68,9 @@
                 </mat-select>
             </mat-form-field>
         </div>
+        <button mat-raised-button color="primary" class="form-field-styles" (click)="fetchRawData()">Plot</button>
     </div>
-    <button mat-raised-button color="primary" class="form-field-styles" (click)="fetchRawData()">Plot</button>
+</div>
 
     <div ng-if="chartOptions != null" echarts [options]="chartOptions" class="chart-container"></div>
 </div>

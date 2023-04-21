@@ -1,22 +1,39 @@
 .echarts-container {
-    height: 1000px;
-    width: 1000px;
-    margin-left: 10vw;
-    margin-top: 5vh;
-}
-
-.chart-container {
-    height: 900px;
-    width: 1200px;
+    // height: 1000px;
+    height: calc(100vh - 11vh);
+    width: calc(100vw - 17.25vw);
+    position: absolute;
+    margin-left: 2vh;
     margin-top: 2vh;
-}
-
-.chart-input-container {
+    border: 1px solid black;
     display: flex;
     flex-direction: row;
-    gap: 10px;
+
+    .chart-container {
+        height: calc(100vh - 11vh);
+        width:  calc(100vw - 17.25vw - 300px);
+        border: 1px solid green;
+        
+    }
+    .chart-input-container {
+        // display: flex;
+        // flex-direction: row;
+        // gap: 10px;
+        width: 23.25vw;
+        border: 1px solid red;
+        height: calc(100vh - 11vh);
+
+    }
+   
 }
 
-.requestInput {
-    flex-grow: 1;
+
+.RequestIDClass{
+    padding: 12px;
+}
+.requestInput{
+    display: block;
+}
+.visualization-types{
+    padding: 12px;
 }
