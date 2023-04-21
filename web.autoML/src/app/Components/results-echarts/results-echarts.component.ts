@@ -25,10 +25,15 @@ export class ResultsEchartsComponent implements OnInit {
 
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
+  defaultChartTypes:string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
+  visualizationChartTypes:string[] = ['tsne_visualization_2d', 'pca_visualization_2d'];
+  visualizationTypes:string[] = ['default_visualization', 'data_centric_visualization'];
+
   requestId: string = "";
   currentMetric: string = "";
   currentRegressor: string = "";
   chartType: string = "boxplot";
+  visualizationType: string = this.visualizationTypes[0];
 
   chartOptions!: EChartsOption;
   yAxisData!: string[];
@@ -50,11 +55,12 @@ export class ResultsEchartsComponent implements OnInit {
         this.boxplotData = this.resultsData.data['visualization_data']['boxplot']
         this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
         this.trainTestErrorData = this.resultsData.data['visualization_data']['train_test_error'];
-        this.yAxisData = this.resultsData.data['metrics_list']
+        this.yAxisData = this.resultsData.data['metrics_list'];
+        this.yAxisData.push('Raw Mean Absolute Percentage Error');
         this.currentMetric = this.yAxisData[0];
         this.regressorList = this.resultsData.data['regressor_list'];
         this.currentRegressor = this.regressorList[0];
-        this.chartOptions = this.getChartOptions(this.chartType);
+        this.chartOptions = this.getChartOptions();
       });
 
     this.uploadRequestService.getVisualizationData(this.requestId)
@@ -69,26 +75,37 @@ export class ResultsEchartsComponent implements OnInit {
 
   changeInCurrentMetric(value: any) {
     this.currentMetric = value;
-    this.chartOptions = this.getChartOptions(this.chartType);
+    this.chartOptions = this.getChartOptions();
   }
 
   changeInRegressor(value: any) {
     this.currentRegressor = value;
-    this.chartOptions = this.getChartOptions(this.chartType);
+    this.chartOptions = this.getChartOptions();
   }
 
   changeInChartType(value: any) {
     this.chartType = value;
-    this.chartOptions = this.getChartOptions(this.chartType);
+    this.chartOptions = this.getChartOptions();
   }
 
-  getChartOptions(chartType: string) {
-    if (chartType === 'boxplot') {
+  changeInVisualizationType(value: any) {
+    this.visualizationType = value;
+    this.chartType = this.visualizationType == 'default_visualization' ? this.defaultChartTypes[0] : this.visualizationChartTypes[0];
+    console.log(this.defaultChartTypes[0]);
+    console.log(this.visualizationChartTypes[0]);
+    console.log('chartType: ' + this.chartType);
+    this.chartOptions = this.getChartOptions();
+  }
+
+  getChartOptions() {
+    if (this.chartType === 'boxplot') {
       return this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
-    } else if (chartType === 'cv_line_chart'){
+    } else if (this.chartType === 'cv_line_chart') {
       return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
-    } else if (chartType === 'tsne_visualization') {
-      return this.getTSNEScatterPlot(this.currentMetric, this.visualizationResponse.tsne.dimension1, this.visualizationResponse.tsne.dimension2);
+    } else if (this.chartType === 'tsne_visualization_2d') {
+      return this.getScatterPlot(this.currentMetric, 'tsne');
+    } else if (this.chartType == 'pca_visualization_2d') {
+      return this.getScatterPlot(this.currentMetric, 'pca');
     } else {
       return this.getDataPercentChartOptions();
     }
@@ -280,70 +297,70 @@ export class ResultsEchartsComponent implements OnInit {
 
     return boxplotOptions;
   }
-  getTSNEScatterPlot(currentMetric: string, dimension1: number[], dimension2: number[]){
-    console.log(dimension1.length);
+
+
+  getScatterPlot(currentMetric: string, algorithm: string) {
+    let coloring_information = this.visualizationResponse.coloring_data[currentMetric][this.currentRegressor]
+    let dimension1: number[];
+    let dimension2: number[];
+
+    if (algorithm == 'tsne') {
+      dimension1 = this.visualizationResponse.tsne.dimension1;
+      dimension2 = this.visualizationResponse.tsne.dimension2;
+    } else {
+      dimension1 = this.visualizationResponse.pca.dimension1;
+      dimension2 = this.visualizationResponse.pca.dimension2;
+    }
+
     let data = [];
-    for (var i=0; i<dimension1.length; i++) {
-      data.push([dimension1[i], dimension2[i]]);
+    for (var i = 0; i < dimension1.length; i++) {
+      data.push([dimension1[i], dimension2[i], this.getColor(coloring_information[i])])
     }
-    var CLUSTER_COUNT = 2;
-    var DIENSIION_CLUSTER_INDEX = 2;
-    var COLOR_ALL = ['#37A2DA', '#e06343'];
-    var pieces = [];
-    for (var i = 0; i < CLUSTER_COUNT; i++) {
-      pieces.push({
-        value: i,
-        label: 'cluster ' + i,
-        color: COLOR_ALL[i]
-      });
-    }
+    return this.get2DScatterPlotOptions(data);
+  }
+
+  get2DScatterPlotOptions(data: any) {
     let scatterPlotOption: EChartsOption = {
       dataset: [
         {
           source: data
         },
-        {
-          transform: {
-            type: 'ecStat:clustering',
-            // print: true,
-            config: {
-              clusterCount: CLUSTER_COUNT,
-              outputType: 'single',
-              outputClusterIndexDimension: DIENSIION_CLUSTER_INDEX
-            }
-          }
-        }
       ],
       tooltip: {
         position: 'top'
       },
       visualMap: {
         type: 'piecewise',
-        top: 'middle',
-        min: 0,
-        max: CLUSTER_COUNT,
-        left: 10,
-        splitNumber: CLUSTER_COUNT,
-        dimension: DIENSIION_CLUSTER_INDEX,
-        pieces: pieces
+        dimension: 2,
+        splitNumber: 3,
+        pieces: [
+          { min: 0, max: 0.250, color: 'green' },
+          { min: 0.251, max: 0.5, color: 'black' },
+          { min: 0.501, max: 100, color: 'red' }
+        ]
       },
       grid: {
         left: 120
       },
       xAxis: {},
       yAxis: {},
-      series: {
+      series: [{
         type: 'scatter',
         encode: { tooltip: [0, 1] },
         symbolSize: 15,
         itemStyle: {
           borderColor: '#555'
         },
-        datasetIndex: 1
-      }
+        datasetIndex: 0
+      }]
     };
-    return scatterPlotOption;
+    return scatterPlotOption
   }
+
+  getColor(colorValue: number) {
+    return colorValue
+  }
+
 
 }
 

@@ -90,12 +90,10 @@ async def get_automl_request(request_id):
             data.result_link = f'{settings.HOST}/results?key={result_file_list[0]}'
             boxplot_vis_data, metrics_list = visualization_service.get_boxplot_data(result_file_list[0])
             cv_lineplot_vis_data = visualization_service.get_lineplot_data_cv(result_file_list[0])
-            # train_test_error_data, regressor_list = visualization_service.get_train_test_error_data(result_file_list[1])
-            # data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data}
-            regressor_list = []
-            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data}
+            train_test_error_data = visualization_service.get_train_test_error_data(result_file_list[1])
+            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data}
             data.metrics_list = metrics_list
-            data.regressor_list = regressor_list
+            data.regressor_list = automl_request.regressor_list.split(',')
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
@@ -122,20 +120,22 @@ async def validate_data(file_data: UploadFile = File(...)):
         }, status_code=200)
 
 @app.get('/dataVisualization')
-async def visualize_data(requestId):
+async def visualize_data(requestId, dimensionality=3):
     try:
         request = AutoMLRequestRepository.get_request_by_id(requestId)
+        result_file_list = request.resultfile.split(',')
         data_path = f"{settings.TEMP_DOWNLOAD_DIR}/{request.datafile}"
         s3_service = S3Service(settings.S3_DATA_BUCKET)
         s3_service.download_file(request.datafile, data_path)
-        dimension1, dimension2 = data_services.visualize_data(data_path, algorithm='tsne')
-        return JSONResponse(content={
-            'tsne': {
-                'dimension1': dimension1,
-                'dimension2': dimension2
-                }
-            }, status_code=200)
+        response = {'coloring_data': data_services.get_coloring(result_file_list[2])}
+        for dim_red_algo in ['tsne', 'pca']:
+            dimensions = data_services.visualize_data(data_path, n_components=dimensionality, algorithm=dim_red_algo)
+            response[dim_red_algo] = {}
+            for i in range(len(dimensions)):
+                response[dim_red_algo][f'dimension{i}'] = dimensions[i]
+        return JSONResponse(content=response, status_code=200)
     except Exception as e:
+        logging.error(f'error in data visualization: {str(e)}')
         return JSONResponse(content={
             'error': f'error while retrieving request for id {requestId}: {str(e)}'
             }, status_code=404)

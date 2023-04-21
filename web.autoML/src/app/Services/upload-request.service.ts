@@ -14,7 +14,9 @@ export class UploadRequest{
 }
 
 export interface IDataVisualizationResponse {
-  tsne: IVisualizationData
+  tsne: IVisualizationData,
+  pca: IVisualizationData,
+  coloring_data: Record<string, Record<string, Record<string, number>>>
 }
 
 export interface IVisualizationData {

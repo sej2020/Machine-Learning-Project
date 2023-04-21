@@ -82,13 +82,12 @@ class S3Service:
             result = self.s3_client.download_file(self.bucket_name, file_name, download_path)
         except Exception as e:
             errorMessage = "error while downloading the file {} from bucket {}: {}".format(file_name, self.bucket_name, e)
-            print(errorMessage)
             log.info(errorMessage)
             raise Exception(errorMessage)
 
     def delete_file(self, file_name):
         try:
-            self.delete_file(file_name)
+            self.s3_client.delete_file(file_name)
         except ClientError as e:
             errorMessage = "error while deleting the file {} from bucket {}: {}".format(file_name, self.bucket_name, e)
             log.info(errorMessage)
