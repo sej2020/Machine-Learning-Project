@@ -72,7 +72,7 @@ def construct_info_dict():
                             v1[ax_ratio] = results[k1][k]
                 
 
-    output_path = Path("BetaDataExper/HyperEllipsoid")
+    output_path = Path("BetaDataExper/HyperEllipsoid/rem_points_test")
     with open(output_path / "big_hyp_sim_rem_1.yaml", "w") as f:
         dump(info_dict_rem_1, f, SafeDumper)
     with open(output_path / "big_hyp_sim_rem_25.yaml", "w") as f:
