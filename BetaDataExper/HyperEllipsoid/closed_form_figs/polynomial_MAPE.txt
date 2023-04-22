@@ -1,0 +1,29 @@
+MAPE of polynomial degree 1 for MAE prediction: 0.31154051998699794
+MAPE of polynomial degree 2 for MAE prediction: 0.12214425459121081
+MAPE of polynomial degree 3 for MAE prediction: 0.06272991839806932
+MAPE of polynomial degree 4 for MAE prediction: 0.03801980340818636
+MAPE of polynomial degree 5 for MAE prediction: 0.01807473811922501
+
+MAPE of polynomial degree 1 for MSE prediction: 1.653470976748898
+MAPE of polynomial degree 2 for MSE prediction: 0.27165742006554355
+MAPE of polynomial degree 3 for MSE prediction: 0.3240867024967119
+MAPE of polynomial degree 4 for MSE prediction: 0.09038652994286242
+MAPE of polynomial degree 5 for MSE prediction: 0.053535645534082146
+
+MAPE of polynomial degree 1 for RMSE prediction: 0.30487166987054043
+MAPE of polynomial degree 2 for RMSE prediction: 0.11281034948840252
+MAPE of polynomial degree 3 for RMSE prediction: 0.06633546952414193
+MAPE of polynomial degree 4 for RMSE prediction: 0.03790699995173782
+MAPE of polynomial degree 5 for RMSE prediction: 0.015944039915829322
+
+MAPE of polynomial degree 1 for R2 prediction: 3853066081291109.0
+MAPE of polynomial degree 2 for R2 prediction: 3969868679400721.0
+MAPE of polynomial degree 3 for R2 prediction: 3344384755813697.0
+MAPE of polynomial degree 4 for R2 prediction: 2421755592473087.0
+MAPE of polynomial degree 5 for R2 prediction: 1615462805688204.8
+
+MAPE of polynomial degree 1 for elapsed_time prediction: 0.23397494938186134
+MAPE of polynomial degree 2 for elapsed_time prediction: 0.23296282560876955
+MAPE of polynomial degree 3 for elapsed_time prediction: 0.23207607505023414
+MAPE of polynomial degree 4 for elapsed_time prediction: 0.2210491780342736
+MAPE of polynomial degree 5 for elapsed_time prediction: 0.22457674559765023
