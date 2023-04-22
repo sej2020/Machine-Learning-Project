@@ -169,8 +169,8 @@ for loc in location2d:
 
 ######### Finding Tangent Data Generation ##########
 
-for loc in [5.025, 5.25, 7.5, 10, 15, 20]:
-    make_exp_data_2d(location=(0,loc), axes=[5,5], rotation=0, resolution=0.001)
+# for loc in [5.025, 5.25, 7.5, 10, 15, 20]:
+#     make_exp_data_2d(location=(0,loc), axes=[5,5], rotation=0, resolution=0.001, data_remove=0)
 
 ##############################################################################################
 # location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]

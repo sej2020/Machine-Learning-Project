@@ -7,8 +7,8 @@ completed_regs:
   - pytorch-svddc
   - sklearn-svddc
   - mxnet-svddc
-dataset_shape: 1000 x 2
-input_data: 'hyperell_loc-(10, 10)_ax-[10, 1]_rot-15_.csv'
+dataset_shape: 500 x 2
+input_data: 'hyperell_loc-(0, 0)_ax-[10, 6]_rot-45_rem-0.5.csv'
 random_seed: 100
 split_percent: No train/test split
 timer_method: total

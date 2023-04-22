@@ -215,5 +215,5 @@ if __name__ == '__main__':
     include_regs = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
     #               "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
     for loc in ["(0, 5.025)", "(0, 5.25)", "(0, 7.5)", "(0, 10)", "(0, 15)", "(0, 20)"]:
-        path = f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-[5, 5]_rot-0_.csv"
+        path = f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-[5, 5]_rot-0.csv"
         main_test(path, include_regs)
