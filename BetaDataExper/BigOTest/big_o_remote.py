@@ -8,11 +8,8 @@ import pandas as pd
 from time import perf_counter_ns, process_time_ns
 from sklearn import linear_model
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import seaborn as sns
 import math
 import torch
-import mxnet as mx
 from pathlib import Path
 import pyaml
 import memray
@@ -56,7 +53,6 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
         for row_count in rows_in_expr:
             partial_X_train = X_train[:row_count, :]
             partial_y_train = y_train[:row_count] 
-            breakpoint()
             
             for iter in range(n_iters_per_row):
                 output_path = Path("memory_output") / f"mem_{reg_name}_{row_count}_{iter}.bin"
@@ -67,59 +63,61 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
                         
                         case "sklearn-svddc":
                             start_lstsq = timer()
-                            model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
+                            #model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
-
+                                #model2 = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
+                                print("ahaha")
                         case "tf-necd":
                             start_lstsq = timer()
-                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
+                            #model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
-                                
+                                #model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
+                                print("ahaha")
+
                         case "tf-cod":
                             start_lstsq = timer()
-                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
+                            #model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
-
+                                #model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
+                                print("ahaha")
                         case "pytorch-qrcp":
                             start_lstsq = timer()
-                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
-
+                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+                                print("ahaha")
                         case "pytorch-qr":
                             start_lstsq = timer()
                             model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                            print("ahaha")                            
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
-                                
+                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                                print("ahaha")
                         case "pytorch-svd":
                             start_lstsq = timer()
-                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
-
+                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+                                print("ahaha")
                         case "pytorch-svddc":
                             start_lstsq = timer()
-                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
+                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
+                            print("ahaha")
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
-
-                        case "mxnet-svddc":
-                            start_lstsq = timer()
-                            model = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
-                            stop_lstsq = timer()
-                            with memray.Tracker(output_path, native_traces=True):
-                                model2 = mx.np.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], rcond=None)[0]
+                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
+                                print("ahaha")
                                 
 
                 except Exception as e:
@@ -173,7 +171,6 @@ def comp_complexity_dict(reg: str):
         "pytorch-svd": lambda x: math.floor(4*x[0]*x[1]**2 + 8*x[1]**3),
         "pytorch-svddc": lambda x: math.floor(x[0]*x[1]**2),
         "sklearn-svddc": lambda x: math.floor(x[0]*x[1]**2),
-        "mxnet-svddc": lambda x: math.floor(x[0]*x[1]**2)
         }
     
     return dict[reg]
@@ -208,83 +205,6 @@ def theoretical_expr(n: int, r: int, reg_names: list, rows_in_expr: list) -> dic
         results_dict[reg_name] = final
 
     return results_dict 
-
-
-def make_viz(actual_time_dict: dict, theory_time_dict: dict, timer: object, rows_in_expr: list):
-    """
-    Will save visualizations for Theoretical Runtime vs. Actual Runtime comparison to user's CWD
-
-    Args:
-        actual_time_dict (dict) - results from actual runtime experiment
-        theory_time_dict (dict) - results from theoretical runtime experiment
-        timer (object) - timer either perf_counter or process time
-        rows_in_expr (list) - a list of the orders of magnitude of rows used in experiment e.g. [10, 100, 1000, 10000] 
-
-    Returns:
-        Saves figures to user's CWD
-    """
-
-    label_dict ={
-        "tf-necd": "TensorFlow (NE-CD)",
-        "tf-cod": "TensorFlow (COD)",
-        "pytorch-qrcp": "PyTorch (QRCP)",
-        "pytorch-qr": "PyTorch (QR)",
-        "pytorch-svd": "PyTorch (SVD)",
-        "pytorch-svddc": "PyTorch (SVDDC)",
-        "sklearn-svddc": "scikit-learn (SVDDC)",
-        "mxnet-svddc": "MXNet (SVDDC)"
-    }
-    
-    SMALL_SIZE = 10
-    MEDIUM_SIZE = 14
-    BIGGER_SIZE = 18
-    CHONK_SIZE = 24
-
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rc('axes', titlesize=BIGGER_SIZE, labelsize=MEDIUM_SIZE, facecolor="xkcd:black")
-    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-    plt.rc('figure', titlesize=BIGGER_SIZE, facecolor="xkcd:white", edgecolor="xkcd:black") #  powder blue
-        
-    sns.set_style("whitegrid", {'font.family':['serif'], 'axes.edgecolor':'black','ytick.left': True})
-
-    # for reg in actual_time_dict.keys():
-    #     plt.plot(rows_in_expr, actual_time_dict[reg], label=label_dict[reg]+' Actual')
-    #     plt.legend()
-    #     plt.title("Theoretical Bound vs. Actual Runtime")
-    #     plt.ylabel("Time in nanoseconds")
-    #     plt.xlabel("Number of rows in dataset")
-    #     plt.savefig(f"BetaDataExper/BigOTest/figs/bigO_{reg}")
-    #     plt.clf()
-
-    # for reg in actual_time_dict.keys():
-    #     plt.plot(rows_in_expr, actual_time_dict[reg], label=label_dict[reg]+' Actual')
-    #     plt.plot(rows_in_expr, theory_time_dict[reg], label=label_dict[reg]+' Theoretical')
-    #     plt.legend()
-    #     plt.title("Theoretical Bound vs. Actual Runtime")
-    #     plt.ylabel("Time in nanoseconds")
-    #     plt.xlabel("Number of rows in dataset")
-    #     plt.savefig(f"BetaDataExper/BigOTest/figs/bigO_{reg}")
-    #     plt.clf()
-
-    for i, reg in enumerate(actual_time_dict.keys()):
-        plt.plot(rows_in_expr, [theo / act for theo, act in zip(theory_time_dict[reg],actual_time_dict[reg])], label=label_dict[reg], color=f'C{i}')
-        plt.title("Ratio between Theoretical and Actual Runtimes")
-        plt.legend(loc=2)
-        plt.xlabel("Number of rows in dataset")
-        plt.xscale("log")
-        plt.savefig(f"BetaDataExper/BigOTest/figs/bigO_ratio_{reg}")
-        plt.clf()
-    
-    for reg in actual_time_dict.keys():
-        plt.plot(rows_in_expr, [theo / act for theo, act in zip(theory_time_dict[reg],actual_time_dict[reg])], label=label_dict[reg])
-        plt.title("Ratio between Theoretical and Actual Runtimes")
-        plt.legend(loc=2)
-        plt.xscale("log")
-        plt.xlabel("Number of rows in dataset")
-
-    plt.savefig(Path.cwd() / "figs/bigO_ratio_aggregate")
 
 
 def dump_to_yaml(path: str, object: dict):
@@ -373,9 +293,9 @@ if __name__ =='__main__':
 
     time_type = "process" #process or total
     reg_names = ["tf-necd", "tf-cod", "sklearn-svddc"] 
-    reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
-        # "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
-    data_rows = 100_000_000
+    reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc"]
+        # "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc"
+    data_rows = 10_000_000
     data_cols = 10
 
     main(time_type, reg_names, data_rows=data_rows, data_cols=data_cols, granularity=2, repeat=1)
