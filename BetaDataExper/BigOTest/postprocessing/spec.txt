@@ -1,0 +1,19 @@
+What should this program even do?
+
+Processing objectives:
+    Real time - 
+        a. read in metadata.yaml
+        b. read in actual_time.yaml (rows, nanoseconds recorded)
+        c. add to df
+
+    Theoretical time - 
+        a. read in theoretical_time.yaml (rows, theoretical flops)
+        b. take MFLOPS from benchmark to create expected time
+        c. add expected time to df next to real time for each reg and rows
+
+    Memory - 
+        a. use memray transform csv command to process each .bin file programmatically
+        b. parse resulting csv files, record total memory usage for each csv reg and row count
+        c. add mem usage to same df as other, should have three columns for each regressor
+
+

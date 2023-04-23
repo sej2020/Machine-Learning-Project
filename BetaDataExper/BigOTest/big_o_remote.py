@@ -59,66 +59,53 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
 
                 try:
                     match reg_name:
-
-                        
                         case "sklearn-svddc":
                             start_lstsq = timer()
-                            #model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
-                            print("ahaha")
+                            model = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
-                                print("ahaha")
+                                model2 = linear_model.LinearRegression(fit_intercept=False).fit(partial_X_train, partial_y_train).coef_
                         case "tf-necd":
                             start_lstsq = timer()
-                            #model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
-                            print("ahaha")
+                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
-                                print("ahaha")
+                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=True).numpy()
 
                         case "tf-cod":
                             start_lstsq = timer()
-                            #model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
-                            print("ahaha")
+                            model = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
-                                print("ahaha")
+                                model2 = tf.linalg.lstsq(partial_X_train, partial_y_train[...,np.newaxis], fast=False).numpy()
+
                         case "pytorch-qrcp":
                             start_lstsq = timer()
-                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
-                            print("ahaha")
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
-                                print("ahaha")
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsy").solution)
+
                         case "pytorch-qr":
                             start_lstsq = timer()
-                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
-                            print("ahaha")                            
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)                          
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
-                                print("ahaha")
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gels").solution)
+                                
                         case "pytorch-svd":
                             start_lstsq = timer()
-                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
-                            print("ahaha")
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
-                                print("ahaha")
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelss").solution)
+
                         case "pytorch-svddc":
                             start_lstsq = timer()
-                            #model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
-                            print("ahaha")
+                            model = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
                             stop_lstsq = timer()
                             with memray.Tracker(output_path, native_traces=True):
-                                #model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
-                                print("ahaha")
-                                
+                                model2 = np.array(torch.linalg.lstsq(torch.Tensor(partial_X_train), torch.Tensor(partial_y_train[...,np.newaxis]), driver="gelsd").solution)
 
                 except Exception as e:
                     failed_regs.append(reg_name)
@@ -126,6 +113,8 @@ def actual_expr(X_train: np.array, y_train: np.array, timer: object, reg_names: 
                     final += [(row_count, None)]
                     continue
                 
+                del model
+                del model2
                 final += [(row_count, stop_lstsq - start_lstsq)] 
 
         results_dict[reg_name] = final   
@@ -276,7 +265,8 @@ def main(time_type: str, reg_names: list, data_rows: int, data_cols: int, granul
         "failed_regs_exceptions": exceptions_lst,
         "rows_in_experiment": rows_in_expr,
         "repeat": repeat,
-        "timer_method": f"{time_type} in nanoseconds"
+        "timer_method": f"{time_type} in nanoseconds",
+        "reg_names": [name for name in reg_names if name not in failed_regs]
     }
 
     dump_to_yaml(Path.cwd() / "metadata.yaml", metadata)
@@ -298,4 +288,4 @@ if __name__ =='__main__':
     data_rows = 10_000_000
     data_cols = 10
 
-    main(time_type, reg_names, data_rows=data_rows, data_cols=data_cols, granularity=2, repeat=1)
+    main(time_type, reg_names, data_rows=data_rows, data_cols=data_cols, granularity=5, repeat=1)
