@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 import scipy as sp
+import random
 
 def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
     rng = np.random.default_rng(seed)
@@ -95,34 +96,34 @@ def make_line(data, dim):
 
 
 
-# def make_data_gen(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
+def make_data_gen(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
 
-#     axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+    axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
 
-#     data = gen_hyp_ellip(axes,resolution)
-#     data[:,[2,-1]] = data[:,[-1,2]]
-#     df = pd.DataFrame(data)
-#     # make_line(data)
-#     df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
+    data = gen_hyp_ellip(axes,resolution)
+    # data[:,[2,-1]] = data[:,[-1,2]]
+    df = pd.DataFrame(data)
+    # make_line(data)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
 
-#     if rot:
-#         data[:,[2,-1]] = data[:,[-1,2]]
-#         for deg in [5,15,30,90]:
-#             data_rot = rotate3d(data, deg, deg, deg)
-#             data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
-#             df = pd.DataFrame(data_rot)
-#             # make_line(data_rot)
-#             df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
-#     pass
+    # if rot:
+    #     data[:,[2,-1]] = data[:,[-1,2]]
+    #     for deg in [5,15,30,90]:
+    #         data_rot = rotate3d(data, deg, deg, deg)
+    #         data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
+    #         df = pd.DataFrame(data_rot)
+    #         # make_line(data_rot)
+    #         df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
+    pass
 
 
-# lower = 100
-# upper = 1000
-# resolution = 0.001
-# dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
+lower = 100
+upper = 1000
+resolution = 0.001
+dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
 
-# for dim in dimensions:
-#     make_data_gen(lower, upper, dim, resolution, rot=True)
+for dim in dimensions:
+    make_data_gen(lower, upper, dim, resolution, rot=False)
 
 
 def make_exp_data_2d(location, axes, rotation, resolution, data_remove):
@@ -159,11 +160,11 @@ data_remove = [0.1, 0.25, 0.5]
 resolution = 0.001
 
 
-for loc in location2d:
-    for rot in rotations:
-        for ax in axis_ratio2d:
-            for dr in data_remove:
-                make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution, data_remove=dr)
+# for loc in location2d:
+#     for rot in rotations:
+#         for ax in axis_ratio2d:
+#             for dr in data_remove:
+#                 make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution, data_remove=dr)
 
 
 
