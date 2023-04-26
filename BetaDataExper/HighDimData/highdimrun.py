@@ -157,9 +157,17 @@ def main(data_path, k_folds, data_name, reg_names):
         fig.savefig(f'BetaDataExper/HighDimData/figs/{data_name}-{metric_name}.png', bbox_inches='tight', dpi=300)
 
 if __name__ == "__main__":
-    paths = ["BetaDataExper/HighDimData/data/Conductivity.csv", "BetaDataExper/HighDimData/data/Residential-Building-Data-Set.csv", "BetaDataExper/HighDimData/data/Geographical-Music.csv"]
-    data_names = ["Superconductivity", "Residential Building", "Geographical Origin of Music"]
+    high_dim_data = {"Superconductivity": "BetaDataExper/HighDimData/data/Conductivity.csv",
+                        "Residential Building": "BetaDataExper/HighDimData/data/Residential-Building-Data-Set.csv",
+                        "Geographical Origin of Music": "BetaDataExper/HighDimData/data/Geographical-Music.csv",
+                        "Facebook Comment Volume": "BetaDataExper/HighDimData/data/Facebook-Comments.csv",
+                        "Online News Popularity": "BetaDataExper/HighDimData/data/Online-News-Popularity.csv",                
+                        "Communities and Crime": "BetaDataExper/HighDimData/data/communities.csv",
+                        "Hailstone": "BetaDataExper/HighDimData/data/hailstone_data.csv",
+                        "Hourly Energy Demand": "BetaDataExper/HighDimData/data/energy_dataset.csv",
+                        "KEGG Metabolic Pathway": "BetaDataExper/HighDimData/data/KEGG-Metabolic.csv",
+                        "Blog Feedback": "BetaDataExper/HighDimData/data/blog.csv"}
     reg_names = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
               #  "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
-    for path, data_name in zip(paths, data_names):
+    for data_name, path in high_dim_data.items():
         main(data_path = path, k_folds = 10, data_name = data_name, reg_names = reg_names)
