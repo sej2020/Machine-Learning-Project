@@ -94,6 +94,17 @@ def main(data_path, k_folds, data_name, reg_names):
         "mxnet-svddc": "MXNet (SVDDC)"
     }
     
+    cdict = {
+        "tf-necd": "red",
+        "tf-cod": "darkblue",
+        "pytorch-qrcp": "darkgreen",
+        "pytorch-qr": "orange",
+        "pytorch-svd": "purple",
+        "pytorch-svddc": "mediumvioletred",
+        "sklearn-svddc": "slategray",
+        "mxnet-svddc": "yellow"
+    }
+    
     metric_lst = [
         ("MAE", metrics.mean_absolute_error),
         ("MSE", metrics.mean_squared_error),
@@ -127,15 +138,15 @@ def main(data_path, k_folds, data_name, reg_names):
         results_df = pd.DataFrame(result_accumulator)
         results_df.to_csv(f"BetaDataExper/HighDimData/results/{data_name}-{metric_name}_linreg_comparison.csv")
     
-        with open(f"BetaDataExper/HighDimData/results/{data_name}-{metric_name}_errors", "a") as e_log:
+        with open(f"BetaDataExper/HighDimData/results/{data_name}-{metric_name}_errors.err", "a") as e_log:
             for k, v in err_accumulator.items():
                 e_log.write(f"{k}: {v}\n")
 
         fig, ax = plt.subplots()
-        for color, column in zip(["red", "darkblue", "darkgreen", "orange", "purple", "mediumvioletred", "slategray"],results_df.columns):
+        for column in results_df.columns:
             y = results_df[column]
             x = results_df.index.values
-            ax.scatter(x, y, c=color, alpha=0.7, label=label_lookup[column], marker='x')
+            ax.scatter(x, y, c=cdict[column], alpha=0.7, label=label_lookup[column], marker='x')
 
         ax.set_ylabel(f'{metric_name}')
         ax.set_xlabel('CV Fold')
