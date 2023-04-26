@@ -8,7 +8,7 @@ import torch
 import mxnet as mx
 
 def read_data(data_path):
-    df = pd.read_csv(data_path)
+    df = pd.read_csv(data_path, na_values="?")
     df = df.fillna(0)
     arr = df.values
     return arr[:, :-1], arr[:, -1]
