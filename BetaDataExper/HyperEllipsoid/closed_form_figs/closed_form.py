@@ -26,14 +26,14 @@ def make_viz(array, deg, trained_model, dummys, metric):
         ax.scatter(x_rot, y_min_ax, z_err, label="Actual")
         ax.scatter(dummy[:,3], dummy[:,5], trained_model.predict(dummy), label="Prediction", marker="_")
         ax.legend()
-        ax.set_title(f"Ellipses at location: ({loc_x}, {loc_y})\nPolynomial of degreee {deg}")
+        ax.set_title(f"Ellipses at location: ({loc_x}, {loc_y})\nPolynomial of degree {deg}")
         ax.grid()
         ax.set_xlabel("Rotation")
         ax.set_ylabel("Minor Axis size")
         ax.set_zlim(min(array[:,-1])*1.1,max(array[:,-1])*1.1)
         ax.set_zlabel(metric)
-        # plt.show()
-        fig.savefig(f"BetaDataExper/HyperEllipsoid/closed_form_figs/{metric}/polydeg{deg}/({loc_x},{loc_y})")
+        plt.show()
+        # fig.savefig(f"BetaDataExper/HyperEllipsoid/closed_form_figs/{metric}/polydeg{deg}/({loc_x},{loc_y})")
 
 
 def main(datapath, metric):

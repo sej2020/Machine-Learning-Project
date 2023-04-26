@@ -16,7 +16,7 @@ final_df = pd.DataFrame(index = ["Blog Feedback", "Communities and Crime", "Face
                   columns = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"])
 for df, idx in zip([blog, communities, facebook, geographical, hailstone, energy, kegg, online, residential, superconductivity], ["Blog Feedback", "Communities and Crime", "Facebook Comment Volume", "Geographical Origin of Music", "Hailstone", "Hourly Energy Demand", "KEGG Metabolic Pathway", "Online News Popularity", "Residential Building", "Superconductivity"]):
     for col in df.columns:
-        final_df.loc[idx,col] = df.mean(axis=0)[col]
+        final_df.loc[idx,col] = round(df.mean(axis=0)[col],3)
 
 final_df.fillna("Failed", inplace=True)
 print(final_df)
