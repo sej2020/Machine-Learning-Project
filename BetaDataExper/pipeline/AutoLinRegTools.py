@@ -290,7 +290,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         ax.legend()
 
         ax.set_aspect('equal')
-        fig.suptitle(f"Regression Over Data")
+        fig.suptitle(f"OLS Regression Lines Over Data")
         ax.set_xlabel(f"{fields[0] if fields else 'X'}")
         ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
         plt.savefig(output_folder / f"regression.png")

@@ -7,8 +7,8 @@ import os
 import sys
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-import torch
-import mxnet as mx
+# import torch
+# import mxnet as mx
 import pyaml
 from pathlib import Path
 
@@ -158,7 +158,7 @@ def gen_every_fig(results_dict, X, y, vis_theme, successful_regs, output_folder,
     print([results_dict[regressor] for regressor in successful_regs])
     reg_lines = [rangex @ results_dict[regressor] for regressor in successful_regs]
     for line, regressor in zip(reg_lines, successful_regs):
-        ax.plot(rangex.flatten(), line.flatten(), label=label_lookup[regressor])
+        ax.plot(rangex.flatten(), line.flatten(), label="Regression Line")
     ax.legend()
 
     # plotting a thin line to accentuate x and y axes
@@ -175,7 +175,7 @@ def gen_every_fig(results_dict, X, y, vis_theme, successful_regs, output_folder,
     # plt.show()  
 
 
-def main_test(path, include_regs, lr=1e-2, threshold=1e-3):
+def main_test(path, include_regs, lr=1e-2, threshold=1e-3, find_tangent=True):
     df = pd.read_csv(path)
     location = path.split("loc-")[-1].split("_")[0].replace(" ","")
     loc_x, loc_y = float(location.split(",")[0].strip("() ")), float(location.split(",")[1].strip("() "))
@@ -183,37 +183,41 @@ def main_test(path, include_regs, lr=1e-2, threshold=1e-3):
     X, y = array[:, :-1], array[:, -1]
     output_folder = Path(f"BetaDataExper/HyperEllipsoid/finding_tangent/figs{location}/")
 
-    dist_from_regline = sys.float_info.max
-    step_n = 1
-    sign = 1
-    while abs(dist_from_regline) > threshold:
-        results = linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs, output_folder=output_folder)
-        min_distance = sys.float_info.max 
-        for reg in include_regs:
-        # print(results[include_regs[0]])
-            regline = X @ results[reg]
-            min_distance = min(np.min(np.subtract(y.flatten(), regline.flatten())), min_distance)
-        # print(y[0::2])
-        # print(regline[0::2])
-        # print(np.subtract(y,regline)[0::2])
-        # print(f"****{min_distance}")
-        if min_distance < 0:
-            sign = -1
-            lr = lr/2
-        else:
-            sign = 1
-        X = X + sign*lr*abs(loc_y)
-        print(f"{min_distance}")
-        dist_from_regline = min_distance
-        step_n += 1
+    # Set find_tangent to True if you want to run this code to find the tangent line. Otherwise the circle will progress for 50 iterations
+    if find_tangent:
+        dist_from_regline = sys.float_info.max
+        step_n = 1
+        sign = 1
+        while abs(dist_from_regline) > threshold:
+            results = linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs, output_folder=output_folder)
+            min_distance = sys.float_info.max 
+            for reg in include_regs:
+                regline = X @ results[reg]
+                min_distance = min(np.min(np.subtract(y.flatten(), regline.flatten())), min_distance)
+            if min_distance < 0:
+                sign = -1
+                lr = lr/2
+            else:
+                sign = 1
+            X = X + sign*lr*abs(loc_y)
+            print(f"{min_distance}")
+            dist_from_regline = min_distance
+            step_n += 1
+    else:
+        step_n = 1
+        for _ in range(50):
+            linreg_pipeline(X, y, location=location, step_n=step_n, include_regs=include_regs, output_folder=output_folder)
+            X = X + lr*abs(loc_y)
+            step_n += 1
+
 
     print("Run Complete")
 
 
 if __name__ == '__main__':
     # path = "BetaDataExper/HyperEllipsoid/data/hyperell_loc-(0, 20)_ax-[5, 5]_rot-0_.csv"
-    include_regs = ["tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"]
+    include_regs = ["sklearn-svddc"]
     #               "tf-necd", "tf-cod", "pytorch-qrcp", "pytorch-qr", "pytorch-svd", "pytorch-svddc", "sklearn-svddc", "mxnet-svddc"
     for loc in ["(0, 5.025)", "(0, 5.25)", "(0, 7.5)", "(0, 10)", "(0, 15)", "(0, 20)"]:
-        path = f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-[5, 5]_rot-0.csv"
-        main_test(path, include_regs)
+        path = f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-[5, 5]_rot-0_.csv"
+        main_test(path, include_regs, find_tangent=False)
