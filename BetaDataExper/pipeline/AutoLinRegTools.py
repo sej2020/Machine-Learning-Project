@@ -258,6 +258,17 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         "sklearn-svddc": "scikit-learn (SVDDC)",
         "mxnet-svddc": "MXNet (SVDDC)"
     }
+
+    cdict = {
+        "tf-necd": "red",
+        "tf-cod": "darkblue",
+        "pytorch-qrcp": "darkgreen",
+        "pytorch-qr": "orange",
+        "pytorch-svd": "purple",
+        "pytorch-svddc": "mediumvioletred",
+        "sklearn-svddc": "slategray",
+        "mxnet-svddc": "yellow"
+    }
     
     reg_titles = [label_lookup[reg] for reg in successful_regs]
 
@@ -286,7 +297,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
         reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
         for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
+            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color=cdict[regressor])
         ax.legend()
 
         ax.set_aspect('equal')
@@ -343,9 +354,9 @@ def main(data_path, params):
     print("Run complete")
 
 if __name__ == "__main__":
-    container_path = Path("BetaDataExper/HyperEllipsoid/data/")
+    container_path = Path("BetaDataExper/outlier_data/data/")
     
-    for hyper_path in container_path.glob("hyperell*"):
+    for hyper_path in container_path.glob("outlier*"):
         main(
             data_path = hyper_path,
             params = {
