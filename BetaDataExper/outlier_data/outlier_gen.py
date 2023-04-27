@@ -7,8 +7,8 @@ def main(outlier_loc):
     df = pd.DataFrame(np.concatenate((X.T, y.T), axis=1))
     df.to_csv(f"BetaDataExper/outlier_data/data/outlier_loc-{outlier_loc}.csv", header=False, index=False)
 
-for x in [-10, 0 , 5, 10, 20]:
-    for y in [-100, -1000, 100, 1000]:
+for x in [-100, 0 , 50, 100, 200]:
+    for y in [-1000, -10000, 1000, 10000]:
         outlier = (x,y)
         main(outlier)
 
