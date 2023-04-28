@@ -5,22 +5,31 @@
     position: absolute;
     margin-left: 2vh;
     margin-top: 2vh;
-    border: 1px solid black;
+    top: 20%;
+    // border: 1px solid black;
     display: flex;
     flex-direction: row;
 
-    .chart-container {
+    .chart-container ::before {
         height: calc(100vh - 11vh);
         width:  calc(100vw - 17.25vw - 300px);
-        border: 1px solid green;
+        // border: 1px solid green;
+        border-radius: 16px;
+        mat-elevation-z4 :none;
         
+    }
+    .chart-container ::after {
+        height: calc(100vh - 11vh);
+        width:  calc(100vw - 17.25vw - 300px);
+        // border: 1px solid green;
+        border-radius: 16px;        
     }
     .chart-input-container {
         // display: flex;
         // flex-direction: row;
         // gap: 10px;
         width: 23.25vw;
-        border: 1px solid red;
+        // border: 1px solid red;
         height: calc(100vh - 11vh);
 
     }
@@ -36,4 +45,7 @@
 }
 .visualization-types{
     padding: 12px;
+}
+.plot-button{
+    left:45%;
 }

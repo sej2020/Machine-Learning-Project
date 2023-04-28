@@ -14,14 +14,9 @@ export class UploadRequest{
 }
 
 export interface IDataVisualizationResponse {
-  tsne: IVisualizationData,
-  pca: IVisualizationData,
+  tsne: Record<string, number[]>,
+  pca: Record<string, number[]>,
   coloring_data: Record<string, Record<string, Record<string, number>>>
-}
-
-export interface IVisualizationData {
-  dimension1: number[],
-  dimension2: number[]
 }
 
 @Injectable({

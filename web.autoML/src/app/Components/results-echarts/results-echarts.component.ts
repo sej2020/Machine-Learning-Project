@@ -5,7 +5,7 @@ import { TransformComponent } from 'echarts/components';
 import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
-import { IDataVisualizationResponse, IVisualizationData, UploadRequestService } from 'src/app/Services/upload-request.service';
+import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Services/upload-request.service';
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
 import { transform } from "echarts-stat";
@@ -25,9 +25,9 @@ export class ResultsEchartsComponent implements OnInit {
 
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
-  defaultChartTypes:string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
-  visualizationChartTypes:string[] = ['tsne_visualization_2d', 'pca_visualization_2d'];
-  visualizationTypes:string[] = ['default_visualization', 'data_centric_visualization'];
+  defaultChartTypes: string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
+  visualizationChartTypes: string[] = ['tsne_visualization_2d', 'pca_visualization_2d'];
+  visualizationTypes: string[] = ['default_visualization', 'data_centric_visualization'];
 
   requestId: string = "";
   currentMetric: string = "";
@@ -305,11 +305,11 @@ export class ResultsEchartsComponent implements OnInit {
     let dimension2: number[];
 
     if (algorithm == 'tsne') {
-      dimension1 = this.visualizationResponse.tsne.dimension1;
-      dimension2 = this.visualizationResponse.tsne.dimension2;
+      dimension1 = this.visualizationResponse.tsne['dimension1'];
+      dimension2 = this.visualizationResponse.tsne['dimension2'];
     } else {
-      dimension1 = this.visualizationResponse.pca.dimension1;
-      dimension2 = this.visualizationResponse.pca.dimension2;
+      dimension1 = this.visualizationResponse.pca['dimension1'];
+      dimension2 = this.visualizationResponse.pca['dimension2'];
     }
 
     let data = [];
@@ -356,6 +356,47 @@ export class ResultsEchartsComponent implements OnInit {
     };
     return scatterPlotOption
   }
+
+  // get3DScatterPlotOptions(data: any) {
+  //   let scatterPlotOption: EChartsOption = {
+  //     visualMap: [
+  //       {
+  //         max: max.color / 2
+  //       },
+  //       {
+  //         max: max.symbolSize / 2
+  //       }
+  //     ],
+  //     xAxis3D: {
+  //       name: config.xAxis3D
+  //     },
+  //     yAxis3D: {
+  //       name: config.yAxis3D
+  //     },
+  //     zAxis3D: {
+  //       name: config.zAxis3D
+  //     },
+  //     series: {
+  //       dimensions: [
+  //         config.xAxis3D,
+  //         config.yAxis3D,
+  //         config.yAxis3D,
+  //         config.color,
+  //         config.symbolSiz
+  //       ],
+  //       data: data.map(function (item, idx) {
+  //         return [
+  //           item[fieldIndices[config.xAxis3D]],
+  //           item[fieldIndices[config.yAxis3D]],
+  //           item[fieldIndices[config.zAxis3D]],
+  //           item[fieldIndices[config.color]],
+  //           item[fieldIndices[config.symbolSize]],
+  //           idx
+  //         ];
+  //       })
+  //     }
+  //   }
+  // }
 
   getColor(colorValue: number) {
     return colorValue
