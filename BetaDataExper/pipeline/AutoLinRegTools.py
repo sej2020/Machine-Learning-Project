@@ -354,9 +354,9 @@ def main(data_path, params):
     print("Run complete")
 
 if __name__ == "__main__":
-    container_path = Path("BetaDataExper/outlier_data/data/")
+    container_path = Path("BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/")
     
-    for hyper_path in container_path.glob("outlier*"):
+    for hyper_path in container_path.glob("_*"):
         main(
             data_path = hyper_path,
             params = {
