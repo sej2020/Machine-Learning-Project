@@ -12,7 +12,7 @@ import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
 
-def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=False, want_figs=False):
+def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=True, want_figs=True):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
@@ -211,13 +211,15 @@ def regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output):
             }
         
         if verbose_output:
-            results_dict["model"] = model
+            results_dict[reg_name]["model"] = model
         
     return results_dict
 
 def process_results(results_dict, y_test, metrics):
     for reg_name, reg_output in results_dict.items():
         for metric, formula in metrics:
+            if type(reg_output) != dict:
+                breakpoint()
             score = formula(y_test, reg_output["y_pred"])
             results_dict[reg_name][metric] = score
 
