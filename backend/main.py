@@ -129,7 +129,7 @@ async def visualize_data(requestId, dimensionality=3):
         s3_service.download_file(request.datafile, data_path)
         response = {'coloring_data': data_services.get_coloring(result_file_list[2])}
         for dim_red_algo in ['tsne', 'pca']:
-            dimensions = data_services.visualize_data(data_path, n_components=dimensionality, algorithm=dim_red_algo)
+            dimensions = data_services.visualize_data(data_path, n_components=int(dimensionality), algorithm=dim_red_algo)
             response[dim_red_algo] = {}
             for i in range(len(dimensions)):
                 response[dim_red_algo][f'dimension{i}'] = dimensions[i]
