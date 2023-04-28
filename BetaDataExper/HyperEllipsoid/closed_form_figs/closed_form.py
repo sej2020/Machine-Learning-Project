@@ -32,7 +32,7 @@ def make_viz(array, deg, trained_model, dummys, metric):
         ax.set_ylabel("Minor Axis size")
         ax.set_zlim(min(array[:,-1])*1.1,max(array[:,-1])*1.1)
         ax.set_zlabel(metric)
-        plt.show()
+        # plt.show()
         # fig.savefig(f"BetaDataExper/HyperEllipsoid/closed_form_figs/{metric}/polydeg{deg}/({loc_x},{loc_y})")
 
 
@@ -60,7 +60,7 @@ def main(datapath, metric):
         lin_poly.fit(X_poly, y)
 
         y_pred = lin_poly.predict(X_poly)
-        print(f'MAPE of polynomial degree {deg} for {metric} prediction: {mean_absolute_percentage_error(y, y_pred)}')
+        print(f'MAPE of polynomial degree {deg} for {metric} prediction: {round(mean_absolute_percentage_error(y, y_pred),4)}')
 
         new_array = np.append(X_poly, np.expand_dims(y, axis=1), axis=1)
         make_viz(new_array, deg, lin_poly, dummy_Xs, metric)
