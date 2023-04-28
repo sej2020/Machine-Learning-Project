@@ -1,7 +1,5 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
-import { EChartsOption, registerTransform } from 'echarts';
-import { ScriptService } from 'src/app/Services/script.service';
-import { TransformComponent } from 'echarts/components';
+import { Component, OnInit } from '@angular/core';
+import { EChartsOption } from 'echarts';
 import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
@@ -9,6 +7,10 @@ import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Servic
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
 import { transform } from "echarts-stat";
+import 'echarts-gl/dist/echarts-gl';
+import 'echarts-gl/src/chart/scatter3D';
+// import { Scatter3DChart } from 'echarts-gl/dist';
+// import { Grid3DComponent } from 'echarts-gl/lib/component/*';
 
 @Component({
   selector: 'app-results-echarts',
@@ -26,7 +28,7 @@ export class ResultsEchartsComponent implements OnInit {
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
   defaultChartTypes: string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
-  visualizationChartTypes: string[] = ['tsne_visualization_2d', 'pca_visualization_2d'];
+  visualizationChartTypes: string[] = ['tsne_visualization_2d', 'pca_visualization_2d', 'tsne_visualization_3d', 'pca_visualization_3d'];
   visualizationTypes: string[] = ['default_visualization', 'data_centric_visualization'];
 
   requestId: string = "";
@@ -46,6 +48,7 @@ export class ResultsEchartsComponent implements OnInit {
     }
     echarts.registerTransform(aggregate as ExternalDataTransform);
     echarts.registerTransform(transform.clustering);
+    // echarts.use([Scatter3DChart, Grid3DComponent]);
   }
 
   fetchRawData = () => {
@@ -103,10 +106,15 @@ export class ResultsEchartsComponent implements OnInit {
     } else if (this.chartType === 'cv_line_chart') {
       return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
     } else if (this.chartType === 'tsne_visualization_2d') {
-      return this.getScatterPlot(this.currentMetric, 'tsne');
-    } else if (this.chartType == 'pca_visualization_2d') {
-      return this.getScatterPlot(this.currentMetric, 'pca');
-    } else {
+      return this.getScatterPlot('tsne',2);
+    }else if (this.chartType === 'tsne_visualization_3d') {
+      console.log("coming from getChartOptions", this.chartType);
+      return this.getScatterPlot('tsne',3); 
+    }else if (this.chartType === 'pca_visualization_2d') {
+      return this.getScatterPlot('pca', 2);
+    }else if (this.chartType === 'pca_visualization_3d') {
+      return this.getScatterPlot('pca', 3);
+    }else {
       return this.getDataPercentChartOptions();
     }
   }
@@ -299,24 +307,36 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
 
-  getScatterPlot(currentMetric: string, algorithm: string) {
-    let coloring_information = this.visualizationResponse.coloring_data[currentMetric][this.currentRegressor]
+  getScatterPlot(algorithm: string, dimension:number) {
+    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor]
     let dimension1: number[];
     let dimension2: number[];
+    let dimension3: number[];
+    let data = [];
 
     if (algorithm == 'tsne') {
-      dimension1 = this.visualizationResponse.tsne['dimension1'];
-      dimension2 = this.visualizationResponse.tsne['dimension2'];
+      // console.log("tsne=====",JSON.stringify(this.visualizationResponse.tsne));
+      dimension1 = this.visualizationResponse.tsne['dimension0'];
+      dimension2 = this.visualizationResponse.tsne['dimension1'];
+      dimension3 = this.visualizationResponse.tsne['dimension2'];
     } else {
-      dimension1 = this.visualizationResponse.pca['dimension1'];
-      dimension2 = this.visualizationResponse.pca['dimension2'];
+      dimension1 = this.visualizationResponse.pca['dimension0'];
+      dimension2 = this.visualizationResponse.pca['dimension1'];
+      dimension3 = this.visualizationResponse.pca['dimension2'];
     }
 
-    let data = [];
-    for (var i = 0; i < dimension1.length; i++) {
-      data.push([dimension1[i], dimension2[i], this.getColor(coloring_information[i])])
+    if(dimension === 3){
+      for (var i = 0; i < dimension1.length; i++) {
+          data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
+      }
+      return this.get3DScatterPlotOptions(data);
     }
-    return this.get2DScatterPlotOptions(data);
+    else{
+        for (var i = 0; i < dimension1.length; i++) {
+        data.push([dimension1[i], dimension2[i], this.getColor(coloring_information[i])]);
+        }
+        return this.get2DScatterPlotOptions(data);
+    }
   }
 
   get2DScatterPlotOptions(data: any) {
@@ -354,49 +374,121 @@ export class ResultsEchartsComponent implements OnInit {
         datasetIndex: 0
       }]
     };
-    return scatterPlotOption
+    return scatterPlotOption;
   }
 
   // get3DScatterPlotOptions(data: any) {
-  //   let scatterPlotOption: EChartsOption = {
-  //     visualMap: [
-  //       {
-  //         max: max.color / 2
-  //       },
-  //       {
-  //         max: max.symbolSize / 2
-  //       }
-  //     ],
+  //   // console.log("data===", data[0], );
+  //   var symbolSize = 4.5;
+  //   var schema = [
+  //     {
+  //       name: 'dimension1',
+  //       index: 0
+  //     },
+  //     {
+  //       name: 'dimension2',
+  //       index: 1
+  //     },
+  //     {
+  //       name: 'dimension3',
+  //       index: 2
+  //     }
+  //   ];
+  //   var fieldIndices = schema.reduce(function (obj: any, item) {
+  //     obj[item.name] = item.index;
+  //     return obj;
+  //   }, {});
+  //   var fieldNames = schema.map(function (item) {
+  //     return item.name;
+  //   });
+  //   let scatter3DPlotOption: EChartsOption = {
+  //     // visualMap: [
+  //     //   {
+  //     //     max: max.color / 2
+  //     //   },
+  //     //   {
+  //     //     max: max.symbolSize / 2
+  //     //   }
+  //     // ],
+  //     visualMap: {
+  //       type: 'piecewise',
+  //       dimension: 3,
+  //       splitNumber: 3,
+  //       pieces: [
+  //         { min: 0, max: 0.250, color: 'green' },
+  //         { min: 0.251, max: 0.5, color: 'black' },
+  //         { min: 0.501, max: 100, color: 'red' }
+  //       ]
+  //     },
+  //     gradientColor: [
+  //         '#f6efa6',
+  //         '#d88273',
+  //         '#bf444c'
+  //       ],
   //     xAxis3D: {
-  //       name: config.xAxis3D
+  //       name: "X"
   //     },
   //     yAxis3D: {
-  //       name: config.yAxis3D
+  //       name: "Y"
   //     },
   //     zAxis3D: {
-  //       name: config.zAxis3D
+  //       name: "Z"
   //     },
   //     series: {
   //       dimensions: [
-  //         config.xAxis3D,
-  //         config.yAxis3D,
-  //         config.yAxis3D,
-  //         config.color,
-  //         config.symbolSiz
+  //         schema[0].name,
+  //         schema[1].name,
+  //         schema[2].name,
   //       ],
-  //       data: data.map(function (item, idx) {
-  //         return [
-  //           item[fieldIndices[config.xAxis3D]],
-  //           item[fieldIndices[config.yAxis3D]],
-  //           item[fieldIndices[config.zAxis3D]],
-  //           item[fieldIndices[config.color]],
-  //           item[fieldIndices[config.symbolSize]],
-  //           idx
-  //         ];
-  //       })
+  //       data: data,
+  //       // data: data.map(function (item:any, idx:number) {
+  //       //   return [
+  //       //     item[fieldIndices[data[0][0]]],
+  //       //     item[fieldIndices[data[1][0]]],
+  //       //     item[fieldIndices[data[2][0]]],
+  //       //     // item[fieldIndices[config.color]],
+  //       //     // item[fieldIndices[config.symbolSize]],
+  //       //     idx
+  //       //   ];
+  //       // })
   //     }
   //   }
+  //   return scatter3DPlotOption;
   // }
+  get3DScatterPlotOptions(data: any) {
+    var symbolSize = 4.5;
+    let scatter3DPlotOption: EChartsOption = {
+      grid3D: {},
+      xAxis3D: {
+        type: 'category'
+      },
+      yAxis3D: {},
+      zAxis3D: {},
+      dataset: {
+        dimensions: [
+          'Income',
+          'Life Expectancy',
+          'Population',
+          'Country',
+          { name: 'Year', type: 'ordinal' }
+        ],
+        source: data
+      },
+      series: [
+        {
+          type: 'scatter3D',
+          symbolSize: symbolSize,
+          encode: {
+            x: 'Country',
+            y: 'Life Expectancy',
+            z: 'Income',
+            tooltip: [0, 1, 2, 3, 4]
+          }
+        }
+      ]
+    };
+    return scatter3DPlotOption;
+  }
 
   getColor(colorValue: number) {
     return colorValue

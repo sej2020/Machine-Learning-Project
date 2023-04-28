@@ -11,3 +11,4 @@ declare module "echarts-stat" {
     clustering: ExternalDataTransform;
   };
 }
+declare module 'echarts-gl/charts';

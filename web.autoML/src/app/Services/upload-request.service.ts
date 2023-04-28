@@ -61,7 +61,7 @@ export class UploadRequestService {
   }
 
   getVisualizationData(requestId: string) {
-    return this.httpClient.get(`${this.api_route}/dataVisualization?requestId=${requestId}`).pipe(retry(1), catchError(this.processError));
+    return this.httpClient.get(`${this.api_route}/dataVisualization?requestId=${requestId}&dimensionality=3`).pipe(retry(1), catchError(this.processError));
   }
   
   processError(err: any) {
