@@ -6,11 +6,12 @@ import seaborn as sns
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-import torch
-import mxnet as mx
+# import torch
+# import mxnet as mx
 import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
+import random
 
 def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=True, want_figs=True):
     """
@@ -299,7 +300,8 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
                   'mediumslateblue', 'orangered', 'violet', 'navy', 
                   'rebeccapurple', 'orchid', 'lime', 'gold', 'firebrick']
         fig, ax = plt.subplots()
-        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color=random.choice(colors))
+        color_selection = random.choice(colors)
+        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color=color_selection, edgecolor=color_selection)
 
         # To produce regression line on the interval bounded by test data
         # X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
@@ -309,19 +311,24 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
 
         reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
         for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color=cdict[regressor], alpha = 0.5)
+            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color='black', alpha = 0.75, linewidth=2) #cdict[regressor]
         
         # Plotting a thin line over x-axis and y-axis
-        ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="lightgray", alpha=0.4)
-        ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="lightgray", alpha=0.4)
+        ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="gray", alpha=0.5)
+        ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="gray", alpha=0.5)
 
         # ax.legend()
+        ax.set_ylim(-15,15)
+        ax.set_xlim(-15,15)
         ax.grid(False)
+        plt.axis('off')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
         ax.set_aspect('equal')
-        fig.suptitle(f"OLS Regression Lines Over Data")
-        ax.set_xlabel(f"{fields[0] if fields else 'X'}")
-        ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
-        plt.savefig(output_folder / f"regression.png")
+        # fig.suptitle(f"OLS Regression Lines Over Data")
+        # ax.set_xlabel(f"{fields[0] if fields else 'X'}")
+        # ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
+        plt.savefig(output_folder / f"regression.png", dpi=300, bbox_inches='tight', pad_inches=0.0)
         
     plt.clf()
     plt.close(fig="all")
@@ -377,7 +384,7 @@ if __name__ == "__main__":
         main(
             data_path = hyper_path,
             params = {
-                "random_seed": 100
+                "random_seed": 100, "include_regs":["tf-necd", "tf-cod", "sklearn-svddc"]
             }
         )
     
