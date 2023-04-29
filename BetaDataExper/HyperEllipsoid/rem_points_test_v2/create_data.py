@@ -58,6 +58,8 @@ def relevant_powerset(splits):
 
 
 def main(axes, rotation_set, n_subset_set, resolution):
+    data = pd.DataFrame(make_data_ellipse(axes, resolution))
+    data.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_0-subsets_0-combo_0-rot.csv', index=False, header=False)
     data = make_data_ellipse(axes, resolution)
     df_data = pd.DataFrame(data)
     df_data.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_0-subsets_0-combo_0-rot.csv', index=False, header=False)
