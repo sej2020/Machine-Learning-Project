@@ -294,14 +294,29 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         plt.savefig(output_folder / f"runtime_barchart.png")
             
     if "2d_scatterplot_w_regression_line" in figures:
+        colors = ['red', 'blue', 'green', 'orange', 'purple', 'pink', 
+                  'yellow', 'indigo', 'chartreuse', 'lightseagreen', 
+                  'mediumslateblue', 'orangered', 'violet', 'navy', 
+                  'rebeccapurple', 'orchid', 'lime', 'gold', 'firebrick']
         fig, ax = plt.subplots()
-        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax)
-        X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
+        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color=random.choice(colors))
+
+        # To produce regression line on the interval bounded by test data
+        # X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
+
+        # To produce regression line on the interval bounded by -50 and 50
+        X_range = np.linspace(-50, 50, 2)[:, np.newaxis]
+
         reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
         for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color=cdict[regressor])
-        ax.legend()
+            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color=cdict[regressor], alpha = 0.5)
+        
+        # Plotting a thin line over x-axis and y-axis
+        ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="lightgray", alpha=0.4)
+        ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="lightgray", alpha=0.4)
 
+        # ax.legend()
+        ax.grid(False)
         ax.set_aspect('equal')
         fig.suptitle(f"OLS Regression Lines Over Data")
         ax.set_xlabel(f"{fields[0] if fields else 'X'}")

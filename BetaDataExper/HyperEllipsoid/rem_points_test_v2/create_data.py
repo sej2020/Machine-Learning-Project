@@ -4,6 +4,7 @@ import pandas as pd
 import math
 import scipy as sp
 from itertools import chain, combinations
+import random
 
 
 def make_data_ellipse(axes, resolution, ran_seed=100):
@@ -33,19 +34,22 @@ def rotate2d(pairs, degrees):
     return new_pairs.T
 
 
-def make_line(data):
+def make_line(data, n_subset, combo, rotation):
+    colors = ['red', 'blue', 'green', 'orange', 'purple', 'pink', 'yellow', 'indigo', 'chartreuse', 'lightseagreen', 'mediumslateblue', 'orangered', 'violet', 'navy', 'rebeccapurple', 'orchid', 'lime', 'gold', 'firebrick']
     fig = plt.figure()
     X = data[:,0]
     Y = data[:,1]
     ax = fig.add_subplot()
-    ax.plot(X,Y,'.')
+    ax.plot(X,Y,'.', color = random.choice(colors), markersize=10)
     ax.set_xlabel('x')
     ax.set_ylabel('y')
+    ax.set_title('{}-subsets_{}-combo_{}-rot.csv'.format(n_subset, combo, rotation))
     ax.grid()
     ax.set_aspect('equal')
+    plt.grid(False)
     plt.xlim(-15, 15)
     plt.ylim(-15, 15)
-    plt.show()
+    plt.savefig('BetaDataExper/HyperEllipsoid/rem_points_test_v2/pretty_pictures/_{}-subsets_{}-combo_{}-rot.png'.format(n_subset, combo, rotation))
 
 
 def relevant_powerset(splits):
@@ -64,7 +68,10 @@ def main(axes, rotation_set, n_subset_set, resolution):
             print(powerset)
             for combo in powerset:
                 df = pd.DataFrame(np.vstack(tuple([data_part[c] for c in combo])))
-                df.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_{}-subsets_{}-combo_{}-rot.csv'.format(n_subset, combo, rotation), index=False)
+                if rotation == 0:
+                    make_line(df.values, n_subset, combo, rotation)
+
+                # df.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_{}-subsets_{}-combo_{}-rot.csv'.format(n_subset, combo, rotation), index=False)
             
     
 
