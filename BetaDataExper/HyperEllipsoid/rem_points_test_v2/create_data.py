@@ -5,6 +5,7 @@ import math
 import scipy as sp
 from itertools import chain, combinations
 import random
+from pathlib import Path
 
 
 def make_data_ellipse(axes, resolution, ran_seed=100):
@@ -59,10 +60,9 @@ def relevant_powerset(splits):
 
 def main(axes, rotation_set, n_subset_set, resolution):
     data = pd.DataFrame(make_data_ellipse(axes, resolution))
-    data.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_0-subsets_0-combo_0-rot.csv', index=False, header=False)
-    data = make_data_ellipse(axes, resolution)
-    df_data = pd.DataFrame(data)
-    df_data.to_csv('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/_0-subsets_0-combo_0-rot.csv', index=False, header=False)
+    p = Path('BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/')
+    p.mkdir(exist_ok=True, parents=True)
+    data.to_csv(p / "_0-subsets_0-combo_0-rot.csv", index=False, header=False)
     for rotation in rotation_set:
         data_rot = rotate2d(data, rotation)
         for n_subset in n_subset_set:

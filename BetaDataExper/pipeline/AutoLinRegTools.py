@@ -6,8 +6,8 @@ import seaborn as sns
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
-# import torch
-# import mxnet as mx
+import torch
+import mxnet as mx
 import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
@@ -160,14 +160,14 @@ def decide_figures(data, chosen_figures, verbose_output):
     if chosen_figures == "all":
         figures = [figure_name for figure_name in possible_figures if figure_name not in impossible_figures]
         
-    elif isinstance(generate_figures, (tuple, list, set)):
-        figures = [figure_name for figure_name in generate_figures if (figure_name in possible_figures) and (figure_name not in impossible_figures)]
+    elif isinstance(chosen_figures, (tuple, list, set)):
+        figures = [figure_name for figure_name in chosen_figures if (figure_name in possible_figures) and (figure_name not in impossible_figures)]
         
-    elif generate_figures == False:
+    elif chosen_figures == False:
         figures = None
         
     else: 
-        raise ValueError(f'Invalid value passed for generate_figures: {generate_figures}\nSee documentation')
+        raise ValueError(f'Invalid value passed for generate_figures: {chosen_figures}\nSee documentation')
 
     return figures
 
@@ -295,13 +295,8 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         plt.savefig(output_folder / f"runtime_barchart.png")
             
     if "2d_scatterplot_w_regression_line" in figures:
-        colors = ['red', 'blue', 'green', 'orange', 'purple', 'pink', 
-                  'yellow', 'indigo', 'chartreuse', 'lightseagreen', 
-                  'mediumslateblue', 'orangered', 'violet', 'navy', 
-                  'rebeccapurple', 'orchid', 'lime', 'gold', 'firebrick']
         fig, ax = plt.subplots()
-        color_selection = random.choice(colors)
-        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color=color_selection, edgecolor=color_selection)
+        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color="blue", edgecolor="blue")
 
         # To produce regression line on the interval bounded by test data
         # X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
@@ -318,7 +313,7 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="gray", alpha=0.5)
 
         # ax.legend()
-        ax.set_ylim(-15,15)
+        ax.set_ylim(-12,12)
         ax.set_xlim(-15,15)
         ax.grid(False)
         plt.axis('off')
@@ -384,7 +379,8 @@ if __name__ == "__main__":
         main(
             data_path = hyper_path,
             params = {
-                "random_seed": 100, "include_regs":["tf-necd", "tf-cod", "sklearn-svddc"]
+                "random_seed": 100,
+                "chosen_figures": ["2d_scatterplot_w_regression_line"]
             }
         )
     
