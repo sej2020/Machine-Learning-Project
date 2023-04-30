@@ -3,17 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib import ticker
+from pathlib import Path
 
 # Load data
 def load_data(data_path):
     df = pd.read_csv(data_path)
     return df
 
-def main(memory_path, actual_runtime_path, theoretical_runtime_path, experiment):
+def main(output_dir):
     # Load data
-    mem_df = load_data(memory_path)
-    act_rt_df = load_data(actual_runtime_path)
-    theo_rt_df = load_data(theoretical_runtime_path)
+    input_data = output_dir / "processed_output"
+    mem_df = load_data(input_data / "bytes.csv")
+    act_rt_df = load_data(input_data / "actual_runtime.csv")
+    theo_rt_df = load_data(input_data / "theoretical_runtime.csv")
     row_counts = list(mem_df.iloc[:,0])
     print(act_rt_df)
     print(row_counts)
@@ -64,7 +66,9 @@ def main(memory_path, actual_runtime_path, theoretical_runtime_path, experiment)
     ax.yaxis.set_major_formatter(ticker.FixedFormatter(labels))
     plt.xscale("log")
     ax.legend()
-    plt.savefig(f"BetaDataExper/BigOTest/postprocessing/mem_figs/{experiment}/all_memory.png", dpi=300)
+    mem_figs_path = output_dir / "mem_figs"
+    mem_figs_path.mkdir(exist_ok=True)
+    plt.savefig(mem_figs_path / "all_memory.png", dpi=300)
     plt.clf()
 
     #Plotting small-scale memory
@@ -83,13 +87,15 @@ def main(memory_path, actual_runtime_path, theoretical_runtime_path, experiment)
     plt.xscale("log")
     plt.yscale("log")
     ax.legend()
-    plt.savefig(f"BetaDataExper/BigOTest/postprocessing/mem_figs/{experiment}/small-scale_memory.png", dpi=300)
+    plt.savefig(mem_figs_path / "small-scale_memory.png", dpi=300)
     plt.clf()
 
 
     # Plotting runtime
     act_rt_df_s = act_rt_df.iloc[:,1:].div(1e9)
     theo_rt_df_s = theo_rt_df.iloc[:,1:].div(1e9)
+    rt_figs_path = output_dir / "rt_figs"
+    rt_figs_path.mkdir(exist_ok=True)
 
     solvers = list(act_rt_df_s.columns)
     for solver, color in zip(solvers,["red", "darkblue", "darkgreen", "orange", "purple", "mediumvioletred", "slategray"]):
@@ -101,7 +107,7 @@ def main(memory_path, actual_runtime_path, theoretical_runtime_path, experiment)
         ax.set_title("Runtime of OLS solvers")
         plt.xscale("log")
         ax.legend()
-        plt.savefig(f"BetaDataExper/BigOTest/postprocessing/rt_figs/{experiment}/{solver}.png", dpi=300)
+        plt.savefig(rt_figs_path / f"{solver}.png", dpi=300)
         plt.clf()
 
     # Plotting runtime - log
@@ -119,15 +125,12 @@ def main(memory_path, actual_runtime_path, theoretical_runtime_path, experiment)
         plt.xscale("log")
         plt.yscale("log")
         ax.legend()
-        plt.savefig(f"BetaDataExper/BigOTest/postprocessing/rt_figs/{experiment}/{solver}_log.png", dpi=300)
+        plt.savefig(rt_figs_path / f"{solver}_log.png", dpi=300)
         plt.clf()
 
 
 
 
 if __name__ == '__main__':
-    mem_path = "BetaDataExper/BigOTest/postprocessing/processed_output/bytes.csv"
-    act_rt_path = "BetaDataExper/BigOTest/postprocessing/processed_output/actual_runtime.csv"
-    the_rt_path = "BetaDataExper/BigOTest/postprocessing/processed_output/theoretical_runtime.csv"
-    experiment = "Quartz" # "Quartz" or "Carbonate" or "Mac" or "RaspberryPi"
-    main(memory_path=mem_path, actual_runtime_path=act_rt_path, theoretical_runtime_path=the_rt_path, experiment=experiment)
+    output_dir = Path("BetaDataExper/BigOTest/postprocessing") / "carbonate_run1"
+    main(output_dir)

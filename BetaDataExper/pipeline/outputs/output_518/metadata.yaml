@@ -8,7 +8,7 @@ completed_regs:
   - sklearn-svddc
   - mxnet-svddc
 dataset_shape: 500 x 2
-input_data: '_4-subsets_(0, 1)-combo_60-rot.csv'
+input_data: '_4-subsets_(2, 3)-combo_60-rot.csv'
 random_seed: 100
 split_percent: No train/test split
 timer_method: total
