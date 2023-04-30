@@ -1,0 +1,6 @@
+This includes all the fields that will go into the system details table for the paper 
+for Quartz, Carbonate, Joshua's Computer, and His Raspberry Pi:
+    Name
+    Processor Model
+    Available Memory (RAM)
+    MFLOPS (Linpack)
