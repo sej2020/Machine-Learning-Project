@@ -132,5 +132,5 @@ def main(output_dir):
 
 
 if __name__ == '__main__':
-    output_dir = Path("BetaDataExper/BigOTest/postprocessing") / "carbonate_run1"
+    output_dir = Path("BetaDataExper/BigOTest/postprocessing") / "carbonate_run2"
     main(output_dir)
