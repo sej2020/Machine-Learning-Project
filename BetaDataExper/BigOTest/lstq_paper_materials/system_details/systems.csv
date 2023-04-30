@@ -1,5 +1,5 @@
 Name, Processor Model, Available Memory (GB), MFLOPS
 Indiana University's Quartz, AMD EPYC 7742 64-Core Processor, 512, 870
-Indiana University's Carbonate, Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz, 256, 
-2020 MacBook Pro, Intel(R) Core(TM) i7-1068NG7 CPU @ 2.30GHz, 32, 
+Indiana University's Carbonate, Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz, 256, 750
+2020 MacBook Pro, Intel(R) Core(TM) i7-1068NG7 CPU @ 2.30GHz, 32, 1250
 Raspberry Pi 4 Model B, Broadcom BCM2711 Quad core Cortex-A72 (ARM v8) 64-bit SoC @ 1.8GHz, 8, 
