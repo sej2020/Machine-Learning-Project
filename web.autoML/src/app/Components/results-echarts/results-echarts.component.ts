@@ -7,10 +7,11 @@ import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Servic
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
 import { transform } from "echarts-stat";
-import 'echarts-gl/dist/echarts-gl';
-import 'echarts-gl/src/chart/scatter3D';
-// import { Scatter3DChart } from 'echarts-gl/dist';
-// import { Grid3DComponent } from 'echarts-gl/lib/component/*';
+import { Scatter3DChart } from 'echarts-gl/charts';
+import { Grid3DComponent } from 'echarts-gl/components';
+
+echarts.use([Scatter3DChart, Grid3DComponent]);
+
 
 @Component({
   selector: 'app-results-echarts',
@@ -42,13 +43,13 @@ export class ResultsEchartsComponent implements OnInit {
   regressorList!: string[];
 
   ngOnInit() {
+    echarts.use([echarts_gl.components.Grid3DComponent, echarts_gl.charts.Scatter3DChart]);
     this.requestId = history.state.id ? history.state.id : "";
     if (this.requestId.length > 0) {
       this.fetchRawData();
     }
     echarts.registerTransform(aggregate as ExternalDataTransform);
     echarts.registerTransform(transform.clustering);
-    // echarts.use([Scatter3DChart, Grid3DComponent]);
   }
 
   fetchRawData = () => {
@@ -106,15 +107,15 @@ export class ResultsEchartsComponent implements OnInit {
     } else if (this.chartType === 'cv_line_chart') {
       return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
     } else if (this.chartType === 'tsne_visualization_2d') {
-      return this.getScatterPlot('tsne',2);
-    }else if (this.chartType === 'tsne_visualization_3d') {
+      return this.getScatterPlot('tsne', 2);
+    } else if (this.chartType === 'tsne_visualization_3d') {
       console.log("coming from getChartOptions", this.chartType);
-      return this.getScatterPlot('tsne',3); 
-    }else if (this.chartType === 'pca_visualization_2d') {
+      return this.getScatterPlot('tsne', 3);
+    } else if (this.chartType === 'pca_visualization_2d') {
       return this.getScatterPlot('pca', 2);
-    }else if (this.chartType === 'pca_visualization_3d') {
+    } else if (this.chartType === 'pca_visualization_3d') {
       return this.getScatterPlot('pca', 3);
-    }else {
+    } else {
       return this.getDataPercentChartOptions();
     }
   }
@@ -307,7 +308,7 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
 
-  getScatterPlot(algorithm: string, dimension:number) {
+  getScatterPlot(algorithm: string, dimension: number) {
     let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor]
     let dimension1: number[];
     let dimension2: number[];
@@ -325,17 +326,17 @@ export class ResultsEchartsComponent implements OnInit {
       dimension3 = this.visualizationResponse.pca['dimension2'];
     }
 
-    if(dimension === 3){
+    if (dimension === 3) {
       for (var i = 0; i < dimension1.length; i++) {
-          data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
+        data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
       }
       return this.get3DScatterPlotOptions(data);
     }
-    else{
-        for (var i = 0; i < dimension1.length; i++) {
+    else {
+      for (var i = 0; i < dimension1.length; i++) {
         data.push([dimension1[i], dimension2[i], this.getColor(coloring_information[i])]);
-        }
-        return this.get2DScatterPlotOptions(data);
+      }
+      return this.get2DScatterPlotOptions(data);
     }
   }
 
@@ -377,118 +378,109 @@ export class ResultsEchartsComponent implements OnInit {
     return scatterPlotOption;
   }
 
-  // get3DScatterPlotOptions(data: any) {
-  //   // console.log("data===", data[0], );
-  //   var symbolSize = 4.5;
-  //   var schema = [
-  //     {
-  //       name: 'dimension1',
-  //       index: 0
-  //     },
-  //     {
-  //       name: 'dimension2',
-  //       index: 1
-  //     },
-  //     {
-  //       name: 'dimension3',
-  //       index: 2
-  //     }
-  //   ];
-  //   var fieldIndices = schema.reduce(function (obj: any, item) {
-  //     obj[item.name] = item.index;
-  //     return obj;
-  //   }, {});
-  //   var fieldNames = schema.map(function (item) {
-  //     return item.name;
-  //   });
-  //   let scatter3DPlotOption: EChartsOption = {
-  //     // visualMap: [
-  //     //   {
-  //     //     max: max.color / 2
-  //     //   },
-  //     //   {
-  //     //     max: max.symbolSize / 2
-  //     //   }
-  //     // ],
-  //     visualMap: {
-  //       type: 'piecewise',
-  //       dimension: 3,
-  //       splitNumber: 3,
-  //       pieces: [
-  //         { min: 0, max: 0.250, color: 'green' },
-  //         { min: 0.251, max: 0.5, color: 'black' },
-  //         { min: 0.501, max: 100, color: 'red' }
-  //       ]
-  //     },
-  //     gradientColor: [
-  //         '#f6efa6',
-  //         '#d88273',
-  //         '#bf444c'
-  //       ],
-  //     xAxis3D: {
-  //       name: "X"
-  //     },
-  //     yAxis3D: {
-  //       name: "Y"
-  //     },
-  //     zAxis3D: {
-  //       name: "Z"
-  //     },
-  //     series: {
-  //       dimensions: [
-  //         schema[0].name,
-  //         schema[1].name,
-  //         schema[2].name,
-  //       ],
-  //       data: data,
-  //       // data: data.map(function (item:any, idx:number) {
-  //       //   return [
-  //       //     item[fieldIndices[data[0][0]]],
-  //       //     item[fieldIndices[data[1][0]]],
-  //       //     item[fieldIndices[data[2][0]]],
-  //       //     // item[fieldIndices[config.color]],
-  //       //     // item[fieldIndices[config.symbolSize]],
-  //       //     idx
-  //       //   ];
-  //       // })
-  //     }
-  //   }
-  //   return scatter3DPlotOption;
-  // }
   get3DScatterPlotOptions(data: any) {
+    // console.log("data===", data[0], );
     var symbolSize = 4.5;
-    let scatter3DPlotOption: EChartsOption = {
-      grid3D: {},
-      xAxis3D: {
-        type: 'category'
+    var schema = [
+      {
+        name: 'dimension1',
+        index: 0
       },
-      yAxis3D: {},
-      zAxis3D: {},
-      dataset: {
-        dimensions: [
-          'Income',
-          'Life Expectancy',
-          'Population',
-          'Country',
-          { name: 'Year', type: 'ordinal' }
-        ],
-        source: data
+      {
+        name: 'dimension2',
+        index: 1
+      },
+      {
+        name: 'dimension3',
+        index: 2
+      }
+    ];
+    var fieldIndices = schema.reduce(function (obj: any, item) {
+      obj[item.name] = item.index;
+      return obj;
+    }, {});
+    var fieldNames = schema.map(function (item) {
+      return item.name;
+    });
+    let scatter3DPlotOption: EChartsOption = {
+      visualMap: {
+        type: 'piecewise',
+        dimension: 3,
+        splitNumber: 3,
+        pieces: [
+          { min: 0, max: 0.250, color: 'green' },
+          { min: 0.251, max: 0.5, color: 'black' },
+          { min: 0.501, max: 100, color: 'red' }
+        ]
+      },
+      gradientColor: [
+        '#f6efa6',
+        '#d88273',
+        '#bf444c'
+      ],
+      xAxis3D: {
+        name: "X"
+      },
+      yAxis3D: {
+        name: "Y"
+      },
+      zAxis3D: {
+        name: "Z"
       },
       series: [
         {
-          type: 'scatter3D',
-          symbolSize: symbolSize,
-          encode: {
-            x: 'Country',
-            y: 'Life Expectancy',
-            z: 'Income',
-            tooltip: [0, 1, 2, 3, 4]
-          }
+          type: 'scatter',
+          dimensions: [
+            schema[0].name,
+            schema[1].name,
+            schema[2].name,
+          ],
+          data: data.map(function (item: any, idx: any) {
+            return [
+              item[0],
+              item[1],
+              item[2]
+            ];
+          }),
         }
       ]
-    };
+    }
     return scatter3DPlotOption;
   }
+
+  // get3DScatterPlotOptions(data: any) {
+  //   var symbolSize = 4.5;
+  //   let scatter3DPlotOption: EChartsOption = {
+  //     grid3D: {},
+  //     xAxis3D: {
+  //       type: 'category'
+  //     },
+  //     yAxis3D: {},
+  //     zAxis3D: {},
+  //     dataset: {
+  //       dimensions: [
+  //         'Income',
+  //         'Life Expectancy',
+  //         'Population',
+  //         'Country',
+  //         { name: 'Year', type: 'ordinal' }
+  //       ],
+  //       source: data
+  //     },
+  //     series: [
+  //       {
+  //         symbolSize: symbolSize,
+  //         encode: {
+  //           x: 'Country',
+  //           y: 'Life Expectancy',
+  //           z: 'Income',
+  //           tooltip: [0, 1, 2, 3, 4]
+  //         }
+  //       }
+  //     ]
+  //   };
+  //   return scatter3DPlotOption;
+  // }
 
   getColor(colorValue: number) {
     return colorValue

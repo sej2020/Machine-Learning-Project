@@ -39,7 +39,7 @@
               "src/assets/css/typography.module.css",
               "src/styles.scss"
             ],
-            "scripts": []
+            "scripts": ["node_modules/echarts-gl/dist/echarts-gl.min.js"]
           },
           "configurations": {
             "production": {

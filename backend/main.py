@@ -34,6 +34,9 @@ app.add_middleware(CORSMiddleware,
                    allow_headers=["*"],
                    )
 
+visualization_response_cache = {}
+results_cache = {}
+
 def create_tables():
     logging.info('creating all database tables')
     print('am i coming here?')
@@ -82,6 +85,8 @@ async def create_automl_request(form_data: AutoMLCreateRequest = Depends(), file
 
 @app.get('/getAutoMLRequest', response_model_exclude_none=True)
 async def get_automl_request(request_id):
+    if request_id in results_cache:
+        return JSONResponse(content=results_cache[request_id], status_code=200)
     try:
         automl_request = AutoMLRequestRepository.get_request_by_id(request_id)
         data = AutoMLCreateResponseContents(request_id=request_id, request_status=automl_request.status, estimated_time_completion=0)
@@ -95,6 +100,7 @@ async def get_automl_request(request_id):
             data.metrics_list = metrics_list
             data.regressor_list = automl_request.regressor_list.split(',')
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
+        results_cache[request_id] = response
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
         print(e)
@@ -121,6 +127,8 @@ async def validate_data(file_data: UploadFile = File(...)):
 
 @app.get('/dataVisualization')
 async def visualize_data(requestId, dimensionality=3):
+    if requestId in visualization_response_cache:
+        return JSONResponse(content=visualization_response_cache[requestId], status_code=200)
     try:
         request = AutoMLRequestRepository.get_request_by_id(requestId)
         result_file_list = request.resultfile.split(',')
@@ -133,6 +141,7 @@ async def visualize_data(requestId, dimensionality=3):
             response[dim_red_algo] = {}
             for i in range(len(dimensions)):
                 response[dim_red_algo][f'dimension{i}'] = dimensions[i]
+        visualization_response_cache[requestId] = response
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
         logging.error(f'error in data visualization: {str(e)}')

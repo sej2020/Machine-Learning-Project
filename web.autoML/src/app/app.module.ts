@@ -27,6 +27,7 @@ import { DisclaimerDialogComponent } from './Components/disclaimer-dialog/discla
 import { NgxEchartsModule } from 'ngx-echarts';
 import { ResultsEchartsComponent } from './Components/results-echarts/results-echarts.component';
 import * as echarts from 'echarts';
+import 'echarts-gl';
 import { UserProfileCardsComponent } from './Components/user-profile-cards/user-profile-cards.component';
 import { MatCarouselModule} from 'ng-mat-carousel';
 import { DataValidationComponent } from './Components/data-validation/data-validation.component';
