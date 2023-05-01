@@ -1,0 +1,16 @@
+Rows,PyTorch (QR),PyTorch (QRCP),PyTorch (SVD),PyTorch (SVDDC),scikit-learn (SVDDC),TensorFlow (COD),TensorFlow (NE-CD)
+$10^{1}$,\textbf{260.503},\textbf{26759.377},\textbf{32.354},\textbf{379.625},\textbf{5507.875},\textbf{969.407},\textbf{1775.75}
+$10^{1.5}$,\textbf{57.36},\textbf{69.967},\textbf{18.946},\textbf{120.403},\textbf{358.387},\textbf{214.66},\textbf{220.183}
+$10^{2}$,\textbf{82.644},\textbf{92.788},\textbf{39.698},\textbf{183.988},\textbf{114.388},\textbf{51.598},\textbf{80.841}
+$10^{2.5}$,\textbf{25.644},\textbf{30.684},\textbf{13.377},\textbf{61.206},\textbf{39.687},\textbf{19.622},\textbf{28.14}
+$10^{3}$,\textbf{10.61},\textbf{13.437},\textbf{5.414},\textbf{26.115},\textbf{13.14},\textbf{8.505},\textbf{9.521}
+$10^{3.5}$,\textbf{3.873},\textbf{3.651},\textbf{2.046},\textbf{8.057},\textbf{21.716},\textbf{4.809},\textbf{4.89}
+$10^{4}$,\textbf{2.239},\textbf{2.068},\textbf{1.086},\textbf{4.844},\textbf{14.293},\textbf{3.37},\textbf{2.25}
+$10^{4.5}$,\textbf{1.025},\textbf{1.577},0.579,\textbf{2.43},\textbf{10.465},\textbf{3.304},\textbf{1.354}
+$10^{5}$,0.912,\textbf{1.325},0.459,\textbf{1.88},\textbf{11.178},\textbf{4.073},\textbf{1.147}
+$10^{5.5}$,0.968,\textbf{1.589},0.494,\textbf{1.938},\textbf{11.005},\textbf{4.483},0.958
+$10^{6}$,\textbf{1.236},\textbf{1.682},0.63,\textbf{2.479},\textbf{11.609},\textbf{4.954},\textbf{1.001}
+$10^{6.5}$,\textbf{1.296},\textbf{1.874},0.647,\textbf{2.598},\textbf{7.295},\textbf{5.15},\textbf{1.028}
+$10^{7}$,\textbf{1.287},\textbf{1.686},0.653,\textbf{2.618},\textbf{6.616},\textbf{5.553},\textbf{1.263}
+$10^{7.5}$,\textbf{1.304},\textbf{1.513},0.639,\textbf{2.606},\textbf{6.209},\textbf{5.62},\textbf{1.247}
+$10^{8}$,\textbf{1.137},\textbf{1.188},0.539,\textbf{2.32},\textbf{6.459},\textbf{7.406},\textbf{1.253}
