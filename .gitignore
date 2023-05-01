@@ -12,3 +12,7 @@ BetaDataExper/HyperEllipsoid/data/
 err_distr_synth.ipynb
 animals.csv
 bigly_datums
+imgs
+figs\(*
+*.bin
+memray-csv*

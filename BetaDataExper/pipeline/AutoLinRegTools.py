@@ -11,8 +11,9 @@ import mxnet as mx
 import pyaml
 from pathlib import Path
 from time import perf_counter, process_time
+import random
 
-def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=False, want_figs=False):
+def linreg_pipeline(data_path, include_regs="all", split_pcnt=None, random_seed=None, time_type="total", chosen_figures="all", vis_theme="whitegrid", output_folder=os.getcwd(), verbose_output=True, want_figs=True):
     """
     Pipeline takes actual data, not a path, and runs each of the linear regression algorithms available over it
     
@@ -159,14 +160,14 @@ def decide_figures(data, chosen_figures, verbose_output):
     if chosen_figures == "all":
         figures = [figure_name for figure_name in possible_figures if figure_name not in impossible_figures]
         
-    elif isinstance(generate_figures, (tuple, list, set)):
-        figures = [figure_name for figure_name in generate_figures if (figure_name in possible_figures) and (figure_name not in impossible_figures)]
+    elif isinstance(chosen_figures, (tuple, list, set)):
+        figures = [figure_name for figure_name in chosen_figures if (figure_name in possible_figures) and (figure_name not in impossible_figures)]
         
-    elif generate_figures == False:
+    elif chosen_figures == False:
         figures = None
         
     else: 
-        raise ValueError(f'Invalid value passed for generate_figures: {generate_figures}\nSee documentation')
+        raise ValueError(f'Invalid value passed for generate_figures: {chosen_figures}\nSee documentation')
 
     return figures
 
@@ -211,13 +212,15 @@ def regression_loop(X_train, y_train, X_test, timer, reg_names, verbose_output):
             }
         
         if verbose_output:
-            results_dict["model"] = model
+            results_dict[reg_name]["model"] = model
         
     return results_dict
 
 def process_results(results_dict, y_test, metrics):
     for reg_name, reg_output in results_dict.items():
         for metric, formula in metrics:
+            if type(reg_output) != dict:
+                breakpoint()
             score = formula(y_test, reg_output["y_pred"])
             results_dict[reg_name][metric] = score
 
@@ -258,6 +261,17 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
         "sklearn-svddc": "scikit-learn (SVDDC)",
         "mxnet-svddc": "MXNet (SVDDC)"
     }
+
+    cdict = {
+        "tf-necd": "red",
+        "tf-cod": "darkblue",
+        "pytorch-qrcp": "darkgreen",
+        "pytorch-qr": "orange",
+        "pytorch-svd": "purple",
+        "pytorch-svddc": "mediumvioletred",
+        "sklearn-svddc": "slategray",
+        "mxnet-svddc": "yellow"
+    }
     
     reg_titles = [label_lookup[reg] for reg in successful_regs]
 
@@ -282,18 +296,34 @@ def generate_figures(results_dict, X_test, y_test, fields, vis_theme, metric_lst
             
     if "2d_scatterplot_w_regression_line" in figures:
         fig, ax = plt.subplots()
-        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax)
-        X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
+        sns.scatterplot(x=X_test.flatten(), y=y_test.flatten(), ax=ax, color="blue", edgecolor="blue", s=100)
+
+        # To produce regression line on the interval bounded by test data
+        # X_range = np.linspace(np.min(X_test), np.max(X_test), 2)[:, np.newaxis]
+
+        # To produce regression line on the interval bounded by -50 and 50
+        X_range = np.linspace(-50, 50, 2)[:, np.newaxis]
+
         reg_lines = [X_range @ results_dict[regressor]["model"] for regressor in successful_regs]
         for line, regressor in zip(reg_lines, successful_regs):
-            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor])
-        ax.legend()
+            ax.plot(X_range.flatten(), line.flatten(), label=label_lookup[regressor], color='black', alpha = 0.75, linewidth=8) #cdict[regressor]
+        
+        # Plotting a thin line over x-axis and y-axis
+        ax.plot([i for i in range(-50,50)], [0 for _ in range(-50,50)], linestyle="dashed", color="gray", alpha=0.5)
+        ax.plot([0 for _ in range(-50,50)], [i for i in range(-50,50)], linestyle="dashed", color="gray", alpha=0.5)
 
+        # ax.legend()
+        ax.set_ylim(-12,12)
+        ax.set_xlim(-15,15)
+        ax.grid(False)
+        plt.axis('off')
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
         ax.set_aspect('equal')
-        fig.suptitle(f"Regression Over Data")
-        ax.set_xlabel(f"{fields[0] if fields else 'X'}")
-        ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
-        plt.savefig(output_folder / f"regression.png")
+        # fig.suptitle(f"OLS Regression Lines Over Data")
+        # ax.set_xlabel(f"{fields[0] if fields else 'X'}")
+        # ax.set_ylabel(f"{fields[1] if fields else 'Y'}")
+        plt.savefig(output_folder / f"regression.png", dpi=300, bbox_inches='tight', pad_inches=0.0)
         
     plt.clf()
     plt.close(fig="all")
@@ -343,13 +373,14 @@ def main(data_path, params):
     print("Run complete")
 
 if __name__ == "__main__":
-    container_path = Path("BetaDataExper/HyperEllipsoid/data/")
+    container_path = Path("BetaDataExper/HyperEllipsoid/rem_points_test_v2/data/")
     
-    for hyper_path in container_path.glob("hyperell*"):
+    for hyper_path in container_path.glob("_*"):
         main(
             data_path = hyper_path,
             params = {
-                "random_seed": 100
+                "random_seed": 100,
+                "chosen_figures": ["2d_scatterplot_w_regression_line"]
             }
         )
     

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 import scipy as sp
+import random
 
 def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
     rng = np.random.default_rng(seed)
@@ -17,7 +18,8 @@ def gen_hyp_ellip(axes: list, resolution: float, seed: int = 100):
 
     return points_org
 
-def make_data_ellipse(axes, resolution):
+
+def make_data_ellipse(axes, resolution, data_remove=0.0, ran_seed=100):
     print('workin')
     a,b = axes
     num = 1/resolution
@@ -33,6 +35,9 @@ def make_data_ellipse(axes, resolution):
         x = a * np.cos(angle)
         y = b * np.sin(angle)
         pairs.append([x,y])
+    rng = np.random.default_rng(ran_seed)
+    rows_to_be_removed = rng.choice(range(len(pairs)), int(data_remove*len(pairs)), replace=False)
+    pairs = np.delete(pairs, rows_to_be_removed, axis=0)
     return np.array(pairs)
 
 
@@ -50,6 +55,7 @@ def rotate3d(pairs, yaw, pitch, roll):
     print(rot_mat)
     new_pairs = np.array(rot_mat) @ np.array(pairs).T
     return new_pairs.T
+
 
 def rotate2d(pairs, degrees):
     rot_mat = np.identity(pairs.shape[1])
@@ -90,46 +96,48 @@ def make_line(data, dim):
 
 
 
-# def make_data_gen(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
+def make_data_gen(lower: int, upper: int, dimensions: int, resolution: float, rot: bool):
 
-#     axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
+    axes = [random.randrange(lower, upper, 1) for i in range(dimensions)]
 
-#     data = gen_hyp_ellip(axes,resolution)
-#     data[:,[2,-1]] = data[:,[-1,2]]
-#     df = pd.DataFrame(data)
-#     # make_line(data)
-#     df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
+    data = gen_hyp_ellip(axes,resolution)
+    # data[:,[2,-1]] = data[:,[-1,2]]
+    df = pd.DataFrame(data)
+    # make_line(data)
+    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_0.csv", index=False, header=False)
 
-#     if rot:
-#         data[:,[2,-1]] = data[:,[-1,2]]
-#         for deg in [5,15,30,90]:
-#             data_rot = rotate3d(data, deg, deg, deg)
-#             data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
-#             df = pd.DataFrame(data_rot)
-#             # make_line(data_rot)
-#             df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
-#     pass
+    # if rot:
+    #     data[:,[2,-1]] = data[:,[-1,2]]
+    #     for deg in [5,15,30,90]:
+    #         data_rot = rotate3d(data, deg, deg, deg)
+    #         data_rot[:,[2,-1]] = data_rot[:,[-1,2]]
+    #         df = pd.DataFrame(data_rot)
+    #         # make_line(data_rot)
+    #         df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{dimensions}-dim_3drot_{deg}.csv", index=False, header=False)
+    pass
 
 
-# lower = 100
-# upper = 1000
-# resolution = 0.001
-# dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
+lower = 100
+upper = 1000
+resolution = 0.001
+dimensions =  [3, 5, 10, 50, 100, 250, 500, 1000, 5000, 10000] #50,000, 100,000 ?
 
-# for dim in dimensions:
-#     make_data_gen(lower, upper, dim, resolution, rot=True)
+for dim in dimensions:
+    make_data_gen(lower, upper, dim, resolution, rot=False)
 
-def make_exp_data_2d(location, axes, rotation, resolution):
 
-    data = make_data_ellipse(axes,resolution)
+def make_exp_data_2d(location, axes, rotation, resolution, data_remove):
+
+    data = make_data_ellipse(axes, resolution, data_remove)
     data_rot = rotate2d(data, rotation)
     data_rot[:,0] += location[0]
     data_rot[:,1] += location[1]
 
     df = pd.DataFrame(data_rot)
-    if rotation == 15:
-        make_line(data_rot, dim=2)
-    df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{loc}_ax-{axes}_rot-{rot}_.csv", index=False, header=False)
+    if data_remove != 0:   
+        df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{location}_ax-{axes}_rot-{rotation}_rem-{data_remove}.csv", index=False, header=False)
+    else:
+        df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_loc-{location}_ax-{axes}_rot-{rotation}.csv", index=False, header=False)
 
 
 def make_exp_data_3d(location, axes, rotation, resolution):
@@ -144,16 +152,27 @@ def make_exp_data_3d(location, axes, rotation, resolution):
     make_line(data_rot, dim=3)
     # df.to_csv(f"BetaDataExper/HyperEllipsoid/data/hyperell_{loc}_{axes}_{rot}_.csv", index=False, header=False)
 
-#############################################################################################
+######## Removing Points from Ellipse ###########
 location2d = [(x,y) for x in [0,10] for y in [0,10]]
-axis_ratio2d = [[10,b] for b in range(1,11)]
-rotations = [0, 15, 30, 45, 60, 75, 90, 180]
+axis_ratio2d = [[10,b] for b in range(2,12,2)]
+rotations = [0, 15, 45, 60, 90]
+data_remove = [0.1, 0.25, 0.5]
 resolution = 0.001
 
-for loc in location2d:
-    for rot in rotations:
-        for ax in axis_ratio2d:
-            make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution)
+
+# for loc in location2d:
+#     for rot in rotations:
+#         for ax in axis_ratio2d:
+#             for dr in data_remove:
+#                 make_exp_data_2d(location=loc, axes=ax, rotation=rot, resolution=resolution, data_remove=dr)
+
+
+
+######### Finding Tangent Data Generation ##########
+
+# for loc in [5.025, 5.25, 7.5, 10, 15, 20]:
+#     make_exp_data_2d(location=(0,loc), axes=[5,5], rotation=0, resolution=0.001, data_remove=0)
+
 ##############################################################################################
 # location3d = [(x,y,z) for x in [-10,0,10] for y in [-10,0,10] for z in [-10,0,10]]
 # axis_ratio3d = [(10,b,c) for b in [4,10] for c in [4,10]]

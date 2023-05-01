@@ -88,8 +88,6 @@ def create_viz(rotation='0'):
     return relevant_results
 
 
-    
-    
 if __name__=="__main__":
     for rot in [0,5,15,30,90]:
         print(create_viz(rotation=rot))

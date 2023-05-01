@@ -1,0 +1,4 @@
+System, Processor, Memory (GB), MFLOPS
+IU's Quartz, AMD EPYC 7742 64-Core Processor, 512, 870
+IU's Carbonate, Intel(R) Xeon(R) CPU E5-2680 v3 @ 2.50GHz, 256, 750
+2020 MacBook Pro, Intel(R) Core(TM) i7-1068NG7 CPU @ 2.30GHz, 32, 1250
