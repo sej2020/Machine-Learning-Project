@@ -1,17 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { EChartsOption } from 'echarts';
-import * as echarts from 'echarts';
-import { aggregate } from '@manufac/echarts-simple-transform';
-import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
 import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Services/upload-request.service';
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
+import * as echarts from 'echarts';
+import { aggregate } from '@manufac/echarts-simple-transform';
+import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
 import { transform } from "echarts-stat";
-import { Scatter3DChart } from 'echarts-gl/charts';
-import { Grid3DComponent } from 'echarts-gl/components';
 
-echarts.use([Scatter3DChart, Grid3DComponent]);
-
+declare let Plotly: any;
 
 @Component({
   selector: 'app-results-echarts',
@@ -38,12 +34,13 @@ export class ResultsEchartsComponent implements OnInit {
   chartType: string = "boxplot";
   visualizationType: string = this.visualizationTypes[0];
 
-  chartOptions!: EChartsOption;
+  chartOptions!: echarts.EChartsOption;
+  // highChartOptions!: Highcharts.Options;
+  // Highcharts: typeof Highcharts = Highcharts;
   yAxisData!: string[];
   regressorList!: string[];
 
   ngOnInit() {
-    echarts.use([echarts_gl.components.Grid3DComponent, echarts_gl.charts.Scatter3DChart]);
     this.requestId = history.state.id ? history.state.id : "";
     if (this.requestId.length > 0) {
       this.fetchRawData();
@@ -53,6 +50,7 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   fetchRawData = () => {
+    console.log('echarts.version: ', echarts.version);
     this.uploadRequestService.getRequestStatus(this.requestId)
       .subscribe((data: any) => {
         this.resultsData = data;
@@ -64,7 +62,7 @@ export class ResultsEchartsComponent implements OnInit {
         this.currentMetric = this.yAxisData[0];
         this.regressorList = this.resultsData.data['regressor_list'];
         this.currentRegressor = this.regressorList[0];
-        this.chartOptions = this.getChartOptions();
+        this.updateChartOptions();
       });
 
     this.uploadRequestService.getVisualizationData(this.requestId)
@@ -79,50 +77,46 @@ export class ResultsEchartsComponent implements OnInit {
 
   changeInCurrentMetric(value: any) {
     this.currentMetric = value;
-    this.chartOptions = this.getChartOptions();
+    this.updateChartOptions();
   }
 
   changeInRegressor(value: any) {
     this.currentRegressor = value;
-    this.chartOptions = this.getChartOptions();
+    this.updateChartOptions();
   }
 
   changeInChartType(value: any) {
     this.chartType = value;
-    this.chartOptions = this.getChartOptions();
+    this.updateChartOptions();
   }
 
   changeInVisualizationType(value: any) {
     this.visualizationType = value;
     this.chartType = this.visualizationType == 'default_visualization' ? this.defaultChartTypes[0] : this.visualizationChartTypes[0];
-    console.log(this.defaultChartTypes[0]);
-    console.log(this.visualizationChartTypes[0]);
-    console.log('chartType: ' + this.chartType);
-    this.chartOptions = this.getChartOptions();
+    this.updateChartOptions();
   }
 
-  getChartOptions() {
+  updateChartOptions() {
     if (this.chartType === 'boxplot') {
-      return this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
+      this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
     } else if (this.chartType === 'cv_line_chart') {
-      return this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
+      this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
     } else if (this.chartType === 'tsne_visualization_2d') {
-      return this.getScatterPlot('tsne', 2);
+      this.getScatterPlot('tsne', 2);
     } else if (this.chartType === 'tsne_visualization_3d') {
-      console.log("coming from getChartOptions", this.chartType);
-      return this.getScatterPlot('tsne', 3);
+      this.getScatterPlot('tsne', 3);
     } else if (this.chartType === 'pca_visualization_2d') {
-      return this.getScatterPlot('pca', 2);
+      this.getScatterPlot('pca', 2);
     } else if (this.chartType === 'pca_visualization_3d') {
-      return this.getScatterPlot('pca', 3);
+      this.getScatterPlot('pca', 3);
     } else {
-      return this.getDataPercentChartOptions();
+      this.getDataPercentChartOptions();
     }
   }
 
   getDataPercentChartOptions() {
     let dataPercentages = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-    let dataPercentChartOptions: EChartsOption = {
+    let dataPercentChartOptions: echarts.EChartsOption = {
       xAxis: {
         type: 'category',
         data: dataPercentages
@@ -157,7 +151,7 @@ export class ResultsEchartsComponent implements OnInit {
         }
       ]
     };
-    return dataPercentChartOptions;
+    this.chartOptions = dataPercentChartOptions;
   }
 
   getCvLinePlotChartOptions(currentMetric: string, num_cv_folds: number, lineData: any) {
@@ -171,7 +165,7 @@ export class ResultsEchartsComponent implements OnInit {
       })
     }
 
-    let cvLineplotOptions: EChartsOption = {
+    let cvLineplotOptions: echarts.EChartsOption = {
       title: {
         text: 'Regressors - ' + currentMetric
       },
@@ -206,11 +200,11 @@ export class ResultsEchartsComponent implements OnInit {
       series: lineYAxisData
     };
 
-    return cvLineplotOptions;
+    this.chartOptions = cvLineplotOptions;
   }
 
   getBoxPlotCharOptions(currentMetric: string, dataSource: [string[]]) {
-    let boxplotOptions: EChartsOption = {
+    let boxplotOptions: echarts.EChartsOption = {
       title: {
         text: 'Regressors - ' + currentMetric
       },
@@ -304,7 +298,7 @@ export class ResultsEchartsComponent implements OnInit {
         }],
     };
 
-    return boxplotOptions;
+    this.chartOptions = boxplotOptions;
   }
 
 
@@ -328,7 +322,8 @@ export class ResultsEchartsComponent implements OnInit {
 
     if (dimension === 3) {
       for (var i = 0; i < dimension1.length; i++) {
-        data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
+        // data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
+        data.push([dimension1[i], dimension2[i], dimension3[i]]);
       }
       return this.get3DScatterPlotOptions(data);
     }
@@ -341,7 +336,7 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   get2DScatterPlotOptions(data: any) {
-    let scatterPlotOption: EChartsOption = {
+    let scatterPlotOption: echarts.EChartsOption = {
       dataset: [
         {
           source: data
@@ -375,117 +370,104 @@ export class ResultsEchartsComponent implements OnInit {
         datasetIndex: 0
       }]
     };
-    return scatterPlotOption;
+    this.chartOptions = scatterPlotOption;
   }
 
-  get3DScatterPlotOptions(data: any) {
-    // console.log("data===", data[0], );
-    var symbolSize = 4.5;
-    var schema = [
-      {
-        name: 'dimension1',
-        index: 0
-      },
-      {
-        name: 'dimension2',
-        index: 1
-      },
-      {
-        name: 'dimension3',
-        index: 2
-      }
-    ];
-    var fieldIndices = schema.reduce(function (obj: any, item) {
-      obj[item.name] = item.index;
-      return obj;
-    }, {});
-    var fieldNames = schema.map(function (item) {
-      return item.name;
-    });
-    let scatter3DPlotOption: EChartsOption = {
-      visualMap: {
-        type: 'piecewise',
-        dimension: 3,
-        splitNumber: 3,
-        pieces: [
-          { min: 0, max: 0.250, color: 'green' },
-          { min: 0.251, max: 0.5, color: 'black' },
-          { min: 0.501, max: 100, color: 'red' }
-        ]
-      },
-      gradientColor: [
-        '#f6efa6',
-        '#d88273',
-        '#bf444c'
-      ],
-      xAxis3D: {
-        name: "X"
-      },
-      yAxis3D: {
-        name: "Y"
-      },
-      zAxis3D: {
-        name: "Z"
-      },
-      series: [
-        {
-          type: 'scatter',
-          dimensions: [
-            schema[0].name,
-            schema[1].name,
-            schema[2].name,
-          ],
-          data: data.map(function (item: any, idx: any) {
-            return [
-              item[0],
-              item[1],
-              item[2]
-            ];
-          }),
-        }
-      ]
+  get3DScatterPlotOptions(data:any) {
+    console.log(this.visualizationResponse.pca['dimension1']);
+    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor]
+    var colors = [];
+    for (var i=0; i<this.visualizationResponse.pca['dimension0'].length; i++) {
+      var curColor = this.getColor(coloring_information[i]);
+      colors.push(curColor);
     }
-    return scatter3DPlotOption;
+    var trace1 = {
+      x: this.visualizationResponse.tsne['dimension0'].map(String), 
+      y: this.visualizationResponse.tsne['dimension1'].map(String),
+      z: this.visualizationResponse.tsne['dimension2'].map(String),
+      mode: 'markers',
+      marker: {
+        size: 12,
+        line: {
+                color: 'rgba(217, 217, 217, 0.14)',
+                width: 0.5
+              },
+        opacity: 0.8,
+        color: colors
+      },
+      type: "scatter3d"
+    };
+    var plotData = [trace1];
+    var layout = {margin: {
+      l: 0,
+      r: 0,
+      b: 0,
+      t: 0
+      }};
+    Plotly.newPlot('plotly-div', plotData, layout);
   }
 
   // get3DScatterPlotOptions(data: any) {
-  //   var symbolSize = 4.5;
-  //   let scatter3DPlotOption: EChartsOption = {
-  //     grid3D: {},
-  //     xAxis3D: {
-  //       type: 'category'
+  //   console.log("am i coming here?", this.is3DVisualization());
+  //   this.highChartOptions = {
+  //     chart: {
+  //       renderTo: 'container',
+  //       margin: 100,
+  //       type: 'scatter3d',
+  //       animation: false,
+  //       options3d: {
+  //         enabled: true,
+  //         alpha: 10,
+  //         beta: 30,
+  //         depth: 250,
+  //         viewDistance: 5,
+  //         fitToPlot: false,
+  //       },
   //     },
-  //     yAxis3D: {},
-  //     zAxis3D: {},
-  //     dataset: {
-  //       dimensions: [
-  //         'Income',
-  //         'Life Expectancy',
-  //         'Population',
-  //         'Country',
-  //         { name: 'Year', type: 'ordinal' }
-  //       ],
-  //       source: data
+  //     title: {
+  //       text: '3D scatter chart',
   //     },
+  //     // yAxis: {
+  //     //   min: -50,
+  //     //   max: 50,
+  //     // },
+  
+  //     // xAxis: {
+  //     //   min: -50,
+  //     //   max: 50,
+  //     //   gridLineWidth: 1,
+  //     // },
+  
+  //     // zAxis: {
+  //     //   min: -50,
+  //     //   max: 50,
+  //     //   showFirstLabel: false,
+  //     // },
+  
   //     series: [
   //       {
-  //         symbolSize: symbolSize,
-  //         encode: {
-  //           x: 'Country',
-  //           y: 'Life Expectancy',
-  //           z: 'Income',
-  //           tooltip: [0, 1, 2, 3, 4]
-  //         }
-  //       }
-  //     ]
+  //         type: 'scatter3d',
+  //         data: data,
+  //         colorByPoint: true,
+  //       },
+  //     ],
   //   };
-  //   return scatter3DPlotOption;
   // }
 
   getColor(colorValue: number) {
-    return colorValue
+    if (Math.abs(colorValue) <0.25) {
+      return '#096921';
+    } else if (Math.abs(colorValue) <0.75) {
+      return '#929608';
+    } else {
+      return '#963a08';
+    }
+    // return colorValue;
   }
 
+  is3DVisualization() {
+    return this.chartType.includes("3d");
+  }
 
 }
 

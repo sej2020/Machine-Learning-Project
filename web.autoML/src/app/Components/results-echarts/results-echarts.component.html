@@ -75,5 +75,9 @@
     </div>
 </div>
 
-    <div ng-if="chartOptions != null" echarts [options]="chartOptions" class="chart-container mat-elevation-z4"></div>
+    <div id="chart-div" *ngIf="!is3DVisualization() && chartOptions != null" echarts [options]="chartOptions" class="chart-container mat-elevation-z4"></div>
+    <!-- <highcharts-chart [Highcharts]="Highcharts" [options]="highChartOptions" *ngIf="is3DVisualization()"></highcharts-chart> -->
+    <!-- <div *ngIf="is3DVisualization()" id="plotly-div"></div> -->
+    <div *ngIf="is3DVisualization()" id="plotly-div" class="chart-container mat-elevation-z4"></div>
+    <!-- <div id="chart-div" ng-if="chartOptions != null" class="chart-container mat-elevation-z4"></div> -->
 </div>

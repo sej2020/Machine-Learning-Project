@@ -28,6 +28,7 @@
     "echarts-stat": "^1.2.0",
     "ng-mat-carousel": "^0.11.1",
     "ngx-echarts": "^15.0.1",
+    "plotly.js-dist": "^2.22.0",
     "rxjs": "~7.8.0",
     "scriptjs": "^2.5.9",
     "tslib": "^2.3.0",

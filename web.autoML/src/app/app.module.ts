@@ -16,7 +16,6 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import {MatCardModule} from '@angular/material/card';
 import {MatListModule} from '@angular/material/list';
 import { MatInputModule } from '@angular/material/input';
-import { EasyDragAndDropFileUploadModule } from  'easy-drag-and-drop-file-upload'; 
 import {MatButtonModule} from '@angular/material/button';
 import {MatDividerModule} from '@angular/material/divider';
 import { HttpClientModule } from '@angular/common/http';
@@ -57,7 +56,6 @@ import { DataValidationComponent } from './Components/data-validation/data-valid
     ReactiveFormsModule,
     MatCardModule,
     MatInputModule,
-    EasyDragAndDropFileUploadModule,
     MatButtonModule,
     MatDividerModule,
     HttpClientModule,
@@ -68,7 +66,6 @@ import { DataValidationComponent } from './Components/data-validation/data-valid
     NgxEchartsModule.forRoot({
       echarts
     }),
-    MatCarouselModule.forRoot(),
   ],
   exports: [
     BrowserModule,
@@ -83,7 +80,6 @@ import { DataValidationComponent } from './Components/data-validation/data-valid
     ReactiveFormsModule ,
     MatCardModule,
     MatInputModule,
-    EasyDragAndDropFileUploadModule,
     MatButtonModule,
     MatDividerModule,
     HttpClientModule,
