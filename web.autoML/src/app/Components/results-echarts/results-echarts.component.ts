@@ -1,3 +1,4 @@
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { Component, OnInit } from '@angular/core';
 import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Services/upload-request.service';
 import { IResults } from '../result-page/result-page.component';
@@ -6,7 +7,6 @@ import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
 import { transform } from "echarts-stat";
-
 declare let Plotly: any;
 
 @Component({
@@ -31,7 +31,7 @@ export class ResultsEchartsComponent implements OnInit {
   requestId: string = "";
   currentMetric: string = "";
   currentRegressor: string = "";
-  chartType: string = "boxplot";
+  chartType: string = "cv_line_chart";
   visualizationType: string = this.visualizationTypes[0];
 
   chartOptions!: echarts.EChartsOption;
@@ -117,33 +117,114 @@ export class ResultsEchartsComponent implements OnInit {
   getDataPercentChartOptions() {
     let dataPercentages = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     let dataPercentChartOptions: echarts.EChartsOption = {
+      responsive: true,
+      maintainAspectRatio: true,
+      title: {
+        text: 'Train Test Error - ' + this.currentMetric,
+        padding: [5, 5, 5, 5],
+        top: '2%',
+        left: '1%'
+      },
       xAxis: {
         type: 'category',
-        data: dataPercentages
+        data: dataPercentages,
+        boundaryGap: false,
+        name: 'Percentage of Data Change',
+        nameLocation: 'middle',
+        nameGap: 30,
+        nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
       },
       yAxis: {
-        type: 'value'
+        type: 'value',
+        splitArea:{
+          interval: 'auto'
+        },
+        axisLine:{
+          show: true
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359',
+        },
+        name: this.currentMetric,
+        nameLocation: 'middle',
+        nameGap: 50,
+         nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black',
+          padding : [0, 10, 0, 0]
+        },
       },
       legend: {
         data: ['Train ' + this.currentMetric, 'Test ' + this.currentMetric],
-        top: 30
+        top: '10%',
+        itemHeight: 16,
+        textStyle:{
+          fontWeight: 'bold',
+          color: '#003300',
+          fontSize: 16
+        }
+      },
+      grid: {
+        left: '3%',
+        right: '4%',
+        bottom: '5%',
+        top: '20%',
+        containLabel: true
+      },
+      tooltip:{
+        show: true,
+        trigger: 'axis',
+      },
+      toolbox: {
+        feature: {
+          dataView: {
+            readOnly: false,
+            title: 'Data View'
+          },
+          saveAsImage: {
+            type: 'png',
+            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
       },
       series: [
         {
           name: 'Train ' + this.currentMetric,
-          data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'],
+          data:this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'],
+          tooltip:{
+            show: true
+          },
           type: 'line',
           smooth: true,
           label: {
             show: true,
             position: "top"
-          }
+          },
+          showSymbol: true
         },
         {
           name: 'Test ' + this.currentMetric,
           data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['test'],
           type: 'line',
           smooth: true,
+          tooltip:{
+            show: true
+          },
+          showSymbol: true,
           label: {
             show: true,
             position: "top"
@@ -161,41 +242,95 @@ export class ResultsEchartsComponent implements OnInit {
       lineYAxisData.push({
         name: regressorNames[i],
         type: 'line',
-        data: lineData[regressorNames[i]]
+        data: lineData[regressorNames[i]],
+        lineStyle: {
+          width: 3,
+          type: 'solid'
+        }
       })
     }
 
     let cvLineplotOptions: echarts.EChartsOption = {
+      responsive: true,
+      maintainAspectRatio: true,
       title: {
-        text: 'Regressors - ' + currentMetric
+        text: 'Regressors - ' + currentMetric,
+        padding: [5, 5, 5, 5],
+        top: '2%',
+        left: '1%'
       },
       tooltip: {
         trigger: 'axis'
       },
       legend: {
         data: regressorNames,
-        top: 30
+        top: '10%',
+        textStyle:{
+          fontWeight: 'bold',
+          color: '#003300',
+          fontSize: 16
+        },
+        
+        
       },
       grid: {
         left: '3%',
         right: '4%',
-        bottom: '3%',
+        bottom: '5%',
+        top: '20%',
         containLabel: true
       },
       toolbox: {
         feature: {
-          saveAsImage: {}
-        }
+          dataView: {
+            readOnly: false,
+            title: 'Data View'
+          },
+          saveAsImage: {
+            type: 'png',
+            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
         data: [...Array(num_cv_folds).keys()],
-        name: "CV Fold"
+        name: "CV Fold",
+        nameLocation: 'middle',
+        nameGap: 30,
+        nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
       },
       yAxis: {
         type: 'value',
-        name: currentMetric
+        axisLine:{
+          show: true
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+        name: currentMetric,
+        nameLocation: 'middle',
+        nameGap: 30,
+         nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+
+        },
       },
       series: lineYAxisData
     };
@@ -204,22 +339,33 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   getBoxPlotCharOptions(currentMetric: string, dataSource: [string[]]) {
+
     let boxplotOptions: echarts.EChartsOption = {
+      responsive: true,
+      maintainAspectRatio: true,
       title: {
-        text: 'Regressors - ' + currentMetric
+        text: 'Regressors - ' + currentMetric,
+        padding: [5, 5, 5, 5],
+        top: '2%',
+        left: '1%'
       },
       tooltip: {
         trigger: 'axis',
         confine: true
       },
       toolbox: {
-        show: true,
         feature: {
           dataView: {
-            readOnly: false
+            readOnly: false,
+            title: 'Data View'
           },
-          saveAsImage: {}
-        }
+          saveAsImage: {
+            type: 'png',
+            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
       },
       dataset: [
         {
@@ -268,16 +414,45 @@ export class ResultsEchartsComponent implements OnInit {
         name: this.currentMetric,
         nameLocation: 'middle',
         nameGap: 30,
-        scale: true
+        scale: true,
+        nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
       },
       yAxis: {
         type: 'category',
         splitArea: {
           show: true
-        }
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+        nameGap: 30,
+         nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+
+        },
       },
+      // grid: {
+      //   bottom: 100
+      // },
       grid: {
-        bottom: 100
+        left: '3%',
+        right: '4%',
+        bottom: '5%',
+        top: '10%',
+        containLabel: true
       },
       series: [
         {
@@ -302,8 +477,10 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
 
-  getScatterPlot(algorithm: string, dimension: number) {
-    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor]
+  getScatterPlot(algorithm: string, dimension:number) {
+    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
+    let minColorValue = Math.min(...Object.values(coloring_information));
+    let maxColorValue = Math.max(...Object.values(coloring_information));
     let dimension1: number[];
     let dimension2: number[];
     let dimension3: number[];
@@ -322,47 +499,123 @@ export class ResultsEchartsComponent implements OnInit {
 
     if (dimension === 3) {
       for (var i = 0; i < dimension1.length; i++) {
-        // data.push([dimension1[i], dimension2[i], dimension3[i], this.getColor(coloring_information[i])]);
-        data.push([dimension1[i], dimension2[i], dimension3[i]]);
+          data.push([dimension1[i], dimension2[i], dimension3[i], coloring_information[i]]);
       }
       return this.get3DScatterPlotOptions(data);
     }
-    else {
-      for (var i = 0; i < dimension1.length; i++) {
-        data.push([dimension1[i], dimension2[i], this.getColor(coloring_information[i])]);
-      }
-      return this.get2DScatterPlotOptions(data);
+    else{
+        for (var i = 0; i < dimension1.length; i++) {
+        data.push([dimension1[i], dimension2[i], coloring_information[i]]);
+        }
+        return this.get2DScatterPlotOptions(data, minColorValue, maxColorValue);
     }
   }
 
-  get2DScatterPlotOptions(data: any) {
+  get2DScatterPlotOptions(data: any, minColorValue: number, maxColorValue: number) {
     let scatterPlotOption: echarts.EChartsOption = {
+      title: {
+        text: this.currentRegressor+" : "+this.chartType+' - ' + this.currentMetric,
+        padding: [5, 5, 5, 5],
+        top: '2%',
+        left: '1%'
+      },
+      toolbox: {
+        feature: {
+          dataView: {
+            readOnly: false,
+            title: 'Data View'
+          },
+          saveAsImage: {
+            type: 'png',
+            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
+      },
       dataset: [
         {
           source: data
         },
       ],
       tooltip: {
+        trigger: 'item',
+        confine: true,
         position: 'top'
       },
+      legend: {
+        data: data,
+        top: '10%',
+        textStyle:{
+          fontWeight: 'bold',
+          color: '#003300',
+          fontSize: 16
+        },
+      },
       visualMap: {
-        type: 'piecewise',
+        type: 'continuous',
+        precision: 3,
+        min: 0,
+        max: 1,
         dimension: 2,
-        splitNumber: 3,
-        pieces: [
-          { min: 0, max: 0.250, color: 'green' },
-          { min: 0.251, max: 0.5, color: 'black' },
-          { min: 0.501, max: 100, color: 'red' }
-        ]
+        calculable: true,
+        inRange:{
+          color: ['#24b7f2','#f2c31a','#ff0066'  ]
+        },
+        orient: 'vertical',
+        right: 10,
+        top: 'center',
+        text: ['Prediction - Bad', 'Prediction - Good']
       },
       grid: {
-        left: 120
+        left: '3%',
+        right: '20%',
+        bottom: '5%',
+        top: '20%',
+        containLabel: true
       },
-      xAxis: {},
-      yAxis: {},
+      
+      xAxis: {
+        name: 'Dimension 1',
+        nameLocation: 'start',
+        nameRotate: 90,
+        nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 400,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+      },
+      yAxis: {
+        name: 'Dimension 2',
+        nameLocation: 'start',
+        nameGap: 40,
+        nameTextStyle:{
+          lineHeight: 14,
+          fontWeight: 400,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel:{
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+      },
+      animation: true,
+      animationEasing: 'cubicInOut',
       series: [{
         type: 'scatter',
         encode: { tooltip: [0, 1] },
+        emphasis: {
+          scale: true
+        },
+        markPoint: {
+          symbol: 'pin'
+        },
         symbolSize: 15,
         itemStyle: {
           borderColor: '#555'
