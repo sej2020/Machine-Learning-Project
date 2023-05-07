@@ -25,14 +25,14 @@ paramdict = {'id': 30,
             'test_set_size': 0.2,
             'n_cv_folds': 10,
             'score_method': 'Root Mean Squared Error',
-            'n_workers': 1
+            'n_workers': 1,
             }
 
 
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    print(comparison_wrapper(1,{'id': 30, 'datapath':'AutoML/ConcreteData/Concrete_Data.csv'})) # 'AutoML\PowerPlantData\Folds5x2_pp.csv' 'AutoML/ConcreteData/Concrete_Data.csv'
+    print(comparison_wrapper(1,{'id': 30, 'datapath':'AutoML/ConcreteData/Concrete_Data.csv', 'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set']})) # 'AutoML\PowerPlantData\Folds5x2_pp.csv' 'AutoML/ConcreteData/Concrete_Data.csv'
     # print(comparison(**paramdict))
     stop = perf_counter()
 

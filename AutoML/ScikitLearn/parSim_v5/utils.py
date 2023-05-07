@@ -362,7 +362,7 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'score_method': 'Root Mean Squared Error',
             'datapath': conf['datapath'], 
             'n_workers': 1,
-            'figure_lst': ['Test_Best_Models'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models'
+            'figure_lst': ['Test_Best_Models', 'Accuracy_over_Various_Proportions_of_Training_Set'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models'
                 }
     if setting == 1:
         return comparison(**default_conf)
@@ -869,21 +869,29 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
     Returns: 
 
     """
-    ITERS = 10
-    FOLDS = 10
+    ITERS = 11
+    # ITERS = 10  
+    FOLDS = 11
+    # FOLDS = 10
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
     pcnts = range(10, 110, 10)
     ## generate fold_sets
-    gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
+    # gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
     train_outputs = []
     test_outputs = []
     for i in range(ITERS):
-        X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train, cv_X_test, cv_y_train, cv_y_test)]
+        X_train, X_test, y_train, y_test = cv_X_train[i], cv_X_test[i], cv_y_train[i], cv_y_test[i]
+        # X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train, cv_X_test, cv_y_train, cv_y_test)]
         for n_folds in range(1, FOLDS+1):
-            X_tr = np.vstack(X_train[:n_folds])
-            X_te = np.vstack(X_test[:n_folds])
-            y_tr = np.hstack(y_train[:n_folds])
-            y_te = np.hstack(y_test[:n_folds])
+            # X_tr = np.vstack(X_train[:n_folds])
+            # X_te = np.vstack(X_test[:n_folds])
+            # y_tr = np.hstack(y_train[:n_folds])
+            # y_te = np.hstack(y_test[:n_folds])
+            size = cv_X_test[0].shape[0]
+            X_tr = np.vstack(X_train[:n_folds*size])
+            X_te = np.vstack(X_test[:n_folds*size])
+            y_tr = np.hstack(y_train[:n_folds*size])
+            y_te = np.hstack(y_test[:n_folds*size])
             for reg, reg_name in zip(regs, reg_names):
                 train_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_tr, y_tr.flatten())
                 test_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_te, y_te.flatten())
