@@ -3,11 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { IDataVisualizationResponse, UploadRequestService } from 'src/app/Services/upload-request.service';
 import { IResults } from '../result-page/result-page.component';
 import { Router } from '@angular/router';
-import * as echarts from 'echarts';
 import { aggregate } from '@manufac/echarts-simple-transform';
 import type { ExternalDataTransform } from "@manufac/echarts-simple-transform";
 import { transform } from "echarts-stat";
+import * as echarts from 'echarts';
+// import 'node_modules/echarts-gl/dist/echarts-gl.js';
 declare let Plotly: any;
+// declare let echarts-gl any;
 
 @Component({
   selector: 'app-results-echarts',
@@ -15,12 +17,12 @@ declare let Plotly: any;
   styleUrls: ['./results-echarts.component.scss']
 })
 export class ResultsEchartsComponent implements OnInit {
-
   boxplotData!: [string[]]
   cvLineplotData!: any
   trainTestErrorData!: any
   resultsData!: IResults;
   visualizationResponse!: IDataVisualizationResponse;
+  visualizationResponse2d!: IDataVisualizationResponse;
 
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
@@ -35,8 +37,6 @@ export class ResultsEchartsComponent implements OnInit {
   visualizationType: string = this.visualizationTypes[0];
 
   chartOptions!: echarts.EChartsOption;
-  // highChartOptions!: Highcharts.Options;
-  // Highcharts: typeof Highcharts = Highcharts;
   yAxisData!: string[];
   regressorList!: string[];
 
@@ -58,16 +58,21 @@ export class ResultsEchartsComponent implements OnInit {
         this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
         this.trainTestErrorData = this.resultsData.data['visualization_data']['train_test_error'];
         this.yAxisData = this.resultsData.data['metrics_list'];
-        this.yAxisData.push('Raw Mean Absolute Percentage Error');
+        // this.yAxisData.push('Raw Mean Absolute Percentage Error');
         this.currentMetric = this.yAxisData[0];
         this.regressorList = this.resultsData.data['regressor_list'];
         this.currentRegressor = this.regressorList[0];
         this.updateChartOptions();
       });
 
-    this.uploadRequestService.getVisualizationData(this.requestId)
+    this.uploadRequestService.getVisualizationData(this.requestId, 3)
       .subscribe((data: any) => {
         this.visualizationResponse = data;
+      });
+
+    this.uploadRequestService.getVisualizationData(this.requestId, 3)
+      .subscribe((data: any) => {
+        this.visualizationResponse2d = data;
       });
   }
 
@@ -93,6 +98,12 @@ export class ResultsEchartsComponent implements OnInit {
   changeInVisualizationType(value: any) {
     this.visualizationType = value;
     this.chartType = this.visualizationType == 'default_visualization' ? this.defaultChartTypes[0] : this.visualizationChartTypes[0];
+    if (this.visualizationType == 'default_visualization') {
+      this.yAxisData = this.resultsData.data['metrics_list'];
+    } else {
+      this.yAxisData = ['Raw Mean Absolute Percentage Error'];
+    }
+    this.currentMetric = this.yAxisData[0];
     this.updateChartOptions();
   }
 
@@ -132,45 +143,45 @@ export class ResultsEchartsComponent implements OnInit {
         name: 'Percentage of Data Change',
         nameLocation: 'middle',
         nameGap: 30,
-        nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
           color: 'black'
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
       },
       yAxis: {
         type: 'value',
-        splitArea:{
+        splitArea: {
           interval: 'auto'
         },
-        axisLine:{
+        axisLine: {
           show: true
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359',
         },
         name: this.currentMetric,
         nameLocation: 'middle',
         nameGap: 50,
-         nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
           color: 'black',
-          padding : [0, 10, 0, 0]
+          padding: [0, 10, 0, 0]
         },
       },
       legend: {
         data: ['Train ' + this.currentMetric, 'Test ' + this.currentMetric],
         top: '10%',
         itemHeight: 16,
-        textStyle:{
+        textStyle: {
           fontWeight: 'bold',
           color: '#003300',
           fontSize: 16
@@ -183,7 +194,7 @@ export class ResultsEchartsComponent implements OnInit {
         top: '20%',
         containLabel: true
       },
-      tooltip:{
+      tooltip: {
         show: true,
         trigger: 'axis',
       },
@@ -195,7 +206,7 @@ export class ResultsEchartsComponent implements OnInit {
           },
           saveAsImage: {
             type: 'png',
-            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
             pixelRatio: 2
           },
@@ -204,8 +215,8 @@ export class ResultsEchartsComponent implements OnInit {
       series: [
         {
           name: 'Train ' + this.currentMetric,
-          data:this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'],
-          tooltip:{
+          data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'],
+          tooltip: {
             show: true
           },
           type: 'line',
@@ -221,7 +232,7 @@ export class ResultsEchartsComponent implements OnInit {
           data: this.trainTestErrorData[this.currentMetric][this.currentRegressor]['test'],
           type: 'line',
           smooth: true,
-          tooltip:{
+          tooltip: {
             show: true
           },
           showSymbol: true,
@@ -265,13 +276,13 @@ export class ResultsEchartsComponent implements OnInit {
       legend: {
         data: regressorNames,
         top: '10%',
-        textStyle:{
+        textStyle: {
           fontWeight: 'bold',
           color: '#003300',
           fontSize: 16
         },
-        
-        
+
+
       },
       grid: {
         left: '3%',
@@ -288,7 +299,7 @@ export class ResultsEchartsComponent implements OnInit {
           },
           saveAsImage: {
             type: 'png',
-            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
             pixelRatio: 2
           },
@@ -301,30 +312,30 @@ export class ResultsEchartsComponent implements OnInit {
         name: "CV Fold",
         nameLocation: 'middle',
         nameGap: 30,
-        nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
           color: 'black'
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
       },
       yAxis: {
         type: 'value',
-        axisLine:{
+        axisLine: {
           show: true
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
         name: currentMetric,
         nameLocation: 'middle',
         nameGap: 30,
-         nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
@@ -361,7 +372,7 @@ export class ResultsEchartsComponent implements OnInit {
           },
           saveAsImage: {
             type: 'png',
-            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
             pixelRatio: 2
           },
@@ -415,13 +426,13 @@ export class ResultsEchartsComponent implements OnInit {
         nameLocation: 'middle',
         nameGap: 30,
         scale: true,
-        nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
           color: 'black'
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
@@ -431,12 +442,12 @@ export class ResultsEchartsComponent implements OnInit {
         splitArea: {
           show: true
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
         nameGap: 30,
-         nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
           fontSize: 16,
@@ -476,45 +487,43 @@ export class ResultsEchartsComponent implements OnInit {
     this.chartOptions = boxplotOptions;
   }
 
-
-  getScatterPlot(algorithm: string, dimension:number) {
-    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
-    let minColorValue = Math.min(...Object.values(coloring_information));
-    let maxColorValue = Math.max(...Object.values(coloring_information));
+  getScatterPlot(algorithm: string, dimension: number) {
     let dimension1: number[];
     let dimension2: number[];
-    let dimension3: number[];
+    let dimension3: number[] = [];
     let data = [];
-
+    let curVisualizationResponse = this.is3DVisualization()? this.visualizationResponse: this.visualizationResponse2d;
+    let coloring_information = curVisualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
+  
     if (algorithm == 'tsne') {
-      // console.log("tsne=====",JSON.stringify(this.visualizationResponse.tsne));
-      dimension1 = this.visualizationResponse.tsne['dimension0'];
-      dimension2 = this.visualizationResponse.tsne['dimension1'];
-      dimension3 = this.visualizationResponse.tsne['dimension2'];
+      dimension1 = curVisualizationResponse.tsne['dimension0'];
+      dimension2 = curVisualizationResponse.tsne['dimension1'];
+      if (dimension==3) {
+        dimension3 = curVisualizationResponse.tsne['dimension2'];
+      }
     } else {
-      dimension1 = this.visualizationResponse.pca['dimension0'];
-      dimension2 = this.visualizationResponse.pca['dimension1'];
-      dimension3 = this.visualizationResponse.pca['dimension2'];
+      dimension1 = curVisualizationResponse.pca['dimension0'];
+      dimension2 = curVisualizationResponse.pca['dimension1'];
+      if (dimension==3) {
+        dimension3 = curVisualizationResponse.tsne['dimension2'];
+      }
     }
 
     if (dimension === 3) {
-      for (var i = 0; i < dimension1.length; i++) {
-          data.push([dimension1[i], dimension2[i], dimension3[i], coloring_information[i]]);
-      }
-      return this.get3DScatterPlotOptions(data);
+      return this.get3DScatterPlotOptions(dimension1, dimension2, dimension3, coloring_information);
     }
-    else{
-        for (var i = 0; i < dimension1.length; i++) {
+    else {
+      for (var i = 0; i < dimension1.length; i++) {
         data.push([dimension1[i], dimension2[i], coloring_information[i]]);
-        }
-        return this.get2DScatterPlotOptions(data, minColorValue, maxColorValue);
+      }
+      return this.get2DScatterPlotOptions(data);
     }
   }
 
-  get2DScatterPlotOptions(data: any, minColorValue: number, maxColorValue: number) {
+  get2DScatterPlotOptions(data: any) {
     let scatterPlotOption: echarts.EChartsOption = {
       title: {
-        text: this.currentRegressor+" : "+this.chartType+' - ' + this.currentMetric,
+        text: this.currentRegressor + " : " + this.chartType + ' - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -527,7 +536,7 @@ export class ResultsEchartsComponent implements OnInit {
           },
           saveAsImage: {
             type: 'png',
-            name: this.currentRegressor+'_'+this.currentMetric+'_'+this.chartType,
+            name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
             pixelRatio: 2
           },
@@ -546,7 +555,7 @@ export class ResultsEchartsComponent implements OnInit {
       legend: {
         data: data,
         top: '10%',
-        textStyle:{
+        textStyle: {
           fontWeight: 'bold',
           color: '#003300',
           fontSize: 16
@@ -559,8 +568,8 @@ export class ResultsEchartsComponent implements OnInit {
         max: 1,
         dimension: 2,
         calculable: true,
-        inRange:{
-          color: ['#24b7f2','#f2c31a','#ff0066'  ]
+        inRange: {
+          color: ['#24b7f2', '#f2c31a', '#ff0066']
         },
         orient: 'vertical',
         right: 10,
@@ -574,18 +583,18 @@ export class ResultsEchartsComponent implements OnInit {
         top: '20%',
         containLabel: true
       },
-      
+
       xAxis: {
         name: 'Dimension 1',
         nameLocation: 'start',
         nameRotate: 90,
-        nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 400,
           fontSize: 16,
           color: 'black'
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
@@ -594,13 +603,13 @@ export class ResultsEchartsComponent implements OnInit {
         name: 'Dimension 2',
         nameLocation: 'start',
         nameGap: 40,
-        nameTextStyle:{
+        nameTextStyle: {
           lineHeight: 14,
           fontWeight: 400,
           fontSize: 16,
           color: 'black'
         },
-        axisLabel:{
+        axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
         },
@@ -626,91 +635,44 @@ export class ResultsEchartsComponent implements OnInit {
     this.chartOptions = scatterPlotOption;
   }
 
-  get3DScatterPlotOptions(data:any) {
-    console.log(this.visualizationResponse.pca['dimension1']);
-    let coloring_information = this.visualizationResponse.coloring_data[this.currentMetric][this.currentRegressor]
+  get3DScatterPlotOptions(dimension1: number[], dimension2: number[], dimension3: number[], coloring_information: any) {
     var colors = [];
-    for (var i=0; i<this.visualizationResponse.pca['dimension0'].length; i++) {
+    for (var i = 0; i < this.visualizationResponse.pca['dimension0'].length; i++) {
       var curColor = this.getColor(coloring_information[i]);
       colors.push(curColor);
     }
     var trace1 = {
-      x: this.visualizationResponse.tsne['dimension0'].map(String), 
-      y: this.visualizationResponse.tsne['dimension1'].map(String),
-      z: this.visualizationResponse.tsne['dimension2'].map(String),
+      x: dimension1,
+      y: dimension2,
+      z: dimension3,
       mode: 'markers',
       marker: {
-        size: 12,
-        line: {
-                color: 'rgba(217, 217, 217, 0.14)',
-                width: 0.5
-              },
+        size: 8,
+        // line: {
+        //   color: 'rgba(217, 217, 217, 0.14)',
+        //   width: 1
+        // },
         opacity: 0.8,
         color: colors
       },
       type: "scatter3d"
     };
     var plotData = [trace1];
-    var layout = {margin: {
-      l: 0,
-      r: 0,
-      b: 0,
-      t: 0
-      }};
+    var layout = {
+      margin: {
+        l: 0,
+        r: 0,
+        b: 0,
+        t: 0
+      }
+    };
     Plotly.newPlot('plotly-div', plotData, layout);
   }
 
-  // get3DScatterPlotOptions(data: any) {
-  //   console.log("am i coming here?", this.is3DVisualization());
-  //   this.highChartOptions = {
-  //     chart: {
-  //       renderTo: 'container',
-  //       margin: 100,
-  //       type: 'scatter3d',
-  //       animation: false,
-  //       options3d: {
-  //         enabled: true,
-  //         alpha: 10,
-  //         beta: 30,
-  //         depth: 250,
-  //         viewDistance: 5,
-  //         fitToPlot: false,
-  //       },
-  //     },
-  //     title: {
-  //       text: '3D scatter chart',
-  //     },
-  //     // yAxis: {
-  //     //   min: -50,
-  //     //   max: 50,
-  //     // },
-  
-  //     // xAxis: {
-  //     //   min: -50,
-  //     //   max: 50,
-  //     //   gridLineWidth: 1,
-  //     // },
-  
-  //     // zAxis: {
-  //     //   min: -50,
-  //     //   max: 50,
-  //     //   showFirstLabel: false,
-  //     // },
-  
-  //     series: [
-  //       {
-  //         type: 'scatter3d',
-  //         data: data,
-  //         colorByPoint: true,
-  //       },
-  //     ],
-  //   };
-  // }
-
   getColor(colorValue: number) {
-    if (Math.abs(colorValue) <0.25) {
+    if (Math.abs(colorValue) < 0.25) {
       return '#096921';
-    } else if (Math.abs(colorValue) <0.75) {
+    } else if (Math.abs(colorValue) < 0.75) {
       return '#929608';
     } else {
       return '#963a08';

@@ -60,8 +60,8 @@ export class UploadRequestService {
     return this.httpClient.post(`${this.api_route}/validateData`, formData).pipe(retry(1), catchError(this.processError));
   }
 
-  getVisualizationData(requestId: string) {
-    return this.httpClient.get(`${this.api_route}/dataVisualization?requestId=${requestId}&dimensionality=3`).pipe(retry(1), catchError(this.processError));
+  getVisualizationData(requestId: string, dimensionality: number) {
+    return this.httpClient.get(`${this.api_route}/dataVisualization?requestId=${requestId}&dimensionality=${dimensionality}`).pipe(retry(1), catchError(this.processError));
   }
   
   processError(err: any) {
