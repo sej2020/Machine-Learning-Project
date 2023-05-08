@@ -1,7 +1,7 @@
 import csv
 import os.path
 
-from config import settings
+from configuration.config import settings
 from services.s3Service import S3Service
 
 def download_results_file(results_filename):

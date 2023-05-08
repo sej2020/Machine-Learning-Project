@@ -2,14 +2,14 @@ import json
 import logging
 import os
 import threading
-from time import sleep
 
 import pika
 
-from config import settings
+
+from configuration.config import settings
 from db.models.auto_ml_request import AutoMLRequestRepository
 from services.s3Service import S3Service
-from src.utils import comparison, comparison_wrapper
+from utils import comparison_wrapper
 
 # logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s  %(name)s  %(levelname)s {%(pathname)s:%(lineno)d}: %(message)s')
 logging.root.setLevel(logging.INFO)

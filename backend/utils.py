@@ -2,7 +2,6 @@ import logging
 
 import pandas as pd
 import os
-import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import KFold
@@ -17,7 +16,7 @@ import multiprocessing as multiprocessing
 
 import warnings
 
-from config import settings
+from configuration.config import settings
 
 warnings.filterwarnings('ignore')
 from inspect import signature, _empty

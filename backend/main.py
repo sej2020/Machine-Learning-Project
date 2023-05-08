@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse, FileResponse
 import uvicorn
 from fastapi import FastAPI, Depends
 
-from config import settings
+from configuration.config import settings
 from data_models.automl import AutoMLCreateRequest, AutoMLCreateResponse, AutoMLCreateResponseContents
 from db.base import Base
 from db.models.auto_ml_request import AutoMLRequestRepository
@@ -15,11 +15,11 @@ from db.session import engine
 from fastapi import File, UploadFile
 
 from services import visualization_service, data_services
-from services.rmq_services import Publisher, send_create_request_message
+from services.rmq_services import send_create_request_message
 from services.s3Service import S3Service
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.utils import validation
+from utils import validation
 
 # from db.base import create_tables
 

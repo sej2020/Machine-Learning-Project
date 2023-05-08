@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from pathlib import Path
 
-env_path = Path('.') / '.env'
+env_path = Path('..') / '.env'
 load_dotenv(dotenv_path=env_path)
 
 class Settings:
@@ -17,8 +17,8 @@ class Settings:
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "auto-ml-db")
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
-    TEMP_UPLOAD_DIR = '/home/madhavan/python-workspace/Machine-Learning-Project/backend/uploads'
-    TEMP_DOWNLOAD_DIR = '/home/madhavan/python-workspace/Machine-Learning-Project/backend/downloads'
+    TEMP_UPLOAD_DIR = '/uploads'
+    TEMP_DOWNLOAD_DIR = '/downloads'
     S3_DATA_BUCKET = 'data-bucket'
     S3_RESULTS_BUCKET = 'results-bucket'
 

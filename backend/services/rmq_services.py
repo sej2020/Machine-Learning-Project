@@ -4,7 +4,7 @@ import pika
 import json
 import os
 
-from config import settings
+from configuration.config import settings
 from db.models.auto_ml_request import AutoMLRequest
 
 log = logging.getLogger(__name__)

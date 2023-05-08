@@ -3,7 +3,7 @@ import csv
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from config import settings
+from configuration.config import settings
 from services.visualization_service import download_results_file
 
 def visualize_data(data_path, n_components=2, algorithm='tsne'):
