@@ -779,22 +779,30 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
         Also, this includes both train and test data, so there should be twice as many columns compared to the normal output of just test accuracy.
     """
     ITERS = 10
-    FOLDS = 10
+    # ITERS = 10  
+    FOLDS = 11
+    # FOLDS = 10
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
-    pcnts = range(10, 110, 10)
+    pcnts = np.arange(10, 110, 10)
     ## generate fold_sets
     gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
     train_outputs = []
     test_outputs = []
-    for i in range(ITERS):
-        X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train, cv_X_test, cv_y_train, cv_y_test)]
-        for n_folds in range(1, FOLDS+1):
-            X_tr = np.vstack(X_train[:n_folds])
-            X_te = np.vstack(X_test[:n_folds])
-            y_tr = np.hstack(y_train[:n_folds])
-            y_te = np.hstack(y_test[:n_folds])
+    for i in range(FOLDS):
+        # X_train, X_test, y_train, y_test = cv_X_train[i], cv_X_test[i], cv_y_train[i], cv_y_test[i]
+        X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train[0], cv_X_test[0], cv_y_train[0], cv_y_test[0])]
+        for n_folds in range(1, ITERS+1):
+            # X_tr = np.vstack(X_train[:n_folds])
+            # X_te = np.vstack(X_test[:n_folds])
+            # y_tr = np.hstack(y_train[:n_folds])
+            # y_te = np.hstack(y_test[:n_folds])
+            size = cv_X_test[0].shape[0]
+            X_tr = np.vstack(X_train[:n_folds*size])
+            X_te = np.vstack(X_test[:n_folds*size])
+            y_tr = np.hstack(y_train[:n_folds*size])
+            y_te = np.hstack(y_test[:n_folds*size])
             for reg, reg_name in zip(regs, reg_names):
-                train_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_tr, y_tr.flatten())
+                train_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_tr, y_tr.flatten()) # remove models from end of data
                 test_output = run(reg, reg_name, metric_list, metric_help, X_tr, y_tr.flatten(), X_te, y_te.flatten())
                 
                 train_outputs.append((i, n_folds-1, *train_output))
@@ -806,40 +814,39 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
     fin_org_results_d = {}
     failed_regs = set()
     for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
-        org_results = {name: [[None for _ in range(FOLDS)] for _ in range(ITERS)] for name in reg_names} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
+        org_results = {name: [[None for _ in range(ITERS)] for _ in range(FOLDS)] for name in reg_names} # -> {'Reg Name': [{'Same Reg Name': [metric, metric, ..., Reg Obj.]}, {}, {}, ... ], '':[], '':[], ... } of raw results
         for iter, amt, success_status, single_reg_output in tt_out:
             if success_status:
                 reg_name = list(single_reg_output.keys())[0]
-                org_results[reg_name][iter][amt] = single_reg_output[reg_name]
+                org_results[reg_name][iter][amt] = single_reg_output[reg_name][:-1]
                     
             else:
                 failed_regs.add(single_reg_output)
                 
-        fin_org_results_d[tt_name] = {k: np.array(v)[..., :-1].mean(axis=0).tolist() for k,v in org_results.items() if k not in failed_regs}
+        fin_org_results_d[tt_name] = {k: np.array(v).mean(axis=0).tolist() for k,v in org_results.items() if k not in failed_regs}
                 
                 
     json = {tt: {reg_name: {metric: {pcnt: [] for pcnt in pcnts} for metric in metric_list} for reg_name in reg_names if reg_name not in failed_regs} for tt in ("train", "test")}
-    # acc = {f"{regr}~{metric}~{tt}": [] for regr in reg_names for metric in metric_list for tt in ("train", "test")}
 
     # processing round 2 - use previous representation of data to get data into a clean JSON format
-    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
-        for regressor, runs in fin_org_results_d[tt_name].items():
+    for tt_name in ("train", "test"):
+        for regressor, averages in fin_org_results_d[tt_name].items():
             if regressor not in failed_regs:
-                for fold, iteration in enumerate(runs):
-                    for metric_idx, value in enumerate(iteration):
+                for n_folds, values in enumerate(averages):
+                    for metric_idx, value in enumerate(values):
                         if metric_idx < len(metric_list):
                             
-                            json[tt_name][regressor][metric_list[metric_idx]][(((fold % (FOLDS)) + 1) * 10)].append(value)
+                            json[tt_name][regressor][metric_list[metric_idx]][(((n_folds % (ITERS)) + 1) * 10)].append(value)
 
     # reshape data to work in a csv format (pd.dataframe)
     output_dict = {f"{regr}~{metric}~{tt}": [] for regr in reg_names if regr not in failed_regs for metric in metric_list for tt in ("train", "test")}
-    for tt_name, tt_out in (("train", train_outputs), ("test", test_outputs)):
+    for tt_name in ("train", "test"):
         for reg_name in reg_names:
             if reg_name not in failed_regs:
                 for metric in metric_list:
                     for pcnt in pcnts:
-                        values = json[tt_name][reg_name][metric][pcnt]
-                        output_dict[f"{reg_name}~{metric}~{tt_name}"].append(sum(values) / len(values))
+                        value = json[tt_name][reg_name][metric][pcnt][0]
+                        output_dict[f"{reg_name}~{metric}~{tt_name}"].append(value)
                         
 
     df = pd.DataFrame(output_dict)
