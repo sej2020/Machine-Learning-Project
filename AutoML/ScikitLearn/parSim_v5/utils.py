@@ -876,12 +876,12 @@ def gen_and_write_training_test_data(regs, reg_names, X, y, path: str, metric_li
     cv_X_train, cv_y_train, cv_X_test, cv_y_test = gen_cv_samples(X, y, FOLDS)
     pcnts = np.arange(10, 110, 10)
     ## generate fold_sets
-    # gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
+    gen_offsetted = lambda data, offset: [data[(i+offset) % len(data)] for i in range(len(data))]
     train_outputs = []
     test_outputs = []
     for i in range(FOLDS):
-        X_train, X_test, y_train, y_test = cv_X_train[i], cv_X_test[i], cv_y_train[i], cv_y_test[i]
-        # X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train, cv_X_test, cv_y_train, cv_y_test)]
+        # X_train, X_test, y_train, y_test = cv_X_train[i], cv_X_test[i], cv_y_train[i], cv_y_test[i]
+        X_train, X_test, y_train, y_test = [gen_offsetted(data, i) for data in (cv_X_train[0], cv_X_test[0], cv_y_train[0], cv_y_test[0])]
         for n_folds in range(1, ITERS+1):
             # X_tr = np.vstack(X_train[:n_folds])
             # X_te = np.vstack(X_test[:n_folds])

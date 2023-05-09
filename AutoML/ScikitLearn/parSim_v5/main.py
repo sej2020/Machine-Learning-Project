@@ -2,16 +2,16 @@ from utils import *
 
 paramdict = {'id': 30,
             'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv', # ConductivityData/train.csv'
-            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 1, 
-                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 1, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
-                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 1, 'GradientBoostingRegressor': 1, 
-                                 'HistGradientBoostingRegressor': 0, 'HuberRegressor': 1, 'IsotonicRegression': 1, 'KNeighborsRegressor': 1, 
+            'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
+                                 'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
+                                 'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
+                                 'HistGradientBoostingRegressor': 1, 'HuberRegressor': 1, 'IsotonicRegression': 1, 'KNeighborsRegressor': 1, 
                                  'KernelRidge': 1, 'Lars': 1, 'Lasso': 1, 'LassoLars': 1, 'LassoLarsIC': 1, 'LinearRegression': 1, 
-                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 1, 'MultiTaskLasso': 1, 'NuSVR': 1, 
-                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 1, 'PLSRegression': 1, 'PassiveAggressiveRegressor': 1, 
+                                 'LinearSVR': 1, 'MLPRegressor': 0, 'MultiTaskElasticNet': 0, 'MultiTaskLasso': 0, 'NuSVR': 1, 
+                                 'OrthogonalMatchingPursuit': 1, 'PLSCanonical': 0, 'PLSRegression': 0, 'PassiveAggressiveRegressor': 1, 
                                  'PoissonRegressor': 1, 'QuantileRegressor': 0, 'RANSACRegressor': 0, 'RadiusNeighborsRegressor': 1, 
-                                 'RandomForestRegressor': 0, 'Ridge': 1, 'SGDRegressor': 1, 'SVR': 1, 'TheilSenRegressor': 0, 
-                                 'TransformedTargetRegressor': 1, 'TweedieRegressor': 1
+                                 'RandomForestRegressor': 1, 'Ridge': 1, 'SGDRegressor': 1, 'SVR': 1, 'TheilSenRegressor': 0, 
+                                 'TransformedTargetRegressor': 0, 'TweedieRegressor': 0
                                  },
             'metric_list': ['Mean Squared Error','Mean Absolute Error','R-Squared', 'Root Mean Squared Error'],
             'styledict': {'boxprops': {'linestyle': '-', 'linewidth': 1, 'color': 'black'},
@@ -33,7 +33,7 @@ paramdict = {'id': 30,
 ### Regular run ###
 if __name__=="__main__":
     start = perf_counter()
-    print(comparison_wrapper(1,paramdict)) # 'AutoML\PowerPlantData\Folds5x2_pp.csv' 'AutoML/ConcreteData/Concrete_Data.csv'
+    print(comparison_wrapper(2,paramdict)) # 'AutoML\PowerPlantData\Folds5x2_pp.csv' 'AutoML/ConcreteData/Concrete_Data.csv'
     # print(comparison(**paramdict))
     stop = perf_counter()
 
