@@ -16,9 +16,10 @@ class Settings:
     POSTGRES_PORT: str = os.getenv("POSTGRES_PORT", 5001)  # default postgres port is 5432
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "auto-ml-db")
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
-
-    TEMP_UPLOAD_DIR = '/uploads'
-    TEMP_DOWNLOAD_DIR = '/downloads'
+    OS = 'linux'
+    PATH_SEPARATOR = '/' if OS == 'linux' else '\\'
+    TEMP_UPLOAD_DIR = f'{PATH_SEPARATOR}/uploads'
+    TEMP_DOWNLOAD_DIR = f'{PATH_SEPARATOR}/downloads'
     S3_DATA_BUCKET = 'data-bucket'
     S3_RESULTS_BUCKET = 'results-bucket'
 

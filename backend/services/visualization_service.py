@@ -6,7 +6,7 @@ from services.s3Service import S3Service
 
 def download_results_file(results_filename):
     s3Service = S3Service(settings.S3_RESULTS_BUCKET)
-    temp_download_path = f"{settings.TEMP_DOWNLOAD_DIR}/{results_filename}"
+    temp_download_path = f"{settings.TEMP_DOWNLOAD_DIR}{settings.PATH_SEPARATOR}{results_filename}"
     if os.path.exists(temp_download_path):
         os.remove(temp_download_path)
     s3Service.download_file(results_filename, temp_download_path)

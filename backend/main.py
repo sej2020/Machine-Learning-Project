@@ -64,7 +64,7 @@ async def create_automl_request(form_data: AutoMLCreateRequest = Depends(), file
     s3Service = S3Service(settings.S3_DATA_BUCKET)
     print(settings.S3_DATA_BUCKET, form_data.default_setting)
     s3_key = f'{request_id}_{file_data.filename}'
-    temp_path = f'{settings.TEMP_UPLOAD_DIR}/{file_data.filename}'
+    temp_path = f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}{file_data.filename}'
     save_file(file_data.file.read(), temp_path)
     try:
         s3Service.upload_file(temp_path, s3_key)
@@ -111,13 +111,13 @@ async def get_automl_request(request_id):
 @app.get('/results')
 async def download_results(key):
     s3_service = S3Service(settings.S3_RESULTS_BUCKET)
-    temp_download_path = f"{settings.TEMP_DOWNLOAD_DIR}/{key}"
+    temp_download_path = f"{settings.TEMP_DOWNLOAD_DIR}{settings.PATH_SEPARATOR}{key}"
     s3_service.download_file(key, temp_download_path)
     return FileResponse(path=temp_download_path, filename=key)
 
 @app.post('/validateData')
 async def validate_data(file_data: UploadFile = File(...)):
-    temp_path = f'{settings.TEMP_UPLOAD_DIR}/{file_data.filename}'
+    temp_path = f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}{file_data.filename}'
     save_file(file_data.file.read(), temp_path)
     data_issues = validation(temp_path)
     delete_file(temp_path)
@@ -132,7 +132,7 @@ async def visualize_data(requestId, dimensionality=3):
     try:
         request = AutoMLRequestRepository.get_request_by_id(requestId)
         result_file_list = request.resultfile.split(',')
-        data_path = f"{settings.TEMP_DOWNLOAD_DIR}/{request.datafile}"
+        data_path = f"{settings.TEMP_DOWNLOAD_DIR}{settings.PATH_SEPARATOR}{request.datafile}"
         s3_service = S3Service(settings.S3_DATA_BUCKET)
         s3_service.download_file(request.datafile, data_path)
         response = {'coloring_data': data_services.get_coloring(result_file_list[2])}
