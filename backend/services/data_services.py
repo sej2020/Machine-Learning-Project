@@ -22,8 +22,8 @@ def visualize_data(data_path, n_components=2, algorithm='tsne'):
 
     return dimensions
 
-def get_coloring(coloring_filename):
-    coloring_result_filepath = download_results_file(coloring_filename)
+def get_coloring(coloring_result_filepath):
+    # coloring_result_filepath = download_results_file(coloring_filename)
     coloring_result_file = open(coloring_result_filepath, 'r')
     coloring_csv_file = csv.DictReader(coloring_result_file)
 

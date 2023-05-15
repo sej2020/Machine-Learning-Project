@@ -54,6 +54,8 @@
                     <mat-option value="pca_visualization_2d">PCA Visualization-2D</mat-option>
                     <mat-option value="tsne_visualization_3d">TSNE Visualization-3D</mat-option>
                     <mat-option value="pca_visualization_3d">PCA Visualization-3D</mat-option>
+                    <mat-option value="pca_heatmap">PCA Heatmap</mat-option>
+                    <mat-option value="tsne_heatmap">TSNE Heatmap</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
@@ -75,9 +77,6 @@
     </div>
 </div>
 
-    <div id="chart-div" *ngIf="!is3DVisualization() && chartOptions != null" echarts [options]="chartOptions" class="chart-container mat-elevation-z4"></div>
-    <!-- <highcharts-chart [Highcharts]="Highcharts" [options]="highChartOptions" *ngIf="is3DVisualization()"></highcharts-chart> -->
-    <!-- <div *ngIf="is3DVisualization()" id="plotly-div"></div> -->
-    <div *ngIf="is3DVisualization()" id="plotly-div" class="chart-container mat-elevation-z4"></div>
-    <!-- <div id="chart-div" ng-if="chartOptions != null" class="chart-container mat-elevation-z4"></div> -->
+    <div id="chart-div" [hidden]="is3DVisualization() && chartOptions != null" echarts [options]="chartOptions" class="chart-container mat-elevation-z4"></div>
+    <div [hidden]="!is3DVisualization()" id="plotly-div" class="chart-container mat-elevation-z4"></div>
 </div>

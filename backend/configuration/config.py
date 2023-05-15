@@ -18,8 +18,8 @@ class Settings:
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
     OS = 'linux'
     PATH_SEPARATOR = '/' if OS == 'linux' else '\\'
-    TEMP_UPLOAD_DIR = f'{PATH_SEPARATOR}/uploads'
-    TEMP_DOWNLOAD_DIR = f'{PATH_SEPARATOR}/downloads'
+    TEMP_UPLOAD_DIR = f'/home/madhavan/python-workspace/Machine-Learning-Project/backend/uploads'
+    TEMP_DOWNLOAD_DIR = f'/home/madhavan/python-workspace/Machine-Learning-Project/backend/downloads'
     S3_DATA_BUCKET = 'data-bucket'
     S3_RESULTS_BUCKET = 'results-bucket'
 

@@ -1,3 +1,4 @@
+import json
 import logging
 import os.path
 import uuid
@@ -39,7 +40,6 @@ results_cache = {}
 
 def create_tables():
     logging.info('creating all database tables')
-    print('am i coming here?')
     Base.metadata.create_all(bind=engine)
 
 @app.get("/")
@@ -100,7 +100,7 @@ async def get_automl_request(request_id):
             data.metrics_list = metrics_list
             data.regressor_list = automl_request.regressor_list.split(',')
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
-        results_cache[request_id] = response
+        # results_cache[request_id] = response
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
         print(e)
@@ -126,22 +126,15 @@ async def validate_data(file_data: UploadFile = File(...)):
         }, status_code=200)
 
 @app.get('/dataVisualization')
-async def visualize_data(requestId, dimensionality=3):
+async def visualize_data_controller(requestId, dimensionality=3):
     if requestId in visualization_response_cache:
         return JSONResponse(content=visualization_response_cache[requestId], status_code=200)
     try:
         request = AutoMLRequestRepository.get_request_by_id(requestId)
-        result_file_list = request.resultfile.split(',')
-        data_path = f"{settings.TEMP_DOWNLOAD_DIR}{settings.PATH_SEPARATOR}{request.datafile}"
-        s3_service = S3Service(settings.S3_DATA_BUCKET)
-        s3_service.download_file(request.datafile, data_path)
-        response = {'coloring_data': data_services.get_coloring(result_file_list[2])}
-        for dim_red_algo in ['tsne', 'pca']:
-            dimensions = data_services.visualize_data(data_path, n_components=int(dimensionality), algorithm=dim_red_algo)
-            response[dim_red_algo] = {}
-            for i in range(len(dimensions)):
-                response[dim_red_algo][f'dimension{i}'] = dimensions[i]
-        visualization_response_cache[requestId] = response
+        data_visualization_response = json.loads(request.data_visualization)
+        response = {'coloring_data': data_visualization_response['coloring_data']}
+        for k in data_visualization_response[dimensionality].keys():
+            response[k] = data_visualization_response[dimensionality][k]
         return JSONResponse(content=response, status_code=200)
     except Exception as e:
         logging.error(f'error in data visualization: {str(e)}')

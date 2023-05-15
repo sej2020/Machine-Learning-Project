@@ -17,6 +17,7 @@ class AutoMLRequest(Base):
     test_set_size = Column(Float, default=0.2)
     num_cv_folds = Column(Integer, default=10)
     resultfile = Column(String)
+    data_visualization = Column(String)
     default_setting = Column(Integer, default=1)
 
 class AutoMLRequestRepository:
@@ -35,7 +36,7 @@ class AutoMLRequestRepository:
         metrics_str = AutoMLRequestRepository.convert_list_to_str(metrics)
         automl_request = AutoMLRequest(id=request_id, datafile=datafile, regressor_list=regressor_list_str, email=email, status=0,
                                        metrics=metrics_str, metric_score_method=metric_score_method, test_set_size=test_set_size,
-                                       num_cv_folds=num_cv_folds, default_setting=default_setting)
+                                       num_cv_folds=num_cv_folds, default_setting=default_setting, data_visualization="")
         try:
             AutoMLRequestRepository.db_session.add(automl_request)
             AutoMLRequestRepository.db_session.commit()
@@ -51,11 +52,13 @@ class AutoMLRequestRepository:
             error_message = f'request details not found for {request_id}'
             raise Exception(error_message)
         return query_result[0]
+
     @staticmethod
-    def update_request(request_id, status, result_file=None):
+    def update_request(request_id, status, data_visualization_response=None, result_file=None):
         update_params = {'status': status}
         if status == 1:
             update_params['resultfile'] = result_file
+            update_params['data_visualization'] = data_visualization_response
         AutoMLRequestRepository.db_session.query(AutoMLRequest).filter(AutoMLRequest.id == request_id).update(update_params)
         AutoMLRequestRepository.db_session.commit()
 

@@ -27,7 +27,7 @@ export class ResultsEchartsComponent implements OnInit {
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
   defaultChartTypes: string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
-  visualizationChartTypes: string[] = ['tsne_visualization_2d', 'pca_visualization_2d', 'tsne_visualization_3d', 'pca_visualization_3d'];
+  visualizationChartTypes: string[] = ['tsne_visualization_2d', 'pca_visualization_2d', 'tsne_visualization_3d', 'pca_visualization_3d', 'tsne_heatmap', 'pca_heatmap'];
   visualizationTypes: string[] = ['default_visualization', 'data_centric_visualization'];
 
   requestId: string = "";
@@ -50,7 +50,6 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   fetchRawData = () => {
-    console.log('echarts.version: ', echarts.version);
     this.uploadRequestService.getRequestStatus(this.requestId)
       .subscribe((data: any) => {
         this.resultsData = data;
@@ -58,7 +57,6 @@ export class ResultsEchartsComponent implements OnInit {
         this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
         this.trainTestErrorData = this.resultsData.data['visualization_data']['train_test_error'];
         this.yAxisData = this.resultsData.data['metrics_list'];
-        // this.yAxisData.push('Raw Mean Absolute Percentage Error');
         this.currentMetric = this.yAxisData[0];
         this.regressorList = this.resultsData.data['regressor_list'];
         this.currentRegressor = this.regressorList[0];
@@ -70,7 +68,7 @@ export class ResultsEchartsComponent implements OnInit {
         this.visualizationResponse = data;
       });
 
-    this.uploadRequestService.getVisualizationData(this.requestId, 3)
+    this.uploadRequestService.getVisualizationData(this.requestId, 2)
       .subscribe((data: any) => {
         this.visualizationResponse2d = data;
       });
@@ -78,6 +76,7 @@ export class ResultsEchartsComponent implements OnInit {
 
   changeInRequestId(event: any) {
     this.requestId = event.target.value;
+    console.log(this.requestId);
   }
 
   changeInCurrentMetric(value: any) {
@@ -120,6 +119,10 @@ export class ResultsEchartsComponent implements OnInit {
       this.getScatterPlot('pca', 2);
     } else if (this.chartType === 'pca_visualization_3d') {
       this.getScatterPlot('pca', 3);
+    } else if (this.chartType == 'pca_heatmap') {
+      this.getHeatMap('pca');
+    } else if (this.chartType == 'tsne_heatmap') {
+      this.getHeatMap('tsne');
     } else {
       this.getDataPercentChartOptions();
     }
@@ -568,8 +571,23 @@ export class ResultsEchartsComponent implements OnInit {
         max: 1,
         dimension: 2,
         calculable: true,
+        // inRange: {
+        //   color: ['#24b7f2', '#f2c31a', '#ff0066']
+        // },
         inRange: {
-          color: ['#24b7f2', '#f2c31a', '#ff0066']
+          color: [
+            '#313695',
+            '#4575b4',
+            '#74add1',
+            '#abd9e9',
+            '#e0f3f8',
+            '#ffffbf',
+            '#fee090',
+            '#fdae61',
+            '#f46d43',
+            '#d73027',
+            '#a50026'
+          ]
         },
         orient: 'vertical',
         right: 10,
@@ -648,10 +666,6 @@ export class ResultsEchartsComponent implements OnInit {
       mode: 'markers',
       marker: {
         size: 8,
-        // line: {
-        //   color: 'rgba(217, 217, 217, 0.14)',
-        //   width: 1
-        // },
         opacity: 0.8,
         color: colors
       },
@@ -677,7 +691,115 @@ export class ResultsEchartsComponent implements OnInit {
     } else {
       return '#963a08';
     }
-    // return colorValue;
+  }
+
+  getHeatMap(algorithm: string) {
+    let curVisualizationResponse = this.is3DVisualization()? this.visualizationResponse: this.visualizationResponse2d;
+    let coloring_information = curVisualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
+    let dimension0: number[], dimension1: number[];
+    let xData: string[] = []
+    let yData: string[] = [];
+    if (algorithm == 'tsne') {
+      dimension0 = curVisualizationResponse.tsne["dimension0"];
+      dimension1 = curVisualizationResponse.tsne["dimension1"];
+    } else {
+      dimension0 = curVisualizationResponse.pca['dimension0'];
+      dimension1 = curVisualizationResponse.pca['dimension1'];
+    }
+
+    for (var i=Math.min(...dimension0); i<Math.max(...dimension0); i = i+1) {
+      xData.push(i.toFixed(2));
+    }
+    for (var i=Math.min(...dimension1); i<Math.max(...dimension1); i = i+1) {
+      yData.push(i.toFixed(2));
+    }
+
+    let fullData = [];
+    for(var i=0; i<xData.length; i++) {
+      fullData.push([dimension0[i], dimension1[i], coloring_information[i]]);
+    }
+
+    let heatMapOptions: echarts.EChartsOption = {
+      tooltip: {},
+      dataZoom: {
+        type: "inside",
+        xAxisIndex: 0,
+        yAxisIndex: 0
+      },
+      xAxis: [{
+        type: 'category',
+        data: xData,
+        name: 'Dimension 1',
+        nameLocation: 'middle',
+        nameGap: 40,
+        // nameRotate: 90,
+        nameTextStyle: {
+          lineHeight: 14,
+          fontWeight: 400,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+      }],
+      yAxis: [{
+        type: 'category',
+        data: yData,
+        name: 'Dimension 2',
+        nameLocation: 'middle',
+        nameGap: 50,
+        nameRotate: 90,
+        nameTextStyle: {
+          lineHeight: 14,
+          fontWeight: 400,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+      }],
+      visualMap: {
+        min: 0,
+        max: 1,
+        calculable: true,
+        realtime: false,
+        inRange: {
+          color: [
+            '#313695',
+            '#4575b4',
+            '#74add1',
+            '#abd9e9',
+            '#e0f3f8',
+            '#ffffbf',
+            '#fee090',
+            '#fdae61',
+            '#f46d43',
+            '#d73027',
+            '#a50026'
+          ]
+        }
+      },
+      series: [
+        {
+          name: this.currentMetric,
+          type: 'heatmap',
+          data: fullData,
+          emphasis: {
+            itemStyle: {
+              borderColor: '#333',
+              borderWidth: 1
+            }
+          },
+          progressive: 1000,
+          animation: false
+        }
+      ]
+    };
+    this.chartOptions = heatMapOptions;
   }
 
   is3DVisualization() {

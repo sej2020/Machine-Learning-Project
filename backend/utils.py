@@ -343,8 +343,10 @@ def comparison_wrapper(setting: int, conf: dict) -> dict:
             'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models'] # 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models'
                 }
     if setting == 1:
+        log.info("running auto ml pipeline in default setting")
         return comparison(**default_conf)
     elif setting == 2:
+        log.info("running auto ml pipeline in advanced setting")
         return comparison(**conf)
     else:
         raise Exception("The setting for the comparison function must be either 1 (to indicate request from basic user interface) or 2 (to indicate request from advanced user interface)")
@@ -435,7 +437,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
     fin_org_results = {k: v for k, v in org_results.items() if k not in failed_regs}
     assert fin_org_results, f"All regressors failed"
 
-    path_gen = lambda file: f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{file}_{id}.csv" # helper for making various output data files
+    path_gen = lambda file: f"{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_{file}_{id}.csv" # helper for making various output data files
     
     
     # the figure lookup dict has to include the parameters that will be passed to any functions it calls
@@ -456,7 +458,7 @@ def comparison(id: int, which_regressors: dict, metric_list: list, n_vizualized_
         if fig in figure_lst:
             func(*params) # these functions will both create AND write out the data - they do not return anything
 
-    output_path = f"{settings.TEMP_UPLOAD_DIR}/perf_stats_{id}.csv"
+    output_path = f"{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_{id}.csv"
     write_results(output_path, fin_org_results, metric_list)
 
     return {
