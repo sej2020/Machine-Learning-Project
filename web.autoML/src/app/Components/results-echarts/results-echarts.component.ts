@@ -495,19 +495,19 @@ export class ResultsEchartsComponent implements OnInit {
     let dimension2: number[];
     let dimension3: number[] = [];
     let data = [];
-    let curVisualizationResponse = this.is3DVisualization()? this.visualizationResponse: this.visualizationResponse2d;
+    let curVisualizationResponse = this.is3DVisualization() ? this.visualizationResponse : this.visualizationResponse2d;
     let coloring_information = curVisualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
-  
+
     if (algorithm == 'tsne') {
       dimension1 = curVisualizationResponse.tsne['dimension0'];
       dimension2 = curVisualizationResponse.tsne['dimension1'];
-      if (dimension==3) {
+      if (dimension == 3) {
         dimension3 = curVisualizationResponse.tsne['dimension2'];
       }
     } else {
       dimension1 = curVisualizationResponse.pca['dimension0'];
       dimension2 = curVisualizationResponse.pca['dimension1'];
-      if (dimension==3) {
+      if (dimension == 3) {
         dimension3 = curVisualizationResponse.tsne['dimension2'];
       }
     }
@@ -571,9 +571,6 @@ export class ResultsEchartsComponent implements OnInit {
         max: 1,
         dimension: 2,
         calculable: true,
-        // inRange: {
-        //   color: ['#24b7f2', '#f2c31a', '#ff0066']
-        // },
         inRange: {
           color: [
             '#313695',
@@ -655,9 +652,23 @@ export class ResultsEchartsComponent implements OnInit {
 
   get3DScatterPlotOptions(dimension1: number[], dimension2: number[], dimension3: number[], coloring_information: any) {
     var colors = [];
+    var originalColors = ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'];
+    const colorScale = [
+      ['0.0909', '#313695'],
+      ['0.1818', '#4575b4'],
+      ['0.2727', '#74add1'],
+      ['0.3636', '#abd9e9'],
+      ['0.4545', '#e0f3f8'],
+      ['0.5454', '#ffffbf'],
+      ['0.6363', '#fee090'],
+      ['0.7272', '#fdae61'],
+      ['0.8181', '#f46d43'],
+      ['0.9090', '#d73027'],
+      ['1', '#a50026'],
+    ]
+    
     for (var i = 0; i < this.visualizationResponse.pca['dimension0'].length; i++) {
-      var curColor = this.getColor(coloring_information[i]);
-      colors.push(curColor);
+      colors.push(this.getColor(coloring_information[i]));
     }
     var trace1 = {
       x: dimension1,
@@ -665,40 +676,73 @@ export class ResultsEchartsComponent implements OnInit {
       z: dimension3,
       mode: 'markers',
       marker: {
-        size: 8,
-        opacity: 0.8,
-        color: colors
+        size: 10,
+        opacity: 0.7,
+        color: colors,
+        colorscale: colorScale,
+        showscale: true
       },
       type: "scatter3d"
     };
     var plotData = [trace1];
     var layout = {
+      title: this.currentRegressor + ' : ' + this.currentMetric,
+      font: {
+        color: 'black',
+        size: 14
+      },
       margin: {
         l: 0,
         r: 0,
-        b: 0,
-        t: 0
+        b: 50,
+        t: 50,
+        pad: 4
+      },
+      scene: {
+        xaxis: {
+          title: 'Dimension 1',
+          backgroundcolor: "#cdd0d1",
+          gridcolor: "rgb(255, 255, 255)",
+          showbackground: true,
+          // zerolinecolor: "rgb(255, 255, 255)",
+        },
+        yaxis: {
+          title: 'Dimension 2',
+          backgroundcolor: "#cdd0d1",
+          gridcolor: "rgb(255, 255, 255)",
+          showbackground: true,
+          // zerolinecolor: "rgb(255, 255, 255)"
+        },
+        zaxis: {
+          title: 'Dimension 3',
+          backgroundcolor: "#cdd0d1",
+          gridcolor: "rgb(255, 255, 255)",
+          showbackground: true,
+          // zerolinecolor: "rgb(255, 255, 255)"
+        }
       }
     };
     Plotly.newPlot('plotly-div', plotData, layout);
   }
 
   getColor(colorValue: number) {
-    if (Math.abs(colorValue) < 0.25) {
-      return '#096921';
-    } else if (Math.abs(colorValue) < 0.75) {
-      return '#929608';
-    } else {
-      return '#963a08';
+    let colors = ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+    var chunkSize = 1 / colors.length;
+    for (var i = 0; i < colors.length; i++) {
+      if (colorValue <= (i + 1) * chunkSize) {
+        return colors[i];
+      }
     }
+    return colors[colors.length - 1];
   }
 
   getHeatMap(algorithm: string) {
-    let curVisualizationResponse = this.is3DVisualization()? this.visualizationResponse: this.visualizationResponse2d;
+    let curVisualizationResponse = this.is3DVisualization() ? this.visualizationResponse : this.visualizationResponse2d;
     let coloring_information = curVisualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
+    console.log(coloring_information);
     let dimension0: number[], dimension1: number[];
-    let xData: string[] = []
-    let yData: string[] = [];
+    let xData: number[] = []
+    let yData: number[] = [];
     if (algorithm == 'tsne') {
       dimension0 = curVisualizationResponse.tsne["dimension0"];
       dimension1 = curVisualizationResponse.tsne["dimension1"];
@@ -707,20 +751,47 @@ export class ResultsEchartsComponent implements OnInit {
       dimension1 = curVisualizationResponse.pca['dimension1'];
     }
 
-    for (var i=Math.min(...dimension0); i<Math.max(...dimension0); i = i+1) {
-      xData.push(i.toFixed(2));
+    var chunkSize = Math.ceil(Math.max(...dimension0) - Math.min(...dimension0)) / 50;
+    // var chunkSize = 20;
+    var i = Math.min(...dimension0);
+    // console.log('dimension0 min = ' + Math.min(...dimension0) +' and max = ' + Math.max(...dimension0))
+    while (i < Math.max(...dimension0)) {
+      // xData.push(i.toFixed(2));
+      xData.push(i);
+      i += chunkSize;
     }
-    for (var i=Math.min(...dimension1); i<Math.max(...dimension1); i = i+1) {
-      yData.push(i.toFixed(2));
+    // console.log('xData: ' + xData);
+    i = Math.min(...dimension1);
+    var chunkSize = Math.ceil(Math.max(...dimension1) - Math.min(...dimension1)) / 50;
+    console.log('dimension1 min = ' + Math.min(...dimension1) + ' and max = ' + Math.max(...dimension1));
+    while (i < Math.max(...dimension1)) {
+      // yData.push(i.toFixed(2));
+      yData.push(i);
+      i += chunkSize;
     }
-
-    let fullData = [];
-    for(var i=0; i<xData.length; i++) {
-      fullData.push([dimension0[i], dimension1[i], coloring_information[i]]);
+    // console.log('yData: ' + yData);
+    let fullData: number[][] = [];
+    for (var i = 0; i < dimension0.length; i++) {
+      // fullData.push([this.findNearestIndex(xData, dimension0[i]), this.findNearestIndex(yData, dimension1[i]), coloring_information[i]]);
+      fullData.push([this.findClosest(xData, dimension0[i]), this.findClosest(yData, dimension1[i]), coloring_information[i]]);
     }
-
+    // console.log(fullData);
     let heatMapOptions: echarts.EChartsOption = {
       tooltip: {},
+      toolbox: {
+        feature: {
+          dataView: {
+            readOnly: false,
+            title: 'Data View'
+          },
+          saveAsImage: {
+            type: 'png',
+            name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
+      },
       dataZoom: {
         type: "inside",
         xAxisIndex: 0,
@@ -762,11 +833,15 @@ export class ResultsEchartsComponent implements OnInit {
           color: '#030359'
         },
       }],
-      visualMap: {
+      visualMap: [{
+        // min: Math.min(...Object.values(coloring_information)),
+        // max:  Math.max(...Object.values(coloring_information)),
+        dimension: 2,
+        type: 'continuous',
         min: 0,
         max: 1,
         calculable: true,
-        realtime: false,
+        realtime: true,
         inRange: {
           color: [
             '#313695',
@@ -782,7 +857,7 @@ export class ResultsEchartsComponent implements OnInit {
             '#a50026'
           ]
         }
-      },
+      }],
       series: [
         {
           name: this.currentMetric,
@@ -793,17 +868,84 @@ export class ResultsEchartsComponent implements OnInit {
               borderColor: '#333',
               borderWidth: 1
             }
-          },
-          progressive: 1000,
-          animation: false
+          }
+          // z: 2,
+          // progressiveThreshold: 10000,
+          // progressive: 0
+          // animation: false
         }
       ]
     };
     this.chartOptions = heatMapOptions;
   }
 
+  findNearestIndex(array: number[], value: number) {
+    let i: number = 0;
+    for (i = 0; i < array.length; i++) {
+      if (value > array[i])
+        return i;
+    }
+    return array.length - 1;
+  }
+
+
   is3DVisualization() {
     return this.chartType.includes("3d");
+  }
+
+  findClosest(arr: number[], target: number) {
+    let n = arr.length;
+
+    // Corner cases
+    if (target <= arr[0])
+      return 0;
+    if (target >= arr[n - 1])
+      return n - 1;
+
+    // Doing binary search
+    let i = 0, j = n, mid = 0;
+    while (i < j) {
+      mid = Math.floor((i + j) / 2);
+
+      if (arr[mid] == target)
+        return mid;
+
+      // If target is less than array
+      // element,then search in left
+      if (target < arr[mid]) {
+
+        // If target is greater than previous
+        // to mid, return closest of two
+        if (mid > 0 && target > arr[mid - 1])
+          return this.getClosest(arr, mid - 1, mid, target);
+
+        // Repeat for left half
+        j = mid;
+      }
+
+      // If target is greater than mid
+      else {
+        if (mid < n - 1 && target < arr[mid + 1])
+          return this.getClosest(arr, mid, mid + 1, target);
+        i = mid + 1; // update i
+      }
+    }
+
+    // Only single element left after search
+    console.log('closest to ' + target + ' is at index ' + mid + ' with value ' + arr[mid]);
+    return mid;
+  }
+
+  // Method to compare which one is the more close
+  // We find the closest by taking the difference
+  //  between the target and both values. It assumes
+  // that val2 is greater than val1 and target lies
+  // between these two.
+  getClosest(arr: number[], idx1: number, idx2: number, target: number) {
+    if (target - arr[idx1] >= arr[idx2] - target)
+      return idx2;
+    else
+      return idx1;
   }
 
 }
