@@ -700,7 +700,7 @@ export class ResultsEchartsComponent implements OnInit {
       colors.push(this.getColor(coloring_information[i]));
       // colors.push(coloring_information[i])
     }
-    console.log(colors);
+    // console.log(colors);
     var trace1 = {
       x: dimension1,
       y: dimension2,
@@ -957,7 +957,7 @@ export class ResultsEchartsComponent implements OnInit {
     }
 
     // Only single element left after search
-    console.log('closest to ' + target + ' is at index ' + mid + ' with value ' + arr[mid]);
+    // console.log('closest to ' + target + ' is at index ' + mid + ' with value ' + arr[mid]);
     return mid;
   }
 
