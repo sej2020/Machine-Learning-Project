@@ -1,3 +1,11 @@
-,Root Mean Squared Error,Explained Variance,Max Error,Mean Absolute Error,Mean Squared Error,Median Absolute Error,R-Squared,Mean Poisson Deviance,Mean Gamma Deviance,Mean Absolute Percentage Error,D-Squared Absolute Error Score,D-Squared Pinball Score,D-Squared Tweedie Score
-DecisionTreeRegressor,7.0748,0.7869,28.64,4.8878,50.0526,3.62,0.7859,1.4977,0.0559,0.1544,0.6017,0.6017,0.7859
-LassoLars,10.2184,0.5541,38.0019,8.1225,104.4164,6.9935,0.5533,3.024,0.1044,0.3047,0.3381,0.3381,0.5533
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+KNeighborsRegressor,3.9403,15.5258,2.8358,0.9452
+Lars,4.5371,20.5857,3.6118,0.9274
+LassoLarsIC,4.5371,20.5857,3.6118,0.9274
+LinearRegression,4.5371,20.5857,3.6118,0.9274
+Ridge,4.5371,20.5853,3.612,0.9274
+DecisionTreeRegressor,4.7403,22.4701,3.2999,0.9207
+Lasso,4.9384,24.3879,3.9654,0.914
+LassoLars,4.9388,24.3916,3.9657,0.9139
+ElasticNet,6.1948,38.3753,4.9369,0.8646
+GammaRegressor,7.2776,52.964,5.8634,0.8131
