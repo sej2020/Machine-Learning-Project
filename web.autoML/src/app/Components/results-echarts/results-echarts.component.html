@@ -47,15 +47,20 @@
         </div>
         <div *ngIf="visualizationType=='data_centric_visualization'">
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
+                <mat-label>Select Visualization Algorithm</mat-label>
+                <mat-select aria-required="true" [(value)]="visualizationAlgorithm"
+                    (selectionChange)="changeInVisualizationAlgorithm($event.value)">
+                    <mat-option value="pca">PCA</mat-option>
+                    <mat-option value="tsne">TSNE</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Select Chart Type</mat-label>
-                <mat-select aria-required="true" [(value)]="chartType"
+                <mat-select aria-required="true" [(value)]="actualChartType"
                     (selectionChange)="changeInChartType($event.value)">
-                    <mat-option value="tsne_visualization_2d">TSNE Visualization-2D</mat-option>
-                    <mat-option value="pca_visualization_2d">PCA Visualization-2D</mat-option>
-                    <mat-option value="tsne_visualization_3d">TSNE Visualization-3D</mat-option>
-                    <mat-option value="pca_visualization_3d">PCA Visualization-3D</mat-option>
-                    <mat-option value="pca_heatmap">PCA Heatmap</mat-option>
-                    <mat-option value="tsne_heatmap">TSNE Heatmap</mat-option>
+                    <mat-option value="2d">Two Dimensional Visualization</mat-option>
+                    <mat-option value="3d">Three Dimensional Visualization</mat-option>
+                    <mat-option value="heatmap">Data Quality Map</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">

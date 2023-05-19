@@ -1,3 +1,6 @@
-<app-main-component></app-main-component>
+<div class="my-overlay" *ngIf="showOverlay">
+    <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+</div>
+<app-main-component *ngIf="!showOverlay"></app-main-component>
 
 

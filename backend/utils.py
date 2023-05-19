@@ -588,6 +588,7 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
 
     df_sorted = df.sort_values(by=columns[0], axis=0, ascending=not (metric_help[columns[0]]['Correlation Score']))
     df_sorted = df_sorted.iloc[:n_vizualized_tb]
+    log.info(df_sorted)
     df_sorted.to_csv(path, header=True, index=True)
 
     return
