@@ -1,7 +1,8 @@
-import { FormContainerComponent } from './../form-container/form-container.component';
-import { UploadRequest, UploadRequestService } from './../../Services/upload-request.service';
+import { NONE_TYPE } from '@angular/compiler';
+import { UploadRequestService } from './../../Services/upload-request.service';
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subject, Subscription, interval, takeUntil } from 'rxjs';
 
 export interface IResultsData {
   request_id: string,
@@ -27,34 +28,46 @@ export interface IResults {
 
 export class ResultPageComponent {
 
-  constructor(private uploadRequestService: UploadRequestService, public route : ActivatedRoute, private router: Router) { }
+  constructor(private uploadRequestService: UploadRequestService, public route: ActivatedRoute, private router: Router) { }
 
   req_id: string = '';
   resultsData!: IResults;
-  resultsFetched = false;
-
+  resultInterval = interval(1000);
+  stopPlay$: Subject<any> = new Subject();
+  keepFetching: boolean = true;
   ngOnInit() {
-    this.req_id = history.state.id? history.state.id: '';
-    if(this.req_id.length > 0) {
-      this.getResults();
+    this.req_id = history.state.id ? history.state.id : '';
+    if (this.req_id.length > 0) {
+      this.getResultsWithSubscription();
     }
   }
 
   changeInRequestId(event: any) {
+    this.stopPlay$.next(10);
     this.req_id = event.target.value;
+  }
+
+  getResultsWithSubscription() {
+    
+    this.resultInterval.pipe(takeUntil(this.stopPlay$)).subscribe(() => {
+      this.getResults();
+    });
+   
   }
 
   getResults() {
     this.uploadRequestService.getRequestStatus(this.req_id)
       .subscribe((data: any) => {
         this.resultsData = data;
-        this.resultsFetched = true;
-        console.log("results data", this.resultsData);
+        if (this.resultsData.data.request_status !== '0') {
+          this.keepFetching = false;
+          this.stopPlay$.next(10);
+        }
       });
   }
 
   redirectToVisualization() {
-    this.router.navigate(["", "result-charts"],{relativeTo: this.route, skipLocationChange :false, state: {id: this.req_id}});
+    this.router.navigate(["", "result-charts"], { relativeTo: this.route, skipLocationChange: false, state: { id: this.req_id } });
   }
 
 }
