@@ -66,6 +66,9 @@ async def create_automl_request(form_data: AutoMLCreateRequest = Depends(), file
     s3_key = f'{request_id}_{file_data.filename}'
     temp_path = f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}{file_data.filename}'
     save_file(file_data.file.read(), temp_path)
+    if form_data.default_setting == 1:
+        form_data.regressor_list = settings.REGRESSOR_LIST
+        form_data.metrics = settings.METRICS_LIST
     try:
         s3Service.upload_file(temp_path, s3_key)
         automl_request = AutoMLRequestRepository.add_request(request_id, s3_key, form_data.regressor_list, form_data.email, form_data.metrics,

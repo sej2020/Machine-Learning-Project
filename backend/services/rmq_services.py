@@ -37,7 +37,7 @@ def send_create_request_message(automl_create_request: AutoMLRequest):
     regressor_map = {}
     req_regressor_list = convert_str_to_list(automl_create_request.regressor_list)
     for regressor in settings.REGRESSOR_LIST:
-        regressor_map[regressor] = 1 if regressor in req_regressor_list else 0
+        regressor_map[regressor] = 1 if (automl_create_request.default_setting == 1 or regressor in req_regressor_list) else 0
     data = {
         'id':               automl_create_request.id,
         'which_regressors': regressor_map,

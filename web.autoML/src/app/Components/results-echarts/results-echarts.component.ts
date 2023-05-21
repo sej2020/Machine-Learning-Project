@@ -111,6 +111,7 @@ export class ResultsEchartsComponent implements OnInit {
 
   changeInVisualizationType(value: any) {
     this.visualizationType = value;
+    this.currentRegressor = this.regressorList[0];
     this.actualChartType = this.visualizationType == 'default_visualization' ? this.defaultChartTypes[0] : this.visualizationChartTypes[0];
     this.chartType = this.visualizationType == 'default_visualization' ? this.defaultChartTypes[0] : this.visualizationAlgorithm + '_visualization_' + this.visualizationChartTypes[0];
     if (this.visualizationType == 'default_visualization') {
@@ -513,7 +514,6 @@ export class ResultsEchartsComponent implements OnInit {
     let data = [];
     let curVisualizationResponse = this.is3DVisualization() ? this.visualizationResponse : this.visualizationResponse2d;
     let coloring_information = curVisualizationResponse.coloring_data[this.currentMetric][this.currentRegressor];
-
     if (algorithm == 'tsne') {
       dimension1 = curVisualizationResponse.tsne['dimension0'];
       dimension2 = curVisualizationResponse.tsne['dimension1'];
