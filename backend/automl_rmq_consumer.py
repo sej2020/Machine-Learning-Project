@@ -1,16 +1,10 @@
-import json
 import logging
 import os
 import threading
 
 import pika
 
-
-from configuration.config import settings
-from db.models.auto_ml_request import AutoMLRequestRepository
 from services.rmq_services import process_automlrequest
-from services.s3Service import S3Service
-from utils import comparison_wrapper
 
 # logging.basicConfig(level=logging.CRITICAL, format='%(asctime)s  %(name)s  %(levelname)s {%(pathname)s:%(lineno)d}: %(message)s')
 logging.root.setLevel(logging.INFO)
@@ -24,11 +18,9 @@ class Consumer:
         rmq_password = os.getenv('rmq_password') or 'guest'
         self.credentials = pika.PlainCredentials(rmq_username, rmq_password)
         if os.getenv('rmq_service_name'):
-            log.info("pointing to kubernetes cluster")
             rmqServiceName = os.getenv('rmq_service_name')
             rmq_host, rmq_port = os.getenv('{}_SERVICE_HOST'.format(rmqServiceName)), os.getenv('{}_SERVICE_PORT'.format(rmqServiceName))
         else:
-            log.info("is this from log? pointing to local")
             rmq_host, rmq_port = os.getenv('rmq_host') or 'localhost', int(os.getenv('rmq_port') or '5672')
         log.info('rmq_url: {}:{}'.format(rmq_host, rmq_port))
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(host=rmq_host, port=rmq_port, credentials=self.credentials))

@@ -69,7 +69,8 @@ def process_automlrequest(body):
         log.info(f'completed running automl pipeline for {request_id}')
         result_file_list = [comparison_result['output_path'],
                             f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Accuracy_over_Various_Proportions_of_Training_Set_{request_id}.csv',
-                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Error_by_Datapoint_{request_id}.csv']
+                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Error_by_Datapoint_{request_id}.csv',
+                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Test_Best_Models_{request_id}.csv']
         s3_service = S3Service(settings.S3_RESULTS_BUCKET)
         result_s3_key_list = []
         for i, result_file in enumerate(result_file_list):

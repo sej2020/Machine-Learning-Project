@@ -20,6 +20,7 @@ export class ResultsEchartsComponent implements OnInit {
   boxplotData!: [string[]]
   cvLineplotData!: any
   trainTestErrorData!: any
+  testBestModelsData!: any
   resultsData!: IResults;
   visualizationResponse!: IDataVisualizationResponse;
   visualizationResponse2d!: IDataVisualizationResponse;
@@ -57,6 +58,7 @@ export class ResultsEchartsComponent implements OnInit {
         this.boxplotData = this.resultsData.data['visualization_data']['boxplot']
         this.cvLineplotData = this.resultsData.data['visualization_data']['cv_lineplot'];
         this.trainTestErrorData = this.resultsData.data['visualization_data']['train_test_error'];
+        this.testBestModelsData = this.resultsData.data['visualization_data']['test_best_models'];
         this.yAxisData = this.resultsData.data['metrics_list'];
         this.currentMetric = this.yAxisData[0];
         this.regressorList = this.resultsData.data['regressor_list'];
@@ -126,6 +128,8 @@ export class ResultsEchartsComponent implements OnInit {
   updateChartOptions() {
     if (this.chartType === 'boxplot') {
       this.getBoxPlotCharOptions(this.currentMetric, this.boxplotData);
+    } else if (this.chartType === 'test_best_models') {
+      this.getTestBestModelsChartOptions();
     } else if (this.chartType === 'cv_line_chart') {
       this.getCvLinePlotChartOptions(this.currentMetric, this.cvLineplotData['num_cv_folds'], this.cvLineplotData[this.currentMetric]);
     } else if (this.chartType === 'tsne_visualization_2d') {
@@ -143,6 +147,98 @@ export class ResultsEchartsComponent implements OnInit {
     } else {
       this.getDataPercentChartOptions();
     }
+  }
+
+  getTestBestModelsChartOptions() {
+    console.log(this.testBestModelsData);
+    let curData = this.testBestModelsData[this.currentMetric];
+    let regressorNames = Object.keys(curData);
+    let plotData = [['Regressor', this.currentMetric]]
+    for (var i = 0; i < regressorNames.length; i++) {
+      plotData.push([regressorNames[i], curData[regressorNames[i]]])
+    }
+    
+    console.log(plotData)
+
+    let sortBarOptions: echarts.EChartsOption = {
+      toolbox: {
+        feature: {
+          dataView: {
+            readOnly: false,
+            title: 'Data View'
+          },
+          saveAsImage: {
+            type: 'png',
+            name: 'best_models_' + this.requestId,
+            title: 'Download Plot',
+            pixelRatio: 2
+          },
+        },
+      },
+      title: {
+        text: 'Ranking of regressors based on ' + this.currentMetric,
+        padding: [5, 5, 5, 5],
+        top: '2%',
+        left: '1%'
+      },
+      dataset: [
+        {
+          dimensions: ['Regressor', this.currentMetric],
+          source: plotData
+        }
+      ],
+      xAxis: {
+        type: 'category',
+        nameLocation: 'middle',
+        nameGap: 30,
+        scale: true,
+        nameTextStyle: {
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359',
+          rotate: 30
+        },
+        // show: false
+      },
+      yAxis: {
+        type: 'value',
+        axisLine: {
+          show: true
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359'
+        },
+        name: this.currentMetric,
+        nameLocation: 'middle',
+        nameGap: 30,
+        nameTextStyle: {
+          lineHeight: 14,
+          fontWeight: 800,
+          fontSize: 16,
+          color: 'black'
+        },
+      },
+      series: {
+        type: 'bar',
+        encode: { x: 'Regressor', y: this.currentMetric },
+        datasetIndex: 0,
+        label: {
+          show: true,
+          position: 'inside'
+          // position: [5, -15],
+          // formatter: function(params) {
+          //     return params.name;
+          // }
+        }
+      }
+    };
+    this.chartOptions = sortBarOptions;
   }
 
   getDataPercentChartOptions() {
@@ -301,8 +397,6 @@ export class ResultsEchartsComponent implements OnInit {
           color: '#003300',
           fontSize: 16
         },
-
-
       },
       grid: {
         left: '3%',

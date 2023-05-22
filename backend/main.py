@@ -99,7 +99,8 @@ async def get_automl_request(request_id):
             boxplot_vis_data, metrics_list = visualization_service.get_boxplot_data(result_file_list[0])
             cv_lineplot_vis_data = visualization_service.get_lineplot_data_cv(result_file_list[0])
             train_test_error_data = visualization_service.get_train_test_error_data(result_file_list[1])
-            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data}
+            test_best_models_data = visualization_service.get_best_models_data(result_file_list[3])
+            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data, 'test_best_models': test_best_models_data}
             data.metrics_list = metrics_list
             data.regressor_list = automl_request.regressor_list.split(',')
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))
