@@ -176,7 +176,7 @@ export class ResultsEchartsComponent implements OnInit {
         },
       },
       title: {
-        text: 'Ranking of regressors based on ' + this.currentMetric,
+        text: ' Single Model Comparison (SMC) : ' + this.currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -247,7 +247,7 @@ export class ResultsEchartsComponent implements OnInit {
       responsive: true,
       maintainAspectRatio: true,
       title: {
-        text: 'Train Test Error - ' + this.currentMetric,
+        text: this.currentRegressor + ' : Quantity Curve - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -381,7 +381,7 @@ export class ResultsEchartsComponent implements OnInit {
       responsive: true,
       maintainAspectRatio: true,
       title: {
-        text: 'Regressors - ' + currentMetric,
+        text: 'Cross-Validation Model Comparison (CVMC) Line Plot : ' + currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -469,7 +469,7 @@ export class ResultsEchartsComponent implements OnInit {
       responsive: true,
       maintainAspectRatio: true,
       title: {
-        text: 'Regressors - ' + currentMetric,
+        text: 'Cross-Validation Model Comparison (CVMC) Box Plot : ' + currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -636,7 +636,7 @@ export class ResultsEchartsComponent implements OnInit {
   get2DScatterPlotOptions(data: any) {
     let scatterPlotOption: echarts.EChartsOption = {
       title: {
-        text: this.currentRegressor + " : " + this.currentMetric,
+        text: this.currentRegressor + ' : ' + this.visualizationAlgorithm.toUpperCase() + ' Point Predictability (2D) - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
@@ -811,7 +811,7 @@ export class ResultsEchartsComponent implements OnInit {
     };
     var plotData = [trace1];
     var layout = {
-      title: this.currentRegressor + ' : ' + this.currentMetric,
+      title:  this.currentRegressor + ' : ' + this.visualizationAlgorithm.toUpperCase() + ' Point Predictability (3D) - ' + this.currentMetric,
       font: {
         color: 'black',
         size: 14
@@ -895,7 +895,7 @@ export class ResultsEchartsComponent implements OnInit {
     let heatMapOptions: echarts.EChartsOption = {
       tooltip: {},
       title: {
-        text: this.currentRegressor + " : " + this.currentMetric,
+        text:  this.currentRegressor + ' : ' + this.visualizationAlgorithm.toUpperCase() + ' Region Predictability - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
