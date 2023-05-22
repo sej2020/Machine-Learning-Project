@@ -381,7 +381,7 @@ export class ResultsEchartsComponent implements OnInit {
       responsive: true,
       maintainAspectRatio: true,
       title: {
-        text: 'Cross-Validation Model Comparison (CVMC) Line Plot : ' + currentMetric,
+        text: 'Cross-Validation Model Comparison (CVMC) Line Chart : ' + currentMetric,
         padding: [5, 5, 5, 5],
         top: '2%',
         left: '1%'
