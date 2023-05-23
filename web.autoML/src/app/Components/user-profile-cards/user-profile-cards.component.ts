@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
+import { MatList } from '@angular/material/list';
 import { MatCarouselSlide, MatCarouselSlideComponent } from 'ng-mat-carousel';
+import { Observer } from 'rxjs';
+import { Observable } from 'rxjs/internal/Observable';
 
 interface usersInterface {
   UserName: string
@@ -7,17 +10,32 @@ interface usersInterface {
   UserDetails: string
   UserProfileLinks: string[]
 }
-
+export interface Tabs {
+  label: string;
+}
 @Component({
   selector: 'app-user-profile-cards',
   templateUrl: './user-profile-cards.component.html',
   styleUrls: ['./user-profile-cards.component.scss']
 })
+
 export class UserProfileCardsComponent {
 
-  usersProfile: usersInterface[] = [];
+  studentsProfile: usersInterface[] = [];
+  advisorsProfile: usersInterface[] = [];
+  asyncTabs: any;
+  constructor(){
+    this.asyncTabs = new Observable((observer: Observer<Tabs[]>) => {
+      setTimeout(() => {
+        observer.next([
+          {label: 'Students'},
+          {label: 'Advisors'},
+        ]);
+      }, 1000);
+    });
+  }
   ngOnInit() {
-    this.usersProfile = [
+    this.studentsProfile = [
       {
         "UserName": "Sam Johnson",
         "UserTitle": "Undergraduate student at IUB",
@@ -41,7 +59,33 @@ export class UserProfileCardsComponent {
         "UserTitle": "Graduate student at IUB",
         "UserDetails": "Keerthana graduated in Masters in Computer Science from Luddy School of Informatics, Computing, and Engineering, Indiana University Bloomington.",
         "UserProfileLinks": ['https://github.com/keerthana-mk']
+      },
+      {
+        "UserName": "Prof. Hasan Kurban",
+        "UserTitle": "Professor at IUB",
+        "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
+        "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
+      },
+      {
+        "UserName": "Prof. DD",
+        "UserTitle": "Professor at IUB",
+        "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
+        "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
       }
+    ];
+    this.advisorsProfile = [
+      {
+        "UserName": "Prof. Hasan Kurban",
+        "UserTitle": "Professor at IUB",
+        "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
+        "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
+      },
+      {
+        "UserName": "Prof. DD",
+        "UserTitle": "Professor at IUB",
+        "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
+        "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
+      },
     ];
   }
 }

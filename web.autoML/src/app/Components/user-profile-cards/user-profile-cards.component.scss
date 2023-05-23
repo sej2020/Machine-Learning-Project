@@ -1,5 +1,6 @@
 .users-profile-container{
     display: flex;
+    position: absolute;
     flex-direction: row;
     overflow-x: scroll;
     overflow-y: hidden;
@@ -8,9 +9,9 @@
 }
 .user-card{
 //   max-width: 400px;
-  position: relative;
+//   position: relative;
   width: 400px;
-  margin-top: 2%;
+  margin-top: 0.8%;
   margin-left: 1%;
   margin-right: 2%;
   height: calc(100vh - 70vh);
@@ -18,7 +19,12 @@
   display: inline-flex;
   
 }
-
+// .tab-group-cards{
+    
+//     overflow-x: scroll;
+//     overflow-y: hidden;
+// }
+ 
 .user-card-group-title{
     padding: 10px;
 
@@ -26,13 +32,38 @@
 }
 .user-card-details{
     padding-bottom: 8px;
+    height: 100px;
 }
 
 .user-card-footer{
     margin: 2px;
     background-color: grey;
+    height: 200px;
 }
 .mat-card-action-links{
+    top: 1%;
     position: relative;
     padding: 10px;
 }
+::ng-deep {
+
+    // SOLUITON:
+   .mat-tab-list {
+     transform: inherit !important;
+   }
+ 
+ 
+   // FORCES SCROLLABILIY:
+   .mat-tab-label-container {
+     overflow-x: scroll !important;
+   }
+ 
+   // HIDES MAT-TAB's NATIVE PAGINATION:
+   .mat-tab-header-pagination {
+     display: none !important;
+   }
+ 
+ }
+ .card-container{
+    overflow: scroll;
+ }
