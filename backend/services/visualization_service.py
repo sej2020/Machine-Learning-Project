@@ -1,4 +1,5 @@
 import csv
+import logging
 import os.path
 
 from configuration.config import settings
@@ -71,5 +72,24 @@ def get_train_test_error_data(visualization_filename):
                 visualization_data[metricName][regressorName]['train'] = []
                 visualization_data[metricName][regressorName]['test'] = []
             visualization_data[metricName][regressorName][data_type].append(round(float(v), 2))
+
+    return visualization_data
+
+def get_best_models_data(visualization_filename):
+    visualization_result_filepath = download_results_file(visualization_filename)
+    visualization_result_file = open(visualization_result_filepath, 'r')
+    visualization_csv_file = csv.DictReader(visualization_result_file)
+
+    visualization_data = {}
+    for row in visualization_csv_file:
+        for k, v in row.items():
+            if k == '':
+                regressorName = v
+            else:
+                metricName = k
+                metricValue = v
+                if metricName not in visualization_data:
+                    visualization_data[metricName] = {}
+                visualization_data[metricName][regressorName] = metricValue
 
     return visualization_data

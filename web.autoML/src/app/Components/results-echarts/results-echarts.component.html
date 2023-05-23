@@ -24,9 +24,10 @@
                 <mat-label>Enter Chart Type</mat-label>
                 <mat-select aria-required="true" [(value)]="chartType"
                     (selectionChange)="changeInChartType($event.value)">
-                    <mat-option value="boxplot">Boxplot</mat-option>
-                    <mat-option value="cv_line_chart">Cross Validation Line Chart</mat-option>
-                    <mat-option value="train_test_error">Train Test Error</mat-option>
+                    <mat-option value="boxplot">Cross-Validation Model Comparison (CVMC) Box Plot</mat-option>
+                    <mat-option value="cv_line_chart">Cross-Validation Model Comparison (CVMC) Line Chart</mat-option>
+                    <mat-option value="train_test_error">Quantity Curve</mat-option>
+                    <mat-option value="test_best_models">Single Model Comparison (SMC) Plot</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
@@ -47,15 +48,20 @@
         </div>
         <div *ngIf="visualizationType=='data_centric_visualization'">
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
+                <mat-label>Select Visualization Algorithm</mat-label>
+                <mat-select aria-required="true" [(value)]="visualizationAlgorithm"
+                    (selectionChange)="changeInVisualizationAlgorithm($event.value)">
+                    <mat-option value="pca">PCA</mat-option>
+                    <mat-option value="tsne">TSNE</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">
                 <mat-label>Select Chart Type</mat-label>
-                <mat-select aria-required="true" [(value)]="chartType"
+                <mat-select aria-required="true" [(value)]="actualChartType"
                     (selectionChange)="changeInChartType($event.value)">
-                    <mat-option value="tsne_visualization_2d">TSNE Visualization-2D</mat-option>
-                    <mat-option value="pca_visualization_2d">PCA Visualization-2D</mat-option>
-                    <mat-option value="tsne_visualization_3d">TSNE Visualization-3D</mat-option>
-                    <mat-option value="pca_visualization_3d">PCA Visualization-3D</mat-option>
-                    <mat-option value="pca_heatmap">PCA Heatmap</mat-option>
-                    <mat-option value="tsne_heatmap">TSNE Heatmap</mat-option>
+                    <mat-option value="2d">Point Predictability (2D)</mat-option>
+                    <mat-option value="3d">Point Predictability (3D)</mat-option>
+                    <mat-option value="heatmap">Region Predictability</mat-option>
                 </mat-select>
             </mat-form-field>
             <mat-form-field *ngIf="yAxisData!=null && yAxisData.length > 0" class="requestInput">

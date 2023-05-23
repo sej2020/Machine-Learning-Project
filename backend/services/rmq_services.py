@@ -37,7 +37,7 @@ def send_create_request_message(automl_create_request: AutoMLRequest):
     regressor_map = {}
     req_regressor_list = convert_str_to_list(automl_create_request.regressor_list)
     for regressor in settings.REGRESSOR_LIST:
-        regressor_map[regressor] = 1 if regressor in req_regressor_list else 0
+        regressor_map[regressor] = 1 if (automl_create_request.default_setting == 1 or regressor in req_regressor_list) else 0
     data = {
         'id':               automl_create_request.id,
         'which_regressors': regressor_map,
@@ -69,7 +69,8 @@ def process_automlrequest(body):
         log.info(f'completed running automl pipeline for {request_id}')
         result_file_list = [comparison_result['output_path'],
                             f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Accuracy_over_Various_Proportions_of_Training_Set_{request_id}.csv',
-                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Error_by_Datapoint_{request_id}.csv']
+                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Error_by_Datapoint_{request_id}.csv',
+                            f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}perf_stats_Test_Best_Models_{request_id}.csv']
         s3_service = S3Service(settings.S3_RESULTS_BUCKET)
         result_s3_key_list = []
         for i, result_file in enumerate(result_file_list):

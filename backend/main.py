@@ -66,6 +66,9 @@ async def create_automl_request(form_data: AutoMLCreateRequest = Depends(), file
     s3_key = f'{request_id}_{file_data.filename}'
     temp_path = f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}{file_data.filename}'
     save_file(file_data.file.read(), temp_path)
+    if form_data.default_setting == 1:
+        form_data.regressor_list = settings.REGRESSOR_LIST
+        form_data.metrics = settings.METRICS_LIST
     try:
         s3Service.upload_file(temp_path, s3_key)
         automl_request = AutoMLRequestRepository.add_request(request_id, s3_key, form_data.regressor_list, form_data.email, form_data.metrics,
@@ -96,7 +99,8 @@ async def get_automl_request(request_id):
             boxplot_vis_data, metrics_list = visualization_service.get_boxplot_data(result_file_list[0])
             cv_lineplot_vis_data = visualization_service.get_lineplot_data_cv(result_file_list[0])
             train_test_error_data = visualization_service.get_train_test_error_data(result_file_list[1])
-            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data}
+            test_best_models_data = visualization_service.get_best_models_data(result_file_list[3])
+            data.visualization_data = {'boxplot': boxplot_vis_data, 'cv_lineplot': cv_lineplot_vis_data, 'train_test_error': train_test_error_data, 'test_best_models': test_best_models_data}
             data.metrics_list = metrics_list
             data.regressor_list = automl_request.regressor_list.split(',')
         response = jsonable_encoder(AutoMLCreateResponse(error=None, data=data))

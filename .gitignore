@@ -16,3 +16,8 @@ imgs
 figs\(*
 *.bin
 memray-csv*
+
+
+# docker volumes
+metadata/
+data/

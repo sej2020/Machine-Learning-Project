@@ -18,8 +18,8 @@ class Settings:
     DATABASE_URL = f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
     OS = 'linux'
     PATH_SEPARATOR = '/' if OS == 'linux' else '\\'
-    TEMP_UPLOAD_DIR = f'/home/madhavan/python-workspace/Machine-Learning-Project/backend/uploads'
-    TEMP_DOWNLOAD_DIR = f'/home/madhavan/python-workspace/Machine-Learning-Project/backend/downloads'
+    TEMP_UPLOAD_DIR = f'C:\\Users\\18123\\OneDrive\\Documents\\sej2020\\uploads'
+    TEMP_DOWNLOAD_DIR = f'C:\\Users\\18123\\OneDrive\\Documents\\sej2020\\downloads'
     S3_DATA_BUCKET = 'data-bucket'
     S3_RESULTS_BUCKET = 'results-bucket'
 
@@ -33,7 +33,7 @@ class Settings:
                       'PassiveAggressiveRegressor', 'PoissonRegressor', 'QuantileRegressor', 'RANSACRegressor', 'RadiusNeighborsRegressor',
                       'RandomForestRegressor', 'Ridge', 'SGDRegressor', 'SVR', 'TheilSenRegressor', 'TransformedTargetRegressor', 'TweedieRegressor']
     METRICS_LIST = ['Mean Squared Error', 'Root Mean Squared Error', 'Mean Absolute Error', 'R-Squared']
-    VISUALIZATION_LIST = ['Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint', 'Test_Best_Models']
+    VISUALIZATION_LIST = ['Test_Best_Models', 'Accuracy_over_Various_Proportions_of_Training_Set', 'Error_by_Datapoint']
 
     HOST = 'http://localhost:8081'
 

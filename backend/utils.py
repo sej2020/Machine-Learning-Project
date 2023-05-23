@@ -585,10 +585,8 @@ def test_best(fin_org_results: dict, metric_list: list, train_attribs: np.array,
     # creating a table to display the prediction score of the "best" model of each regressor type. the regressors are ranked according to the best performance over
     # test label predictions
     df = pd.DataFrame(data=output, index=rows, columns=columns)
-
-    df_sorted = df.sort_values(by=columns[0], axis=0, ascending=not (metric_help[columns[0]]['Correlation Score']))
-    df_sorted = df_sorted.iloc[:n_vizualized_tb]
-    df_sorted.to_csv(path, header=True, index=True)
+    df.sort_values(by=columns[0], axis=0, ascending=not (metric_help[columns[0]]['Correlation Score']), inplace=True)
+    df.to_csv(path, header=True, index=True)
 
     return
 
