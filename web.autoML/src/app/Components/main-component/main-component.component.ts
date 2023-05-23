@@ -28,14 +28,14 @@ export class MainComponentComponent {
       itemLink: "/home"
     },
     {
-      iconName: "assignment_turned_in",
-      itemName: "Data Validation",
-      itemLink: "/dataValidation"
-    },
-    {
       iconName: "draw",
       itemName: "Create New Request",
       itemLink: "/newRequest"
+    },
+    {
+      iconName: "assignment_turned_in",
+      itemName: "Data Validation",
+      itemLink: "/dataValidation"
     },
     {
       iconName: "stacked_bar_chart",
@@ -43,9 +43,14 @@ export class MainComponentComponent {
       itemLink: "/results"
     },
     {
-      iconName: "stacked_bar_chart",
+      iconName: "query_stats",
       itemName: "Result Visualization",
       itemLink: "/result-charts"
+    },
+    {
+      iconName: "info",
+      itemName: "About",
+      itemLink: "/about"
     }
   ]
 

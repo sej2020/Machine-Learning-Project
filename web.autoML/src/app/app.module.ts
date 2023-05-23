@@ -29,6 +29,7 @@ import * as echarts from 'echarts';
 import { UserProfileCardsComponent } from './Components/user-profile-cards/user-profile-cards.component';
 import { MatCarouselModule} from 'ng-mat-carousel';
 import { DataValidationComponent } from './Components/data-validation/data-validation.component';
+import {MatTabsModule} from '@angular/material/tabs';
 @NgModule({
   
   declarations: [
@@ -62,6 +63,7 @@ import { DataValidationComponent } from './Components/data-validation/data-valid
     AppRoutingModule,
     MatListModule,
     MatDialogModule,
+    MatTabsModule,
     NgxEchartsModule.forRoot({
       echarts
     }),
@@ -86,6 +88,7 @@ import { DataValidationComponent } from './Components/data-validation/data-valid
     AppRoutingModule,
     MatListModule,
     MatDialogModule,
+    MatTabsModule
   ],
   providers: [],
   bootstrap: [AppComponent],
