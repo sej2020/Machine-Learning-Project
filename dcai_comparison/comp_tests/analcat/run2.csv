@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+NuSVR,0.5434,0.2953,0.4829,0.3338
+SVR,0.5629,0.3168,0.4733,0.2851
+AdaBoostRegressor,0.576,0.3318,0.5287,0.2514
+GammaRegressor,0.6047,0.3657,0.5102,0.1749
+HistGradientBoostingRegressor,0.6177,0.3815,0.5352,0.1392
+PoissonRegressor,0.6214,0.3862,0.4909,0.1287
+KNeighborsRegressor,0.6358,0.4042,0.5263,0.088
+ElasticNet,0.6392,0.4085,0.521,0.0782
+BayesianRidge,0.6685,0.4469,0.5171,-0.0082
+ARDRegression,0.6798,0.4621,0.5125,-0.0427

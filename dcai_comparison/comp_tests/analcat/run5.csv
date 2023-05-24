@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+LinearSVR,0.6244,0.3898,0.4431,0.7808
+SGDRegressor,0.6857,0.4701,0.454,0.7356
+HuberRegressor,0.6924,0.4795,0.4521,0.7304
+Lars,0.6976,0.4866,0.4452,0.7264
+LinearRegression,0.6976,0.4866,0.4452,0.7264
+Ridge,0.7024,0.4933,0.4453,0.7226
+OrthogonalMatchingPursuit,0.7084,0.5019,0.441,0.7178
+ARDRegression,0.7191,0.5172,0.4745,0.7092
+BayesianRidge,0.7312,0.5346,0.4614,0.6994
+LassoLarsIC,0.7543,0.569,0.4942,0.6801

@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+HistGradientBoostingRegressor,50.9828,2599.2498,43.7168,0.12
+RandomForestRegressor,50.9883,2599.8045,42.7505,0.1198
+GradientBoostingRegressor,51.1285,2614.1253,41.552,0.115
+LassoLars,51.407,2642.6796,43.0422,0.1053
+Lasso,51.407,2642.6791,43.0422,0.1053
+LassoLarsIC,51.4647,2648.6199,42.9107,0.1033
+ARDRegression,51.5713,2659.6003,42.8143,0.0996
+ElasticNet,51.6914,2672.003,42.5844,0.0954
+PoissonRegressor,51.7236,2675.3325,43.8859,0.0942
+HuberRegressor,51.7485,2677.9124,42.5502,0.0934
