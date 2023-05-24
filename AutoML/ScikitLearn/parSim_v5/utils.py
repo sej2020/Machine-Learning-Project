@@ -93,8 +93,8 @@ def dtype_check(dataset: pd.DataFrame) -> set:
     for col_name, typ in dtypes.items():
         if typ == 'bool':
             error.add('The dataset contains a boolean column. Please convert dataset to all numeric values.')
-        if typ == 'float64' and dataset[col_name].isnull().values.any():
-            error.add('The dataset contains missing or NaN values. NaN values could be represented as "NaN", "null", "n/a", etc. Please convert dataset to all numeric values.')
+        # if typ == 'float64' and dataset[col_name].isnull().values.any():
+        #     error.add('The dataset contains missing or NaN values. NaN values could be represented as "NaN", "null", "n/a", etc. Please convert dataset to all numeric values.')
         if typ == 'O':
             error.add('This dataset contains a categorial data column, a date/time data column, or there has been data input error. Please convert dataset to all numeric values.')
     return error
