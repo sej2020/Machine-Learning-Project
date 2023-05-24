@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+ExtraTreesRegressor,3.6003,12.9619,2.7601,0.2093
+KNeighborsRegressor,3.6578,13.3794,2.8928,0.1839
+RandomForestRegressor,3.7152,13.8029,2.782,0.158
+AdaBoostRegressor,3.7227,13.8584,2.7439,0.1546
+SVR,3.7504,14.0656,2.7145,0.142
+LassoLarsIC,3.7715,14.2244,2.7092,0.1323
+ARDRegression,3.7906,14.3688,2.7249,0.1235
+Lars,3.7974,14.4202,2.7441,0.1204
+LinearRegression,3.7974,14.4202,2.7441,0.1204
+Ridge,3.7981,14.4258,2.745,0.12

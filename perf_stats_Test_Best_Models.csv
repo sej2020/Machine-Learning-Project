@@ -1,3 +1,0 @@
-,Root Mean Squared Error,Explained Variance,Max Error,Mean Absolute Error,Mean Squared Error,Median Absolute Error,R-Squared,Mean Poisson Deviance,Mean Gamma Deviance,Mean Absolute Percentage Error,D-Squared Absolute Error Score,D-Squared Pinball Score,D-Squared Tweedie Score
-DecisionTreeRegressor,7.0748,0.7869,28.64,4.8878,50.0526,3.62,0.7859,1.4977,0.0559,0.1544,0.6017,0.6017,0.7859
-LassoLars,10.2184,0.5541,38.0019,8.1225,104.4164,6.9935,0.5533,3.024,0.1044,0.3047,0.3381,0.3381,0.5533

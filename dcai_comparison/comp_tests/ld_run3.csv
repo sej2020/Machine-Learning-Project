@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+NuSVR,3.0801,9.4871,2.3735,0.0219
+LassoLars,3.1211,9.7411,2.4793,-0.0043
+Lasso,3.1211,9.7411,2.4793,-0.0043
+ElasticNet,3.1512,9.9301,2.4781,-0.0238
+SVR,3.2115,10.314,2.4321,-0.0634
+AdaBoostRegressor,3.3934,11.515,2.6688,-0.1872
+KNeighborsRegressor,3.43,11.7651,2.5899,-0.213
+LassoLarsIC,3.4358,11.8049,2.6573,-0.2171
+BayesianRidge,3.4689,12.033,2.6847,-0.2406
+GradientBoostingRegressor,3.4869,12.1586,2.6681,-0.2536

@@ -1,7 +1,7 @@
 from utils import *
 
 paramdict = {'id': 30,
-            'datapath': 'AutoML/PowerPlantData/Folds5x2_pp.csv', # ConductivityData/train.csv'
+            'datapath': 'dcai_comparison/csv_data/liver-disorders.csv', # ConductivityData/train.csv'
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
                                  'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 
@@ -20,7 +20,7 @@ paramdict = {'id': 30,
                           'whiskerprops': {'linestyle': '--', 'linewidth': 1, 'color': 'black'},
                           'capprops': {'linewidth': 1, 'color': 'black'}, 'boxfill': 'lightgray', 'grid': True, 'dpi': 300.0 
                             },
-            'figure_lst': ['Accuracy_over_Various_Proportions_of_Training_Set'],
+            'figure_lst': ['Test_Best_Models'],
             'n_vizualized_bp': 20,
             'n_vizualized_tb': 10,
             'test_set_size': 0.2,

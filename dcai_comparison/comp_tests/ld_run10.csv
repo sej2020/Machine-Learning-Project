@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+PoissonRegressor,2.926,8.5614,2.3208,0.1371
+BayesianRidge,2.9453,8.675,2.3325,0.1256
+OrthogonalMatchingPursuit,2.9509,8.708,2.3362,0.1223
+Ridge,2.9528,8.7192,2.329,0.1212
+Lars,2.9531,8.7209,2.3288,0.121
+LinearRegression,2.9531,8.7209,2.3288,0.121
+SGDRegressor,2.9546,8.7296,2.3315,0.1201
+LassoLarsIC,2.957,8.7439,2.3329,0.1187
+ARDRegression,2.9665,8.8001,2.3198,0.113
+ElasticNet,2.9985,8.9908,2.4142,0.0938

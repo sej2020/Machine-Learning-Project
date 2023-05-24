@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+ExtraTreesRegressor,3.5212,12.3991,2.7278,0.1561
+NuSVR,3.5656,12.7132,2.5595,0.1347
+SVR,3.6127,13.0517,2.5849,0.1117
+RandomForestRegressor,3.619,13.0975,2.7374,0.1086
+SGDRegressor,3.6305,13.1807,2.7525,0.1029
+KNeighborsRegressor,3.6319,13.1906,2.8072,0.1022
+ARDRegression,3.6367,13.2253,2.7523,0.0999
+Lars,3.6392,13.2441,2.768,0.0986
+LinearRegression,3.6392,13.2441,2.768,0.0986
+Ridge,3.6394,13.2451,2.7678,0.0985
