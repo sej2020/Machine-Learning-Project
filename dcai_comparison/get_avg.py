@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 
 folder = "cholesterol"
-dir = Path("dcai_comparison/comp_tests/{folder}")
+dir = Path(f"dcai_comparison/comp_tests/{folder}")
 best = []
 
 for file in dir.glob("run*.csv"):

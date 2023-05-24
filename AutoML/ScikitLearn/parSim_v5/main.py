@@ -1,7 +1,7 @@
 from utils import *
 
 paramdict = {'id': 30,
-            'datapath': 'dcai_comparison/csv_data/liver-disorders.csv', # ConductivityData/train.csv'
+            'datapath': 'dcai_comparison/csv_data/analcatdata_negotiation.csv', # ConductivityData/train.csv'
             'which_regressors': {'ARDRegression': 1, 'AdaBoostRegressor': 1, 'BaggingRegressor': 1, 'BayesianRidge': 1, 'CCA': 0, 
                                  'DecisionTreeRegressor': 1, 'DummyRegressor': 0, 'ElasticNet': 1, 'ExtraTreeRegressor': 1, 
                                  'ExtraTreesRegressor': 1, 'GammaRegressor': 1, 'GaussianProcessRegressor': 0, 'GradientBoostingRegressor': 1, 

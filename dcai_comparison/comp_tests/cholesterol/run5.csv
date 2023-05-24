@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+SVR,45.167,2040.0568,37.6596,-0.0166
+GammaRegressor,45.4105,2062.1174,37.723,-0.0276
+BayesianRidge,45.612,2080.4508,37.7204,-0.0367
+ElasticNet,45.623,2081.4579,37.7406,-0.0372
+NuSVR,45.664,2085.2051,38.0957,-0.0391
+PassiveAggressiveRegressor,45.747,2092.7862,37.3588,-0.0429
+OrthogonalMatchingPursuit,45.7833,2096.1087,38.7209,-0.0445
+LassoLarsIC,45.9376,2110.2659,38.0264,-0.0516
+HuberRegressor,46.1982,2134.2707,37.3202,-0.0635
+ARDRegression,46.2572,2139.7282,38.0784,-0.0663

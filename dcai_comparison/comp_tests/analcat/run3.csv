@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+GammaRegressor,0.6784,0.4602,0.4971,0.471
+PoissonRegressor,0.7181,0.5157,0.4853,0.4071
+BayesianRidge,0.7338,0.5384,0.4992,0.381
+LassoLarsIC,0.7383,0.5451,0.5091,0.3733
+BaggingRegressor,0.7406,0.5484,0.4842,0.3695
+Ridge,0.7481,0.5596,0.5113,0.3566
+RandomForestRegressor,0.75,0.5625,0.5505,0.3533
+ARDRegression,0.7507,0.5635,0.5156,0.3521
+GradientBoostingRegressor,0.7524,0.5661,0.5513,0.3491
+LinearSVR,0.7531,0.5672,0.5507,0.3479

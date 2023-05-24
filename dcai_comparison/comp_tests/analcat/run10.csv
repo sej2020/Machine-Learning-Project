@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+ExtraTreesRegressor,0.9235,0.8529,0.6258,0.4598
+OrthogonalMatchingPursuit,0.9477,0.8982,0.6603,0.4311
+LinearSVR,0.9524,0.9071,0.6619,0.4255
+HuberRegressor,0.9648,0.9308,0.7014,0.4105
+BayesianRidge,0.9777,0.9559,0.7292,0.3946
+ARDRegression,0.9818,0.9639,0.7217,0.3895
+LinearRegression,0.9827,0.9658,0.7287,0.3883
+Lars,0.9827,0.9658,0.7287,0.3883
+LassoLarsIC,0.9829,0.9661,0.7312,0.3881
+Ridge,0.9832,0.9666,0.7286,0.3878

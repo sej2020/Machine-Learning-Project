@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+HistGradientBoostingRegressor,0.4576,0.2094,0.3917,0.748
+PoissonRegressor,0.4835,0.2338,0.3814,0.7187
+SGDRegressor,0.4835,0.2338,0.3804,0.7186
+BayesianRidge,0.4875,0.2376,0.3904,0.714
+Ridge,0.4879,0.2381,0.3872,0.7135
+LinearSVR,0.4886,0.2388,0.3632,0.7127
+LinearRegression,0.4886,0.2387,0.3888,0.7127
+Lars,0.4886,0.2387,0.3888,0.7127
+SVR,0.4969,0.2469,0.422,0.7029
+LassoLarsIC,0.5063,0.2563,0.4077,0.6916
