@@ -12,4 +12,3 @@ for file in dir.glob("run*.csv"):
     
 print(f"Best RMSE: {min(best)}")
 print(f"Mean RMSE: {sum(best)/len(best)}")
-print
