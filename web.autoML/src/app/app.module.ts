@@ -30,6 +30,7 @@ import { UserProfileCardsComponent } from './Components/user-profile-cards/user-
 import { MatCarouselModule} from 'ng-mat-carousel';
 import { DataValidationComponent } from './Components/data-validation/data-validation.component';
 import {MatTabsModule} from '@angular/material/tabs';
+import { AboutPageComponent } from './Components/about-page/about-page.component';
 @NgModule({
   
   declarations: [
@@ -41,7 +42,8 @@ import {MatTabsModule} from '@angular/material/tabs';
     DisclaimerDialogComponent,
     ResultsEchartsComponent,
     UserProfileCardsComponent,
-    DataValidationComponent
+    DataValidationComponent,
+    AboutPageComponent
   ],
   imports: [
     BrowserModule,

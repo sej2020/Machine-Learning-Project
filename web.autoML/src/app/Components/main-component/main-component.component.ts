@@ -50,7 +50,7 @@ export class MainComponentComponent {
     {
       iconName: "info",
       itemName: "About",
-      itemLink: "/about"
+      itemLink: "/walkthrough"
     }
   ]
 
