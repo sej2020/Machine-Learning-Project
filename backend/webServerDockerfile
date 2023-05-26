@@ -1,0 +1,19 @@
+FROM python:3.9.12
+RUN mkdir /automl_webserver
+RUN mkdir /automl_webserver/uploads
+RUN mkdir /automl_webserver/downloads
+WORKDIR /automl_webserver
+
+ENV TEMP_UPLOAD_DIR /automl_webserver/uploads
+ENV TEMP_DOWNLOAD_DIR /automl_webserver/downloads
+
+COPY ./requirements_updated.txt /automl_webserver/requirements.txt
+
+RUN apt-get -y update
+RUN python -m pip install --upgrade pip
+
+RUN pip3 install -r requirements.txt
+
+COPY . /automl_webserver
+
+CMD ["python","./main.py"]

@@ -25,6 +25,10 @@ export class ResultsEchartsComponent implements OnInit {
   visualizationResponse!: IDataVisualizationResponse;
   visualizationResponse2d!: IDataVisualizationResponse;
 
+  echartsInitOptions = {
+    renderer: 'canvas'
+  };
+
   constructor(private uploadRequestService: UploadRequestService, private router: Router) { }
 
   defaultChartTypes: string[] = ['boxplot', 'cv_line_chart', 'train_test_error'];
@@ -38,9 +42,11 @@ export class ResultsEchartsComponent implements OnInit {
   actualChartType: string = "cv_line_chart";
   visualizationType: string = this.visualizationTypes[0];
   visualizationAlgorithm: string = "pca";
-  chartOptions!: echarts.EChartsOption;
+  chartOptions!: any;
   yAxisData!: string[];
   regressorList!: string[];
+
+  echartsDiv!: HTMLDivElement;
 
   ngOnInit() {
     this.requestId = history.state.id ? history.state.id : "";
@@ -49,6 +55,7 @@ export class ResultsEchartsComponent implements OnInit {
     }
     echarts.registerTransform(aggregate as ExternalDataTransform);
     echarts.registerTransform(transform.clustering);
+    this.echartsDiv = document.getElementById('chart-div') as HTMLDivElement;
   }
 
   fetchRawData = () => {
@@ -195,34 +202,46 @@ export class ResultsEchartsComponent implements OnInit {
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
-          color: 'black'
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
           color: '#030359',
-          rotate: 30
-        },
-        // show: false
+          fontSize: '16',
+          rotate: 20
+        }
       },
       yAxis: {
         type: 'value',
-        axisLine: {
-          show: true
-        },
-        axisLabel: {
-          fontWeight: 'bold',
-          color: '#030359'
-        },
         name: this.currentMetric,
         nameLocation: 'middle',
-        nameGap: 30,
+        nameGap: 44,
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
-          color: 'black'
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
         },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359',
+          fontSize: '16'        
+        }
       },
       series: {
         type: 'bar',
@@ -243,9 +262,20 @@ export class ResultsEchartsComponent implements OnInit {
 
   getDataPercentChartOptions() {
     let dataPercentages = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let minTrainInterval = Math.min(...this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'])
+    let minTestInterval = Math.min(...this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'])
+    let minInterval = Math.min(minTrainInterval, minTestInterval)
+    minInterval = 0.9 * minInterval
+
+    let maxTrainInterval = Math.max(...this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'])
+    let maxTestInterval = Math.max(...this.trainTestErrorData[this.currentMetric][this.currentRegressor]['train'])
+    let maxInterval = Math.max(maxTrainInterval, maxTestInterval)
+    maxInterval = 1.2 * maxInterval
+
     let dataPercentChartOptions: echarts.EChartsOption = {
       responsive: true,
-      maintainAspectRatio: true,
+      backgroundColor: '#cdd0d1',
+      // maintainAspectRatio: true,
       title: {
         text: this.currentRegressor + ' : Quantity Curve - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
@@ -262,12 +292,20 @@ export class ResultsEchartsComponent implements OnInit {
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
-          color: 'black'
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
+          color: '#030359',
+          fontSize: '22',
         },
       },
       yAxis: {
@@ -275,20 +313,27 @@ export class ResultsEchartsComponent implements OnInit {
         splitArea: {
           interval: 'auto'
         },
+        // minInterval: minInterval,
+        // maxInterval: maxInterval,
+        splitNumber: 7,
         axisLine: {
-          show: true
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
           color: '#030359',
+          fontSize: '22',
         },
         name: this.currentMetric,
         nameLocation: 'middle',
-        nameGap: 50,
+        nameGap: 40,
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
+          fontSize: 22,
           color: 'black',
           padding: [0, 10, 0, 0]
         },
@@ -324,7 +369,7 @@ export class ResultsEchartsComponent implements OnInit {
             type: 'png',
             name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
-            pixelRatio: 2
+            pixelRatio: 10
           },
         },
       },
@@ -339,9 +384,17 @@ export class ResultsEchartsComponent implements OnInit {
           smooth: true,
           label: {
             show: true,
-            position: "top"
+            position: "top",
+            fontWeight: "bolder",
+            fontSize: "14"
           },
-          showSymbol: true
+          showSymbol: true,
+          symbol: 'emptyCircle',
+          symbolSize: 10,
+          lineStyle: {
+            width: 6,
+          },
+          color: '#0045a5'
         },
         {
           name: 'Test ' + this.currentMetric,
@@ -354,8 +407,16 @@ export class ResultsEchartsComponent implements OnInit {
           showSymbol: true,
           label: {
             show: true,
-            position: "top"
-          }
+            position: "top",
+            fontWeight: "bolder",
+            fontSize: "14"
+          },
+          symbol: 'emptyCircle',
+          symbolSize: 10,
+          lineStyle: {
+            width: 6,
+          },
+          color: '#f04b0a'
         }
       ]
     };
@@ -367,17 +428,20 @@ export class ResultsEchartsComponent implements OnInit {
     let lineYAxisData: object[] = [];
     for (var i = 0; i < regressorNames.length; i++) {
       lineYAxisData.push({
+        smooth: true,
         name: regressorNames[i],
         type: 'line',
         data: lineData[regressorNames[i]],
         lineStyle: {
-          width: 3,
+          width: 4,
           type: 'solid'
-        }
+        },
+        symbol: 'emptyCircle',
+        symbolSize: 10
       })
     }
 
-    let cvLineplotOptions: echarts.EChartsOption = {
+    let cvLineplotOptions = {
       responsive: true,
       maintainAspectRatio: true,
       title: {
@@ -415,7 +479,7 @@ export class ResultsEchartsComponent implements OnInit {
             type: 'png',
             name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
-            pixelRatio: 2
+            pixelRatio: 4 
           },
         },
       },
@@ -436,12 +500,15 @@ export class ResultsEchartsComponent implements OnInit {
           fontWeight: 'bold',
           color: '#030359'
         },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
+        }
       },
       yAxis: {
         type: 'value',
-        axisLine: {
-          show: true
-        },
         axisLabel: {
           fontWeight: 'bold',
           color: '#030359'
@@ -456,6 +523,12 @@ export class ResultsEchartsComponent implements OnInit {
           color: 'black'
 
         },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
+        }
       },
       series: lineYAxisData
     };
@@ -464,8 +537,8 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   getBoxPlotCharOptions(currentMetric: string, dataSource: [string[]]) {
-
-    let boxplotOptions: echarts.EChartsOption = {
+    // let echartsInstance = echarts.init(this.echartsDiv, 'dark', {renderer: 'png'});
+    let boxplotOptions = {
       responsive: true,
       maintainAspectRatio: true,
       title: {
@@ -543,31 +616,46 @@ export class ResultsEchartsComponent implements OnInit {
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
-          color: 'black'
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
-        },
+          color: '#030359',
+          fontSize: '16'        
+        }
       },
       yAxis: {
         type: 'category',
         splitArea: {
           show: true
         },
-        axisLabel: {
-          fontWeight: 'bold',
-          color: '#030359'
-        },
         nameGap: 30,
         nameTextStyle: {
           lineHeight: 14,
           fontWeight: 800,
-          fontSize: 16,
-          color: 'black'
-
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
         },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
+        },
+        axisLabel: {
+          fontWeight: 'bold',
+          color: '#030359',
+          fontSize: '16'        
+        }
       },
       // grid: {
       //   bottom: 100
@@ -597,7 +685,7 @@ export class ResultsEchartsComponent implements OnInit {
           }
         }],
     };
-
+    // echartsInstance.setOption
     this.chartOptions = boxplotOptions;
   }
 
@@ -634,7 +722,7 @@ export class ResultsEchartsComponent implements OnInit {
   }
 
   get2DScatterPlotOptions(data: any) {
-    let scatterPlotOption: echarts.EChartsOption = {
+    let scatterPlotOption = {
       title: {
         text: this.currentRegressor + ' : ' + this.visualizationAlgorithm.toUpperCase() + ' Point Predictability (2D) - ' + this.currentMetric,
         padding: [5, 5, 5, 5],
@@ -651,7 +739,7 @@ export class ResultsEchartsComponent implements OnInit {
             type: 'png',
             name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
-            pixelRatio: 2
+            pixelRatio: 10 
           },
         },
       },
@@ -712,17 +800,26 @@ export class ResultsEchartsComponent implements OnInit {
       xAxis: {
         name: 'Dimension 1',
         nameLocation: 'start',
+        nameGap: 30,
         nameRotate: 90,
         nameTextStyle: {
           lineHeight: 14,
-          fontWeight: 400,
-          fontSize: 16,
-          color: 'black'
+          fontWeight: 800,
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
-        },
+          color: '#030359',
+          fontSize: '22',
+        }
       },
       yAxis: {
         name: 'Dimension 2',
@@ -730,14 +827,22 @@ export class ResultsEchartsComponent implements OnInit {
         nameGap: 40,
         nameTextStyle: {
           lineHeight: 14,
-          fontWeight: 400,
-          fontSize: 16,
-          color: 'black'
+          fontWeight: 800,
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
-        },
+          color: '#030359',
+          fontSize: '22',
+        }
       },
       animation: true,
       animationEasing: 'cubicInOut',
@@ -750,7 +855,7 @@ export class ResultsEchartsComponent implements OnInit {
         markPoint: {
           symbol: 'pin'
         },
-        symbolSize: 15,
+        symbolSize: 20,
         itemStyle: {
           borderColor: '#555'
         },
@@ -777,18 +882,6 @@ export class ResultsEchartsComponent implements OnInit {
     //   ['0.90', '#d73027'],
     //   ['1', '#a50026'],
     // ]
-    var colorScale = [
-      ['0.0', 'rgb(165,0,38)'],
-      ['0.111111111111', 'rgb(215,48,39)'],
-      ['0.222222222222', 'rgb(244,109,67)'],
-      ['0.333333333333', 'rgb(253,174,97)'],
-      ['0.444444444444', 'rgb(254,224,144)'],
-      ['0.555555555556', 'rgb(224,243,248)'],
-      ['0.666666666667', 'rgb(171,217,233)'],
-      ['0.777777777778', 'rgb(116,173,209)'],
-      ['0.888888888889', 'rgb(69,117,180)'],
-      ['1.0', 'rgb(49,54,149)']
-    ]
 
     for (var i = 0; i < this.visualizationResponse.pca['dimension0'].length; i++) {
       colors.push(this.getColor(coloring_information[i]));
@@ -876,14 +969,14 @@ export class ResultsEchartsComponent implements OnInit {
       dimension1 = curVisualizationResponse.pca['dimension1'];
     }
 
-    var chunkSize = Math.ceil(Math.max(...dimension0) - Math.min(...dimension0)) / 50;
+    var chunkSize = Math.ceil(Math.max(...dimension0) - Math.min(...dimension0)) / 30;
     var i = Math.min(...dimension0);
     while (i < Math.max(...dimension0)) {
       xData.push(Math.round(i * 1000) / 1000);
       i += chunkSize;
     }
     i = Math.min(...dimension1);
-    var chunkSize = Math.ceil(Math.max(...dimension1) - Math.min(...dimension1)) / 50;
+    var chunkSize = Math.ceil(Math.max(...dimension1) - Math.min(...dimension1)) / 30;
     while (i < Math.max(...dimension1)) {
       yData.push(Math.round(i * 1000) / 1000);
       i += chunkSize;
@@ -892,7 +985,7 @@ export class ResultsEchartsComponent implements OnInit {
     for (var i = 0; i < dimension0.length; i++) {
       fullData.push([this.findClosest(xData, dimension0[i]), this.findClosest(yData, dimension1[i]), coloring_information[i]]);
     }
-    let heatMapOptions: echarts.EChartsOption = {
+    let heatMapOptions = {
       tooltip: {},
       title: {
         text:  this.currentRegressor + ' : ' + this.visualizationAlgorithm.toUpperCase() + ' Region Predictability - ' + this.currentMetric,
@@ -910,7 +1003,7 @@ export class ResultsEchartsComponent implements OnInit {
             type: 'png',
             name: this.currentRegressor + '_' + this.currentMetric + '_' + this.chartType,
             title: 'Download Plot',
-            pixelRatio: 2
+            pixelRatio: 10 
           },
         },
       },
@@ -927,32 +1020,48 @@ export class ResultsEchartsComponent implements OnInit {
         nameGap: 40,
         nameTextStyle: {
           lineHeight: 14,
-          fontWeight: 400,
-          fontSize: 16,
-          color: 'black'
+          fontWeight: 800,
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
-        },
+          color: '#030359',
+          fontSize: '22',
+        }
       }],
       yAxis: [{
         type: 'category',
         data: yData,
         name: 'Dimension 2',
         nameLocation: 'middle',
-        nameGap: 50,
+        nameGap: 100,
         nameRotate: 90,
         nameTextStyle: {
           lineHeight: 14,
-          fontWeight: 400,
-          fontSize: 16,
-          color: 'black'
+          fontWeight: 800,
+          fontSize: 22,
+          color: 'black',
+          padding: [10, 0, 0, 0]
+        },
+        axisLine: {
+          show: true,
+          lineStyle: {
+            width: 2 
+          }
         },
         axisLabel: {
           fontWeight: 'bold',
-          color: '#030359'
-        },
+          color: '#030359',
+          fontSize: '22',
+        }
       }],
       visualMap: [{
         dimension: 2,
@@ -975,6 +1084,7 @@ export class ResultsEchartsComponent implements OnInit {
             '#d73027',
             '#a50026'
           ]
+          // color: ['#C6DBEF','#9ECAE1', '#6BAED6', '#4292C6', '#2171B5', '#08519C', '#']
         },
         top: 'center',
         text: ['Prediction - Bad', 'Prediction - Good'],

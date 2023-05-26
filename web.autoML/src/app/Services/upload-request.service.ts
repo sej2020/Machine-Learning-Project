@@ -1,7 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, retry, throwError } from 'rxjs';
-
 export class UploadRequest{
   
   // email?: string
@@ -37,6 +36,7 @@ export class UploadRequestService {
 
   // api_route = 'http://192.168.1.216:8081';
   api_route = 'http://localhost:8081';
+  // api_route = 'https://dalkilic.luddy.indiana.edu/api';
 
   createMLRequest(form_data: FormData, regressor: string[], metrics: string[], file_data: File, email: string, metric_score_method: string, test_set_size: string, num_cv_folds: string, default_setting: string): Observable<any> {
     if (default_setting === "1") {

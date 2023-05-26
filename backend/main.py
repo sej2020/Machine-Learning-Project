@@ -26,7 +26,7 @@ from utils import validation
 
 app = FastAPI()
 origins = [
-    "http://localhost:4200"
+    "http://localhost:4200",
     ]
 app.add_middleware(CORSMiddleware,
                    allow_origins=["*"],

@@ -84,5 +84,6 @@
 </div>
 
     <div id="chart-div" [hidden]="is3DVisualization() && chartOptions != null" echarts [options]="chartOptions" class="chart-container mat-elevation-z4"></div>
+    <!-- <div id="chart-div" [hidden]="is3DVisualization() && chartOptions != null" class="chart-container mat-elevation-z4"></div> -->
     <div [hidden]="!is3DVisualization()" id="plotly-div" class="chart-container mat-elevation-z4"></div>
 </div>
