@@ -1,14 +1,46 @@
-<div class="users-profile-container" >
+<div class="users-profile-container">
     <!-- <mat-tab-group >
         <mat-tab *ngFor="let tab of asyncTabs | async">
             <ng-template mat-tab-label >{{tab.label}}</ng-template> -->
+    
+        <mat-tab-group>
+            <mat-tab label="Students">
+                <div class="card-container">
+                <div *ngFor="let user of studentsProfile" style="margin-left: 1%; margin-right: 1%;">
+                    <mat-card class="user-card">
+                        <mat-card-header>
+                            <mat-card-title-group class="user-card-group-title">
+                                <mat-card-title> {{user.UserName}} </mat-card-title>
+                                <mat-card-subtitle>{{user.UserTitle}}</mat-card-subtitle>
+                                <img mat-card-sm-image src={{user.ProfilePicture}} style="border-radius:50%"
+                                    alt="user">
+                            </mat-card-title-group>
+                        </mat-card-header>
+                        <mat-card-content class="user-card-details">
+                            {{user.UserDetails}}
+                        </mat-card-content>
+                        <mat-divider mat-elevation-z4></mat-divider>
+                        <mat-card-actions class="mat-card-action-links">
+                            <a mat-raised-button target="#" color="primary" *ngIf="user.UserProfileLinks[0]" href={{user.UserProfileLinks[0]}}><span
+                                    style="color:rgb(245, 245, 245); padding:2px;"> Github</span></a>
+                            <a mat-raised-button target="#" style="margin-left:5px;" *ngIf="user.UserProfileLinks[1]"
+                                color="accent" href={{user.UserProfileLinks[1]}}><span
+                                    style="color:rgb(255, 255, 255); padding:2px;"> Personal
+                                    Website</span></a>
+                        </mat-card-actions>
+                    </mat-card>
+                </div>
+                </div>
+            </mat-tab>
+        <mat-tab label="Advisors">
             <div class="card-container">
-            <mat-card class="user-card"  *ngFor="let user of studentsProfile">
+        <div *ngFor="let user of advisorsProfile" style="margin-left: 1%; margin-right: 1%">
+            <mat-card class="user-card" style="width: 500px">
                 <mat-card-header>
                     <mat-card-title-group class="user-card-group-title">
                         <mat-card-title> {{user.UserName}} </mat-card-title>
                         <mat-card-subtitle>{{user.UserTitle}}</mat-card-subtitle>
-                        <img mat-card-sm-image src="../../../assets/images/batman.jpg" style="border-radius:50%"
+                        <img mat-card-sm-image src={{user.ProfilePicture}} style="border-radius:50%"
                             alt="user">
                     </mat-card-title-group>
                 </mat-card-header>
@@ -17,37 +49,15 @@
                 </mat-card-content>
                 <mat-divider mat-elevation-z4></mat-divider>
                 <mat-card-actions class="mat-card-action-links">
-                    <a mat-raised-button color="primary" href={{user.UserProfileLinks[0]}}><span
+                    <a mat-raised-button color="primary" target="#" *ngIf="user.UserProfileLinks[0]" href={{user.UserProfileLinks[0]}}><span
                             style="color:rgb(245, 245, 245); padding:2px;"> Github</span></a>
-                    <a mat-raised-button style="margin-left:5px;" *ngIf="user.UserProfileLinks[1]" color="accent"
+                    <a mat-raised-button style="margin-left:5px;" target="#" *ngIf="user.UserProfileLinks[1]" color="accent"
                         href={{user.UserProfileLinks[1]}}><span style="color:rgb(255, 255, 255); padding:2px;"> Personal
                             Website</span></a>
                 </mat-card-actions>
             </mat-card>
         </div>
-        <!-- </mat-tab>
-        <mat-tab label="Advisors"  class="tab-group-cards" > -->
-             <!-- <mat-card class="user-card" *ngFor="let user of advisorsProfile">
-            <mat-card-header>
-                <mat-card-title-group class="user-card-group-title">
-                    <mat-card-title> {{user.UserName}} </mat-card-title>
-                    <mat-card-subtitle>{{user.UserTitle}}</mat-card-subtitle>
-                    <img mat-card-sm-image src="../../../assets/images/batman.jpg" style="border-radius:50%"
-                        alt="user">
-                </mat-card-title-group>
-            </mat-card-header>
-            <mat-card-content class="user-card-details">
-                {{user.UserDetails}}
-            </mat-card-content>
-            <mat-divider mat-elevation-z4></mat-divider>
-            <mat-card-actions class="mat-card-action-links">
-                <a mat-raised-button color="primary" href={{user.UserProfileLinks[0]}}><span
-                        style="color:rgb(245, 245, 245); padding:2px;"> Github</span></a>
-                <a mat-raised-button style="margin-left:5px;" *ngIf="user.UserProfileLinks[1]" color="accent"
-                    href={{user.UserProfileLinks[1]}}><span style="color:rgb(255, 255, 255); padding:2px;"> Personal
-                        Website</span></a>
-            </mat-card-actions>
-        </mat-card>  -->
-    <!-- </mat-tab>
-    </mat-tab-group> -->
+    </div>
+        </mat-tab>
+    </mat-tab-group>
 </div>
