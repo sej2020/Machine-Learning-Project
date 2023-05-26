@@ -1,22 +1,27 @@
 .users-profile-container{
+    // display: flex;
+    // flex-direction: row;
+    // border: dashed 0.5px red;
+    height: calc(100vh - 65vh);
+    overflow-x: hidden;
+    overflow-y: hidden;
+
+  .card-container {
+    overflow-x: scroll;
+    display: inline-flex;
+    direction: row;
     display: flex;
     flex-direction: row;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    scroll-behavior: smooth;
-    scrollbar-width: 2px;     
-}
-.user-card{
-//   max-width: 400px;
-  position: relative;
-  width: 400px;
-  margin-top: 2%;
-  margin-left: 1%;
-  margin-right: 2%;
-  height: calc(100vh - 70vh);
-  margin-bottom: 5px;
-  display: inline-flex;
-  
+  }
+  .user-card{
+      width: 360px;
+      margin-top: 0.8%;
+      margin-left: 1%;
+      margin-right: 1%;
+      margin-bottom: 5px;
+    //   padding-right: 3px;
+      position: relative;
+    }
 }
 
 .user-card-group-title{
@@ -26,13 +31,18 @@
 }
 .user-card-details{
     padding-bottom: 8px;
+    height: 100px;
 }
 
 .user-card-footer{
     margin: 2px;
     background-color: grey;
+    height: 200px;
 }
 .mat-card-action-links{
+    top: 1%;
     position: relative;
     padding: 10px;
 }
+
+ 
