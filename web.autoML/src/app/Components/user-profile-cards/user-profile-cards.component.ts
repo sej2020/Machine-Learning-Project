@@ -67,9 +67,9 @@ export class UserProfileCardsComponent {
         "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
       },
       {
-        "UserName": "Prof. DD",
+        "UserName": "Prof. Mehmet M Dalkilic",
         "UserTitle": "Professor at IUB",
-        "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
+        "UserDetails": "Mehmet M Dalkilic is a Computer Science researcher with expertise in AI applications across multiple fields. He has authored numerous papers and developed unique courses, while pursuing interests in music, writing, and reading.",
         "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu']
       }
     ];
