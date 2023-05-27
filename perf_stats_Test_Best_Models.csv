@@ -1,0 +1,11 @@
+,Root Mean Squared Error,Mean Squared Error,Mean Absolute Error,R-Squared
+GradientBoostingRegressor,12.2292,149.5527,9.4756,0.4382
+HistGradientBoostingRegressor,12.4078,153.9547,9.5384,0.4216
+AdaBoostRegressor,12.8752,165.7718,10.4256,0.3772
+RandomForestRegressor,13.0019,169.05,10.094,0.3649
+ExtraTreesRegressor,13.2192,174.7485,10.2289,0.3435
+BaggingRegressor,13.344,178.0617,10.3147,0.3311
+NuSVR,13.5206,182.8061,10.4208,0.3133
+SVR,13.5452,183.4716,10.3535,0.3108
+KNeighborsRegressor,13.642,186.1054,10.5092,0.3009
+BayesianRidge,14.5505,211.7159,11.3302,0.2046
