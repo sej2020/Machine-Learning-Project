@@ -41,7 +41,7 @@ export class UserProfileCardsComponent {
         "UserName": "Sam Johnson",
         "UserTitle": "Undergraduate student at IUB",
         "UserDetails": "Sam Johnson is a Data Science student at IU whose research interests include Data-Centric AI, ML, and computational logic",
-        "UserProfileLinks": ['https://github.com/sej2020', 'sj110.pages.iu.edu'],
+        "UserProfileLinks": ['https://github.com/sej2020', 'https://sj110.pages.iu.edu'],
         "ProfilePicture": '../../../assets/profile-pics/sam.jpg'
       },
       {
@@ -85,7 +85,7 @@ export class UserProfileCardsComponent {
         "UserName": "Parichit Sharma",
         "UserTitle": "Ph.D. student at IU, Bloomington",
         "UserDetails": "Parichit Sharma is a Computer Science PhD student at IU, Bloomington, focusing on Machine Learning and Bioinformatics. His primary focus is developing algorithms for mining big data and extracting patterns from genomics data, contributing to high-performance computing solutions.",
-        "UserProfileLinks": ['https://github.com/sej2020', 'https://parichitsharma.com/'],
+        "UserProfileLinks": ['https://github.com/parichit', 'https://parichitsharma.com/'],
         "ProfilePicture": '../../../assets/profile-pics/parichit.jpg'
       },
     ];

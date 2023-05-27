@@ -62,7 +62,6 @@ def delete_file(filepath):
 async def create_automl_request(form_data: AutoMLCreateRequest = Depends(), file_data: UploadFile = File(...)):
     request_id = generate_request_id()
     s3Service = S3Service(settings.S3_DATA_BUCKET)
-    print(settings.S3_DATA_BUCKET, form_data.default_setting)
     s3_key = f'{request_id}_{file_data.filename}'
     temp_path = f'{settings.TEMP_UPLOAD_DIR}{settings.PATH_SEPARATOR}{file_data.filename}'
     save_file(file_data.file.read(), temp_path)
@@ -92,7 +91,7 @@ async def get_automl_request(request_id):
         return JSONResponse(content=results_cache[request_id], status_code=200)
     try:
         automl_request = AutoMLRequestRepository.get_request_by_id(request_id)
-        data = AutoMLCreateResponseContents(request_id=request_id, request_status=automl_request.status, estimated_time_completion=0)
+        data = AutoMLCreateResponseContents(request_id=request_id, request_status=automl_request.status, estimated_time_completion=300)
         if automl_request.status == 1:
             result_file_list = automl_request.resultfile.split(',')
             data.result_link = f'{settings.HOST}/results?key={result_file_list[0]}'

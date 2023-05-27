@@ -54,11 +54,13 @@ class AutoMLRequestRepository:
         return query_result[0]
 
     @staticmethod
-    def update_request(request_id, status, data_visualization_response=None, result_file=None):
+    def update_request(request_id, status, data_visualization_response=None, result_file=None, regressor_list=None):
         update_params = {'status': status}
         if status == 1:
             update_params['resultfile'] = result_file
             update_params['data_visualization'] = data_visualization_response
+        if regressor_list is not None:
+            update_params['regressor_list'] = AutoMLRequestRepository.convert_list_to_str(regressor_list)
         AutoMLRequestRepository.db_session.query(AutoMLRequest).filter(AutoMLRequest.id == request_id).update(update_params)
         AutoMLRequestRepository.db_session.commit()
 

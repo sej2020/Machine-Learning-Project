@@ -1,99 +1,163 @@
+<div class="homepage-container mat-elevation-z4">
+  <div class="header">
+    <h1>Guide to Application </h1>
+    <hr>
+  </div>
 
-<div  class="homepage-container mat-elevation-z4">
-  <div class="header"> <h1>Guide to Application </h1> <hr></div>
-<div class="about-items">
-<h2 class="title">AutoML Request Form - Simple</h2> 
-<p class="description-text"> This form will automatically determine the best parameters for the pipeline. New users are recommended to start with this form.</p>
-<p><img src="../../../assets/plot-images/simple_form.png" height="300px" width="600px" class="image-property" alt="Simple Form"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Sample Datasets to try out in AutoML</h2>
+    <p class="description-text">You can download some sample datasets to try out in AutoML pipeline.</p>
+    <p>Valid dataset (dataset that can be run in AutoML pipeline): <a href="https://github.com/sej2020/Machine-Learning-Project/blob/main/AutoML/ConcreteData/Concrete_Data.csv">Concrete Strength Dataset</a></p>
+    <p>Invalid dataset (dataset that cannot be run in AutoML pipeline): <a href="https://github.com/sej2020/Machine-Learning-Project/blob/main/AutoML/ConductivityData/train.csv">Conductivity Data</a></p>
+  </div>
 
-<div class="about-items">
-<h2 class="title">AutoML Request Form - Advanced</h2> 
-<p class="description-text">  This form can be used to specify the parameters of the model. The parameters are described in the documentation.</p>
-<p><img src="../../../assets/plot-images/advanced_form.png"   height="300px" width="600px" class="image-property" alt="Advanced Form"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Sample Request Ids</h2>
+    <p class="description-text"> We have pre run some datasets through AutoML pipeline. Users can use the following request ids to check the visualizations available in our framework.</p>
+    <p>AutoML visualizations on concrete strength dataset: <button mat-raised-button target="#" style="color:black; background-color: beige;"
+      (click)="redirectToVisualization()"><mat-icon>cloud_download</mat-icon> Visualize Results </button>  </p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Data Validation Page</h2> 
-  <p class="description-text">  This is a tool to assist the user in determining whether their data is valid for use with this service. The user can upload a CSV file and the service will return a list of errors, if any exist.</p>
-  <p class="description-text"><img src="../../../assets/plot-images/data_validation.png" height="300px" width="600px" class="image-property" alt="Data Validation Page"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">AutoML Request Form - Simple</h2>
+    <p class="description-text"> This form will automatically determine the best parameters for the pipeline. New users
+      are recommended to start with this form.</p>
+    <p><img src="../../../assets/plot-images/simple_form.png" height="300px" width="600px" class="image-property"
+        alt="Simple Form"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">View Results</h2> 
-  <p class="description-text">After a request is submitted, the user will be presented with this page. The request ID can be saved and used to view the results after the pipeline executes.</p>
-<p><img src="../../../assets/plot-images/request_id.png" height="300px" width="600px" class="image-property"  alt="Request ID Page"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">AutoML Request Form - Advanced</h2>
+    <p class="description-text"> This form can be used to specify the parameters of the model. The parameters are
+      described in the documentation.</p>
+    <p><img src="../../../assets/plot-images/advanced_form.png" height="300px" width="600px" class="image-property"
+        alt="Advanced Form"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title" >Result Visualization</h2> 
-  <p class="description-text">When the service has completed running the pipeline, the user will be presented with this page. The user can choose to view customizable visualizations or download the data for their own use.</p>
-<p><img src="../../../assets/plot-images/results_landing_page.png" height="300px" width="600px" class="image-property" alt="Results Landing Page"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Data Validation Page</h2>
+    <p class="description-text"> This is a tool to assist the user in determining whether their data is valid for use
+      with this service. The user can upload a CSV file and the service will return a list of errors, if any exist.</p>
+    <p class="description-text"><img src="../../../assets/plot-images/data_validation.png" height="300px" width="600px"
+        class="image-property" alt="Data Validation Page"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Box Plot</h2> 
-  <p class="description-text">This plot shows the prediction error for each set of k models from the cross validation process. Low values indicate better model fit, and narrower boxes indicate less variance in the model fit.</p>
-<p><img src="../../../assets/plot-images/ex_boxplot.png" height="300px" width="600px" class="image-property" alt="Boxplot"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">View Results</h2>
+    <p class="description-text">After a request is submitted, the user will be presented with this page. The request ID
+      can be saved and used to view the results after the pipeline executes.</p>
+    <p><img src="../../../assets/plot-images/request_id.png" height="300px" width="600px" class="image-property"
+        alt="Request ID Page"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Line Plot</h2> 
-  <p class="description-text">This plot provide an alternative view to the Boxplot figure. The x-axis shows which of the k models the data point corresponds to. The y-axis shows the prediction error for that model. The color of the line indicates which set of k models the data point corresponds to.</p>
-<p><img src="../../../assets/plot-images/ex_lineplot.png" height="300px" width="600px" class="image-property" alt="Lineplot"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Result Visualization</h2>
+    <p class="description-text">When the service has completed running the pipeline, the user will be presented with
+      this page. The user can choose to view customizable visualizations or download the data for their own use.</p>
+    <p><img src="../../../assets/plot-images/results_landing_page.png" height="300px" width="600px"
+        class="image-property" alt="Results Landing Page"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Best Model Prediction Visualization</h2> 
-  <p class="description-text">This plot shows the prediction error for the single best (according to the specified 'ranking metric') model from each set of the k models constructed during k-fold cross validation. The model has been used to predict on a held-out set of the data.</p>
-<p><img src="../../../assets/plot-images/ex_best_model.png" height="300px" width="600px" class="image-property" alt="Best Model"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Box Plot</h2>
+    <p class="description-text">This plot shows the prediction error for each set of k models from the cross validation
+      process. Low values indicate better model fit, and narrower boxes indicate less variance in the model fit.</p>
+    <p><img src="../../../assets/plot-images/ex_boxplot.png" height="300px" width="600px" class="image-property"
+        alt="Boxplot"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">PCA - 2D Visualization</h2> 
-  <p class="description-text">This plot allows the user to determine how well the model performs over different regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis (PCA) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_2D_PCA.png" height="300px" width="600px" class="image-property" alt="2D PCA"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Line Plot</h2>
+    <p class="description-text">This plot provide an alternative view to the Boxplot figure. The x-axis shows which of
+      the k models the data point corresponds to. The y-axis shows the prediction error for that model. The color of the
+      line indicates which set of k models the data point corresponds to.</p>
+    <p><img src="../../../assets/plot-images/ex_lineplot.png" height="300px" width="600px" class="image-property"
+        alt="Lineplot"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">TSNE - 2D Visualization</h2> 
-  <p class="description-text">This plot allows the user to determine how well the model performs over different regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic Neighbor Embedding (t-SNE) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_2D_TSNE.png" height="300px" width="600px" class="image-property" alt="2D TSNE"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Best Model Prediction Visualization</h2>
+    <p class="description-text">This plot shows the prediction error for the single best (according to the specified
+      'ranking metric') model from each set of the k models constructed during k-fold cross validation. The model has
+      been used to predict on a held-out set of the data.</p>
+    <p><img src="../../../assets/plot-images/ex_best_model.png" height="300px" width="600px" class="image-property"
+        alt="Best Model"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">PCA - 3D Visualization</h2> 
-  <p class="description-text">This plot allows the user to determine how well the model performs over different regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis (PCA) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_3d_PCA_1.png" height="500px" width="600px" class="image-property" alt="3D PCA #1"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">PCA - 2D Visualization</h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate
+      the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis (PCA) have
+      been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_2D_PCA.png" height="300px" width="600px" class="image-property"
+        alt="2D PCA"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">PCA - 3D Visualization</h2> 
-  <p class="description-text">This is an alternate view of the 3D PCA plot.</p>
-<p><img src="../../../assets/plot-images/ex_3D_PCA_2.png" height="500px" width="600px" class="image-property" alt="3D PCA #2"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">TSNE - 2D Visualization</h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate
+      the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic Neighbor
+      Embedding (t-SNE) have been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_2D_TSNE.png" height="300px" width="600px" class="image-property"
+        alt="2D TSNE"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">TSNE - 3D Visualization</h2> 
-  <p class="description-text">This plot allows the user to determine how well the model performs over different regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic Neighbor Embedding (t-SNE) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_3d_TSNE.png" height="300px" width="600px" class="image-property" alt="3D TSNE"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">PCA - 3D Visualization</h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate
+      the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis (PCA) have
+      been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_3d_PCA_1.png" height="500px" width="600px" class="image-property"
+        alt="3D PCA #1"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Quantity Curve</h2> 
-  <p class="description-text">This plot provides the user information about the optimal amount of training data to provide their models. The blue line shows training error, or how well the model predicts its own training data. The green line shows test error, or how well the model predicts data it has not been trained on. The two line will eventually converge, which indicates that the model will not benefit from any more training data.</p>
-<p><img src="../../../assets/plot-images/ex_quant_curve.png" height="300px" width="600px" class="image-property" alt="Quantity Curve"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">PCA - 3D Visualization</h2>
+    <p class="description-text">This is an alternate view of the 3D PCA plot.</p>
+    <p><img src="../../../assets/plot-images/ex_3D_PCA_2.png" height="500px" width="600px" class="image-property"
+        alt="3D PCA #2"></p>
+  </div>
 
-<div class="about-items">
-  <h2 class="title">Region - PCA </h2> 
-  <p class="description-text">This plot allows the user to determine how well the model performs over different discretized regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis (PCA) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_region_PCA.png" height="300px" width="600px" class="image-property" alt="Region PCA"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">TSNE - 3D Visualization</h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate
+      the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic Neighbor
+      Embedding (t-SNE) have been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_3d_TSNE.png" height="300px" width="600px" class="image-property"
+        alt="3D TSNE"></p>
+  </div>
 
-<div class="about-items">
-<h2 class="title">Region - TSNE</h2> 
-<p class="description-text">This plot allows the user to determine how well the model performs over different discretized regions of the data. Red points indicate that the model has predicts a point poorly, while blue points indicate the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic Neighbor Embedding (t-SNE) have been extracted for use in this graph.</p>
-<p><img src="../../../assets/plot-images/ex_region_TSNE.png" height="300px" width="600px" class="image-property" alt="Region TSNE"></p>
-</div>
+  <div class="about-items">
+    <h2 class="title">Quantity Curve</h2>
+    <p class="description-text">This plot provides the user information about the optimal amount of training data to
+      provide their models. The blue line shows training error, or how well the model predicts its own training data.
+      The green line shows test error, or how well the model predicts data it has not been trained on. The two line will
+      eventually converge, which indicates that the model will not benefit from any more training data.</p>
+    <p><img src="../../../assets/plot-images/ex_quant_curve.png" height="300px" width="600px" class="image-property"
+        alt="Quantity Curve"></p>
+  </div>
+
+  <div class="about-items">
+    <h2 class="title">Region - PCA </h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      discretized regions of the data. Red points indicate that the model has predicts a point poorly, while blue points
+      indicate the model is accurate for that point. The 2 most important dimensions from Principal Component Analysis
+      (PCA) have been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_region_PCA.png" height="300px" width="600px" class="image-property"
+        alt="Region PCA"></p>
+  </div>
+
+  <div class="about-items">
+    <h2 class="title">Region - TSNE</h2>
+    <p class="description-text">This plot allows the user to determine how well the model performs over different
+      discretized regions of the data. Red points indicate that the model has predicts a point poorly, while blue points
+      indicate the model is accurate for that point. The 2 most important dimensions from t-Distributed Stochastic
+      Neighbor Embedding (t-SNE) have been extracted for use in this graph.</p>
+    <p><img src="../../../assets/plot-images/ex_region_TSNE.png" height="300px" width="600px" class="image-property"
+        alt="Region TSNE"></p>
+  </div>
 </div>

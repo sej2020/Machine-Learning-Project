@@ -55,7 +55,11 @@ export class FormContainerComponent {
     groupName: 'Others',
     regressorName: ['MLPRegressor', 'PassiveAggressiveRegressor', 'PLSRegression']
   }];
-  visualizationMetricsList: string[] = ['Mean Squared Error', 'Root Mean Squared Error', 'Mean Absolute Error', 'R-Squared'];
+  // visualizationMetricsList: string[] = ['Mean Squared Error', 'Root Mean Squared Error', 'Mean Absolute Error', 'R-Squared'];
+  visualizationMetricsList: string[] = ['Explained Variance', 'Max Error', 'Mean Absolute Error', 'Mean Squared Error', 'Root Mean Squared Error', 
+  'Median Absolute Error', 'R-Squared', 'Mean Poisson Deviance', 'Mean Gamma Deviance', 
+  'Mean Absolute Percentage Error', 'D-Squared Absolute Error Score',
+  'D-Squared Pinball Score', 'D-Squared Tweedie Score']
 
   regressors!: FormControl;
   visualizationMetrics!: FormControl;

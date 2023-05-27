@@ -77,10 +77,17 @@ def process_automlrequest(body):
             result_s3_key = f"{payload['id']}_result_{i}.csv"
             result_s3_key_list.append(result_s3_key)
             s3_service.upload_file(result_file, result_s3_key)
+
+        log.info(f"failed regressors: {comparison_result['failed_regs']}, updating list of regressors")
+        updated_reg_list = []
+        for k, v in payload['which_regressors'].items():
+            if v == 1 and k not in comparison_result['failed_regs']:
+                updated_reg_list.append(k)
+
         log.info(f"creating data visualization for request {request_id}")
         data_visualization_response = generate_data_visualization_response(payload['datapath'], result_file_list)
         log.info(f"completed processing request {request_id}, updating database")
-        AutoMLRequestRepository.update_request(request_id, 1, data_visualization_response, result_file=','.join(result_s3_key_list))
+        AutoMLRequestRepository.update_request(request_id, 1, data_visualization_response, result_file=','.join(result_s3_key_list), regressor_list=updated_reg_list)
         log.info(f"successfully updated {request_id} in database")
     except Exception as e:
         if request_id is not None:
